@@ -10,8 +10,6 @@
 #include "tools.h"
 
 
-
-
 SoftSerialRx::SoftSerialRx(byte pinRx,byte pinTx,size_t maxDataSize) {
 	// TODO Auto-generated constructor stub
 	pSoftSerial = new SoftwareSerial(pinRx,pinTx);
