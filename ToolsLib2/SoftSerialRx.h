@@ -19,6 +19,7 @@ public:
 	SoftSerialRx(byte pinRx,byte pinTy,size_t bufferSize);
 	void setUpdateCallback(void (*ptr)(byte* data, size_t data_size));
 
+
 	void begin(long speed);
 
 	void readNext();
