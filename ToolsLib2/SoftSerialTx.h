@@ -7,11 +7,13 @@
 
 #ifndef SOFTSERIALTX_H_
 #define SOFTSERIALTX_H_
+#include "Arduino.h"
+#include "SoftwareSerial.h"
 #include "SoftSerial.h"
 
 class SoftSerialTx {
 public:
-	SoftSerialTx(byte pinRx,byte pinTy);
+	SoftSerialTx(byte pinRx,byte pinTx);
 
 	void sendData(byte* data, size_t datasize);
 
