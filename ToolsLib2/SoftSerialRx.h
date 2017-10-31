@@ -7,6 +7,7 @@
 
 #ifndef SOFTSERIALRX_H_
 #define SOFTSERIALRX_H_
+#include "SoftSerial.h"
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 
@@ -33,8 +34,8 @@ private:
 	byte dataCount=0;;
 	bool dataCollect=false;
 	size_t bufferSize=0;
-	byte serPreamble[4]  = {1,2,3,4};
-	byte serPostamble[4] = {4,3,2,1};
+	byte serPreamble[4]  = PREAMBLE;
+	byte serPostamble[4] = POSTAMBLE;
 };
 
 #endif /* SOFTSERIALRX_H_ */

@@ -17,8 +17,6 @@ SoftSerialRx::SoftSerialRx(byte pinRx,byte pinTx,size_t maxDataSize) {
 	this->bufferSize  = maxDataSize + sizeof serPostamble;
 	pRecBuffer = new byte[bufferSize];
 
-
-
 }
 
 SoftSerialRx::~SoftSerialRx() {
