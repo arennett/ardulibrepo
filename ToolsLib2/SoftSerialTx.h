@@ -14,6 +14,7 @@
 class SoftSerialTx {
 public:
 	SoftSerialTx(byte pinRx,byte pinTx);
+	SoftSerialTx(SoftwareSerial* pSoftSerial);
 
 	void begin(long speed);
 	void sendData(byte* data, size_t datasize);
@@ -22,6 +23,7 @@ public:
 	virtual ~SoftSerialTx();
 private:
 	SoftwareSerial* pSoftSerial;
+	bool deleteSoftSerial = false;
 	byte serPreamble[4]  = PREAMBLE;
 	byte serPostamble[4] = POSTAMBLE;
 };

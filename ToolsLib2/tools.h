@@ -13,7 +13,7 @@
 	#define MPRINTSVAL(s,x)  	MPRINTS(s);MPRINTLN(x)
 	#define MPRINTSVALS(s,x,z)  MPRINTS(s);MPRINT(x);MPRINTLNS(z)
 
-	#define MPRINTFREE  MPRINTSVALS("free sram : " ,freeRam())
+	#define MPRINTFREE  MPRINTSVAL("free sram : " ,(freeRam()))
 
 
 #else

@@ -2,18 +2,29 @@
  * SoftSerialTx.cpp
  *
  *  Created on: 31.10.2017
- *      Author: User
+ *      Author: Andre Rennett
  */
+#include <SoftwareSerial.h>
 #include "SoftSerialTx.h"
 #include "SoftSerial.h"
+#include "tools.h"
 
 SoftSerialTx::SoftSerialTx(byte pinRx,byte pinTx){
 	pSoftSerial = new SoftwareSerial(pinRx,pinTx);
+	deleteSoftSerial =true;
 }
+
+SoftSerialTx::SoftSerialTx(SoftwareSerial* pSoftSerial){
+	this->pSoftSerial = pSoftSerial;
+	deleteSoftSerial = false;
+}
+
 
 SoftSerialTx::~SoftSerialTx() {
 
-	delete pSoftSerial;
+	if (deleteSoftSerial) {
+		delete pSoftSerial;
+	}
 }
 
 void SoftSerialTx::begin(long speed){
@@ -22,7 +33,7 @@ void SoftSerialTx::begin(long speed){
 }
 
 
-SoftwareSerial* SoftSerialRx::getSoftSerial(){
+SoftwareSerial* SoftSerialTx::getSoftSerial(){
 	return pSoftSerial;
 }
 
@@ -32,4 +43,5 @@ void SoftSerialTx::sendData(byte* data, size_t datasize) {
 	pSoftSerial->write(serPreamble,sizeof serPreamble);
 	pSoftSerial->write(data,datasize);
 	pSoftSerial->write(serPostamble,sizeof serPostamble);
+	MPRINTLN("write data");
 }
