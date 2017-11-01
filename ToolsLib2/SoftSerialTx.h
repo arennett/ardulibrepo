@@ -8,14 +8,16 @@
 #ifndef SOFTSERIALTX_H_
 #define SOFTSERIALTX_H_
 #include "Arduino.h"
-#include "SoftwareSerial.h"
+#include <SoftwareSerial.h>
 #include "SoftSerial.h"
 
 class SoftSerialTx {
 public:
 	SoftSerialTx(byte pinRx,byte pinTx);
 
+	void begin(long speed);
 	void sendData(byte* data, size_t datasize);
+	SoftwareSerial* getSoftSerial();
 
 	virtual ~SoftSerialTx();
 private:

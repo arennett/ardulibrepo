@@ -38,7 +38,10 @@ void SoftSerialRx::begin(long speed){
 bool SoftSerialRx::listen () {
 	return  pSoftSerial->listen();
 }
-SoftwareSerial* getSoftSerial();
+
+SoftwareSerial* SoftSerialRx::getSoftSerial(){
+	return pSoftSerial;
+}
 
 void SoftSerialRx::readNext(){
 	if (!pSoftSerial->isListening()){
@@ -89,7 +92,9 @@ void SoftSerialRx::readNext(){
 							if (updateCallback && dataCollect) {
 								updateCallback(pRecBuffer,dataCount - sizeof serPostamble );
 							}
-							if (!updateCallback)	MPRINTLN("please set update callback function");
+							if (!updateCallback)	{
+								MPRINTLN("please set update callback function");
+							}
 
 
 							postAmCount=0;
