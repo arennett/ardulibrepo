@@ -18,8 +18,8 @@ public:
 	/**
 	 * SoftSerialRx(byte pinRx,byte pinTy,size_t maxDataSize);
 	 * > constructor
-	 * pinRx  		...seriell rx pin number
-	 * pinrRy 		...seriell tx pin number
+	 * pinRx  		...serial rx pin number
+	 * pinrRy 		...serial tx pin number
 	 * maxDataSize 	...data size, to create an internal buffer (dataSize + postamble size)
 	 */
 	SoftSerialRx(byte pinRx,byte pinTy,size_t maxDataSize);
@@ -66,19 +66,19 @@ public:
 
 	/**
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
-	 * > waits until complete message is reveived or timeout is expired
-	 * pData 		...pointer on the received data
+	 * > waits until complete message is received or timeout is expired
+	 * ppData 		...address for : pointer on the received data
 	 * data_size 	...data size
 	 * timeout		...timeout msecs
 	 *
 	 */
-	bool waitOnMessage(byte* pData, size_t& data_size, unsigned long timeout);
+	bool waitOnMessage(byte** ppData, size_t& data_size, unsigned long timeout);
 
 	/**
 	 * bool listen ();
 	 * >if multiple software serials are used, listen
 	 * >activate this software serial connection
-	 * >since they are rconcurrent
+	 * >since they are concurrent
 	 * <returns: true ...if other connection was deactivated
 	 */
 	bool listen ();
@@ -88,6 +88,12 @@ public:
 	 * <returns: pointer on internal SoftwareSerial connection
 	 */
 	SoftwareSerial* getSoftSerial();
+
+	/**
+	 * ~SoftSerialRx();
+	 * > destructor deletes internal softSerial
+	 * > if constructor with softSerial was used, it does not
+	 */
 	virtual ~SoftSerialRx();
 private:
 	void (*updateCallback)(byte* data, size_t data_size);
@@ -102,7 +108,7 @@ private:
 	size_t bufferSize=0;
 	byte serPreamble[4]  = PREAMBLE;
 	byte serPostamble[4] = POSTAMBLE;
-	byte _byte ;
+	byte lastByte ;
 
 };
 

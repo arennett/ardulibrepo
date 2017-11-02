@@ -21,10 +21,10 @@
 								<option id="io.sloeber.compiler.cpp.sketch.option.incpath.587270253" name="Include Paths (-I)" superClass="io.sloeber.compiler.cpp.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/Wire}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1693006335" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -32,10 +32,10 @@
 								<option id="io.sloeber.compiler.c.sketch.option.incpath.903576604" name="Include Paths (-I)" superClass="io.sloeber.compiler.c.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/Wire}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.1066168636" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -43,10 +43,10 @@
 								<option id="io.sloeber.compiler.asm.sketch.option.incpath.1215710025" name="Include Paths (-I)" superClass="io.sloeber.compiler.asm.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/Wire}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ToolsLib2/libraries/SoftwareSerial/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.1517406897" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>
