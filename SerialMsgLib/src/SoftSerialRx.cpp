@@ -64,11 +64,11 @@ bool SoftSerialRx::readNext(){
 	return readNext(&lastByte);
 }
 
-bool SoftSerialRx::waitOnMessage(byte** ppData,size_t& data_size, unsigned long timeOut ){
+bool SoftSerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut ){
 	MPRINTLN("waitOnMessage");
 	long restOfTime= timeOut;
 	data_size=0;
-	*ppData = pRecBuffer;
+	pData = pRecBuffer;
 
 	while (restOfTime >= 10) {
 		if (readNext()) {

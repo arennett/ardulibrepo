@@ -67,12 +67,12 @@ public:
 	/**
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
 	 * > waits until complete message is received or timeout is expired
-	 * ppData 		...address for : pointer on the received data
-	 * data_size 	...data size
+	 * ppData 		...reference for : pointer on the received data
+	 * data_size 	...reference data size
 	 * timeout		...timeout msecs
 	 *
 	 */
-	bool waitOnMessage(byte** ppData, size_t& data_size, unsigned long timeout);
+	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout);
 
 	/**
 	 * bool listen ();
