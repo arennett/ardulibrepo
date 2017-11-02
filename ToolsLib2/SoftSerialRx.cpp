@@ -3,22 +3,22 @@
  *
  *  Created on: 30.10.2017
  *      Author: User
+ *
+ * implementation for SoftSerialRx
+ * comments see SoftSerialRx.h
  */
-
+#include "Arduino.h"
 #include "SoftSerialRx.h"
 #include "tools.h"
 
 
 SoftSerialRx::SoftSerialRx(byte pinRx,byte pinTx,size_t maxDataSize) {
-	// TODO Auto-generated constructor stub
 	pSoftSerial = new SoftwareSerial(pinRx,pinTx);
 	deleteSoftSerial=true;
-	updateCallback=NULL;
+	updateCallback= NULL;
 	this->bufferSize  = maxDataSize + sizeof serPostamble;
 	pRecBuffer = new byte[bufferSize];
-	_byte=0;
-
-
+	lastByte=0;
 }
 
 
@@ -28,14 +28,16 @@ SoftSerialRx::SoftSerialRx(SoftwareSerial* pSoftSerial,size_t maxDataSize){
 	updateCallback=NULL;
 	this->bufferSize  = maxDataSize + sizeof serPostamble;
 	pRecBuffer = new byte[bufferSize];
-	_byte=0;
+	lastByte=0;
 }
 
 
 
 SoftSerialRx::~SoftSerialRx() {
-	// TODO Auto-generated destructor stub
-	delete pSoftSerial;
+	//TODO maybe the delete of pSoftSerial makes problems
+	if (deleteSoftSerial) {
+		delete pSoftSerial;
+	}
 	delete pRecBuffer;
 
 }
@@ -47,8 +49,7 @@ void SoftSerialRx::begin(long speed){
 	pSoftSerial->begin(speed);
 
 }
-// This function sets the current object as the "listening"
-// one and returns true if it replaces another
+
 bool SoftSerialRx::listen () {
 	return  pSoftSerial->listen();
 }
@@ -58,14 +59,15 @@ SoftwareSerial* SoftSerialRx::getSoftSerial(){
 }
 
 bool SoftSerialRx::readNext(){
-	return readNext(&_byte);
+	return readNext(&lastByte);
 }
 
-bool SoftSerialRx::waitOnMessage(byte* pData,size_t& data_size, unsigned long timeOut ){
+bool SoftSerialRx::waitOnMessage(byte** ppData,size_t& data_size, unsigned long timeOut ){
 	MPRINTLN("waitOnMessage");
 	long restOfTime= timeOut;
 	data_size=0;
-	 pData = pRecBuffer;
+	*ppData = pRecBuffer;
+
 	while (restOfTime >= 10) {
 		if (readNext()) {
 	 		MPRINTLN("waitOnMessage : message received");
@@ -74,7 +76,7 @@ bool SoftSerialRx::waitOnMessage(byte* pData,size_t& data_size, unsigned long ti
 			return true;
 		}
 		delay(10);
-		restOfTime=restOfTime-10;
+		restOfTime-=10;
 	}
 
 	MPRINTSVAL("restOfTime TIMEOUT: " ,restOfTime);
@@ -92,12 +94,12 @@ bool SoftSerialRx::readNext(byte* pByte){
 		return messReceived;
 	}
 	if (pSoftSerial->available()> 0) {
-			_byte= pSoftSerial->read();
-			 pByte[0] =_byte;
-			MPRINTSVAL("byte: " ,_byte);
+			lastByte= pSoftSerial->read();
+			 pByte[0] =lastByte;
+			MPRINTSVAL("byte: " ,lastByte);
 			if (dataCollect) {
 				if (dataCount < bufferSize) {
-					pRecBuffer[dataCount]=_byte;
+					pRecBuffer[dataCount]=lastByte;
 					dataCount++;
 				}else {
 					MPRINTSVAL("BUFFER OVERFLOW: DATA SIZE >=" ,bufferSize - sizeof serPostamble );
@@ -106,7 +108,7 @@ bool SoftSerialRx::readNext(byte* pByte){
 
 			}
 
-			if ( _byte == serPreamble[preAmCount] ) {
+			if ( lastByte == serPreamble[preAmCount] ) {
 				//MPRINTSVAL("serPreamble COUNT:",preAmCount);
 				if (preAmCount == (sizeof serPreamble) -1 ) {
 					MPRINTLN("serPreamble COMPLETE");
@@ -118,15 +120,13 @@ bool SoftSerialRx::readNext(byte* pByte){
 				}
 			}else{
 				preAmCount=0;
-				if (_byte == serPreamble[preAmCount]) {
+				if (lastByte == serPreamble[preAmCount]) {
 					//MPRINTSVAL("serPreamble COUNT:",preAmCount);
 					preAmCount++;
 				}
-
-
 			}
 
-			if ( _byte == serPostamble[postAmCount] ) {
+			if ( lastByte == serPostamble[postAmCount] ) {
 						//MPRINTSVAL("serPostamble COUNT:",postAmCount);
 						if (postAmCount == (sizeof serPostamble) -1 ) {
 							MPRINTLN("serPostamble COMPLETE");
@@ -148,7 +148,7 @@ bool SoftSerialRx::readNext(byte* pByte){
 						}
 			}else{
 				postAmCount=0;
-				if (_byte == serPostamble[postAmCount]) {
+				if (lastByte == serPostamble[postAmCount]) {
 					//MPRINTSVAL("serPostamble COUNT:",preAmCount);
 					postAmCount++;
 				}

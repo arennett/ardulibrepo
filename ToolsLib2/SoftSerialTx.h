@@ -13,13 +13,50 @@
 
 class SoftSerialTx {
 public:
+
+	/**
+	 * SoftSerialTx(byte pinRx,byte pinTx)
+	 * > constructor for serial message transmitter
+	 * > using an internal SoftSerial port
+	 * pinRx	pin for receiving data
+	 * pinRy	pin for transmitting data
+	 */
 	SoftSerialTx(byte pinRx,byte pinTx);
+
+	/**
+	 * SoftSerialTx(byte pinRx,byte pinTx)
+	 * > constructor for serial message transmitter
+	 * > using an external SoftSerial port
+	 * pinRx	pin for receiving data
+	 * pinRy	pin for transmitting data
+	 */
 	SoftSerialTx(SoftwareSerial* pSoftSerial);
 
+
+	/**
+	 * void begin(long speed)
+	 * > like Serial.begin , inits serial connection
+	 */
 	void begin(long speed);
+
+
+	/**
+	 * void sendData(byte* data, size_t datasize);
+	 * > like Serial.begin , inits serial connection
+	 */
 	void sendData(byte* data, size_t datasize);
+
+
+	/**
+	 * SoftwareSerial* getSoftSerial();
+	 * <returns: pointer on internal SoftwareSerial connection
+	 */
 	SoftwareSerial* getSoftSerial();
 
+	/**
+	 * ~SoftSerialTx() {
+	 * > Destructor
+	 */
 	virtual ~SoftSerialTx();
 private:
 	SoftwareSerial* pSoftSerial;
