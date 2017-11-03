@@ -11,7 +11,7 @@
 #define SOFTSERIALRX_H_
 #include "Arduino.h"
 #include <SoftwareSerial.h>
-#include "src/SoftSerial.h"
+#include "SoftSerial.h"
 
 class SoftSerialRx {
 public:

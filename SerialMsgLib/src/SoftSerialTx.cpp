@@ -1,5 +1,6 @@
 /*
  * SoftSerialTx.cpp
+
  *
  *  Created on: 31.10.2017
  *      Author: Andre Rennett
@@ -7,12 +8,14 @@
  *  Implementation for SoftSerialTx
  *  comments see SoftSerialTx.h
  */
-#include "src/SoftSerialTx.h"
 
+#include "Arduino.h"
 #include <SoftwareSerial.h>
+#include "SoftSerial.h"
+#include "SoftSerialTx.h"
 
-#include "src/SoftSerial.h"
-#include "src/tools.h"
+#include <src/tools.h> //see ToolsLib2
+#include <src/tools.h> // see ToolsLib2
 
 
 SoftSerialTx::SoftSerialTx(byte pinRx,byte pinTx){

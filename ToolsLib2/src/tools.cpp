@@ -6,7 +6,7 @@
  *      Author: User
  */
 
-#include "src/tools.h"
+#include "../src/tools.h"
 
 int freeRam ()
 {

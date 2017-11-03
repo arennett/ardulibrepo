@@ -10,7 +10,7 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 
-#include "src/SoftSerial.h"
+#include "SoftSerial.h"
 
 class SoftSerialTx {
 public:

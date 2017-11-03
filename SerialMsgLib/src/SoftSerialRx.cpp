@@ -7,11 +7,14 @@
  * implementation for SoftSerialRx
  * comments see SoftSerialRx.h
  */
-#include "src/SoftSerialRx.h"
+
 
 #include "Arduino.h"
+#include <SoftwareSerial.h>
+#include "SoftSerialRx.h"
 
-#include "src/tools.h"
+#include <src/tools.h> //see ToolsLib2
+
 
 
 SoftSerialRx::SoftSerialRx(byte pinRx,byte pinTx,size_t maxDataSize) {
