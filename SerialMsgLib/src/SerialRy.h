@@ -7,13 +7,14 @@
  *     a message receiver for a software serial connection
  */
 
-#ifndef SOFTSERIALRX_H_
-#define SOFTSERIALRX_H_
+#ifndef SERIALRY_H_
+#define SERIALRY_H_
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 #include "SoftSerial.h"
+#include "SerialPort.h";
 
-class SoftSerialRx {
+class SerialRx {
 public:
 	/**
 	 * SoftSerialRx(byte pinRx,byte pinTy,size_t maxDataSize);
@@ -22,15 +23,8 @@ public:
 	 * pinrRy 		...serial tx pin number
 	 * maxDataSize 	...data size, to create an internal buffer (dataSize + postamble size)
 	 */
-	SoftSerialRx(byte pinRx,byte pinTy,size_t maxDataSize);
+	SerialRx(SerialPort* pSerialPort,size_t maxDataSize);
 
-	/**
-	 * SoftSerialRx(byte pinRx,byte pinTy,size_t maxDataSize);
-	 * > constructor
-	 * pSoftSerial  ...existing SoftwareSerial Object
-	 * maxDataSize  ...data size, to create an internal buffer (dataSize + postamble size)
-	 */
-	SoftSerialRx(SoftwareSerial* pSoftSerial, size_t maxDataSize);
 
 	/**
 	 * void setUpdateCallback(void (*ptr)(byte* data, size_t data_size));
@@ -84,22 +78,21 @@ public:
 	bool listen ();
 
 	/**
-	 * SoftwareSerial* getSoftSerial();
-	 * <returns: pointer on internal SoftwareSerial connection
+	 *  SerialPort* getSerialPort()
+	 * <returns: pointer on internal port
 	 */
-	SoftwareSerial* getSoftSerial();
+	 SerialPort* getSerialPort();
 
 	/**
 	 * ~SoftSerialRx();
 	 * > destructor deletes internal softSerial
 	 * > if constructor with softSerial was used, it does not
 	 */
-	virtual ~SoftSerialRx();
+	virtual ~SerialRx();
 private:
 	void (*updateCallback)(byte* data, size_t data_size);
 	byte* pRecBuffer;
-	SoftwareSerial* pSoftSerial;
-	bool deleteSoftSerial = false;
+	SerialPort* pSerialPort;
 	byte preAmCount=0;
 	byte postAmCount=0;
 	byte dataCount=0;
@@ -112,4 +105,4 @@ private:
 
 };
 
-#endif /* SOFTSERIALRX_H_ */
+#endif /* SERIALRY_H_ */

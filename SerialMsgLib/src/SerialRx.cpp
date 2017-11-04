@@ -10,16 +10,17 @@
 
 
 #include "Arduino.h"
-#include <SoftwareSerial.h>
-#include "SoftSerialRx.h"
-
 #include <src/tools.h> //see ToolsLib2
+#include <SoftwareSerial.h>
+
+#include "SerialRy.h"
 
 
 
-SoftSerialRx::SoftSerialRx(byte pinRx,byte pinTx,size_t maxDataSize) {
-	pSoftSerial = new SoftwareSerial(pinRx,pinTx);
-	deleteSoftSerial=true;
+
+
+SerialRx::SerialRx(SerialPort* pSerialPort,size_t maxDataSize) {
+	this->pSerialPort =pSerialPort;
 	updateCallback= NULL;
 	this->bufferSize  = maxDataSize + sizeof serPostamble;
 	pRecBuffer = new byte[bufferSize];
@@ -27,47 +28,34 @@ SoftSerialRx::SoftSerialRx(byte pinRx,byte pinTx,size_t maxDataSize) {
 }
 
 
-SoftSerialRx::SoftSerialRx(SoftwareSerial* pSoftSerial,size_t maxDataSize){
-	this->pSoftSerial = pSoftSerial;
-	deleteSoftSerial = false;
-	updateCallback=NULL;
-	this->bufferSize  = maxDataSize + sizeof serPostamble;
-	pRecBuffer = new byte[bufferSize];
-	lastByte=0;
-}
 
 
-
-SoftSerialRx::~SoftSerialRx() {
-	//TODO maybe the delete of pSoftSerial makes problems
-	if (deleteSoftSerial) {
-		delete pSoftSerial;
-	}
+SerialRx::~SerialRx() {
 	delete pRecBuffer;
 
 }
 
-void SoftSerialRx::setUpdateCallback(void (*ptr)(byte* data, size_t data_size)){
+void SerialRx::setUpdateCallback(void (*ptr)(byte* data, size_t data_size)){
 	updateCallback=ptr;
 }
-void SoftSerialRx::begin(long speed){
-	pSoftSerial->begin(speed);
+void SerialRx::begin(long speed){
+	pSerialPort->begin(speed);
 
 }
 
-bool SoftSerialRx::listen () {
-	return  pSoftSerial->listen();
+bool SerialRx::listen () {
+	return  pSerialPort->listen();
 }
 
-SoftwareSerial* SoftSerialRx::getSoftSerial(){
-	return pSoftSerial;
+SerialPort* SerialRx::getSerialPort(){
+	return pSerialPort;
 }
 
-bool SoftSerialRx::readNext(){
+bool SerialRx::readNext(){
 	return readNext(&lastByte);
 }
 
-bool SoftSerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut ){
+bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut ){
 	MPRINTLN("waitOnMessage");
 	long restOfTime= timeOut;
 	data_size=0;
@@ -91,15 +79,15 @@ bool SoftSerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long
 /**
  * returns true if incoming message was completed
  */
-bool SoftSerialRx::readNext(byte* pByte){
+bool SerialRx::readNext(byte* pByte){
 	bool messReceived = false;
 
-	if (!pSoftSerial->isListening()){
+	if (!pSerialPort->isListening()){
 		MPRINTLN("NOT LISTEN");
 		return messReceived;
 	}
-	if (pSoftSerial->available()> 0) {
-			lastByte= pSoftSerial->read();
+	if (pSerialPort->available()> 0) {
+			lastByte= pSerialPort->read();
 			 pByte[0] =lastByte;
 			MPRINTSVAL("byte: " ,lastByte);
 			if (dataCollect) {
