@@ -7,12 +7,12 @@
  *     a message receiver for a software serial connection
  */
 
-#ifndef SERIALRY_H_
-#define SERIALRY_H_
+#ifndef SERIALRX_H_
+#define SERIALRX_H_
 #include "Arduino.h"
 #include <SoftwareSerial.h>
-#include "SoftSerial.h"
-#include "SerialPort.h";
+
+#include "SerialMsg.h"
 
 class SerialRx {
 public:
@@ -64,8 +64,21 @@ public:
 	 * ppData 		...reference for : pointer on the received data
 	 * data_size 	...reference data size
 	 * timeout		...timeout msecs
+	 * checkPeriod  ...time until next read trial is done
 	 *
 	 */
+	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout, unsigned long checkPeriod);
+
+	/**
+		 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
+		 * > waits until complete message is received or timeout is expired
+		 * > the checkPeriod is 10msec
+		 * ppData 		...reference for : pointer on the received data
+		 * data_size 	...reference data size
+		 * timeout		...timeout msecs
+		 *
+		 *
+		 */
 	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout);
 
 	/**
@@ -105,4 +118,4 @@ private:
 
 };
 
-#endif /* SERIALRY_H_ */
+#endif /* SERIALRX_H_ */

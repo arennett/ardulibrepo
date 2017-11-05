@@ -9,8 +9,8 @@
 #define SERIALTX_H_
 #include "Arduino.h"
 #include <SoftwareSerial.h>
-#include "SoftSerial.h"
-#include  "SerialPort.h"
+#include "SerialMsg.h"
+//#include "SerialPort.h"
 
 class SerialTx {
 public:

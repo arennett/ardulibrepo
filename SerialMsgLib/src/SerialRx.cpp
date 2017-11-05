@@ -10,13 +10,9 @@
 
 
 #include "Arduino.h"
-#include <src/tools.h> //see ToolsLib2
+#include <tools.h> //see ToolsLib2
 #include <SoftwareSerial.h>
-
-#include "SerialRy.h"
-
-
-
+#include "SerialMsg.h"
 
 
 SerialRx::SerialRx(SerialPort* pSerialPort,size_t maxDataSize) {
@@ -55,25 +51,29 @@ bool SerialRx::readNext(){
 	return readNext(&lastByte);
 }
 
-bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut ){
-	MPRINTLN("waitOnMessage");
+bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut ,unsigned long checkPeriod){
+	DPRINTLN("waitOnMessage");
 	long restOfTime= timeOut;
 	data_size=0;
 	pData = pRecBuffer;
 
-	while (restOfTime >= 10) {
+	while (restOfTime >= checkPeriod) {
 		if (readNext()) {
-	 		MPRINTLN("waitOnMessage : message received");
-			MPRINTSVAL("restOfTime: " ,restOfTime);
+	 		DPRINTLN("waitOnMessage : message received");
+			DPRINTSVAL("restOfTime: " ,restOfTime);
 			data_size = prevDataCount;
 			return true;
 		}
-		delay(10);
-		restOfTime-=10;
+		delay(checkPeriod);
+		restOfTime-=checkPeriod;
 	}
 
-	MPRINTSVAL("restOfTime TIMEOUT: " ,restOfTime);
+	DPRINTSVAL("TIMEOUT! restOfTime:" ,restOfTime);
 	return false;
+}
+
+bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut){
+	return SerialRx::waitOnMessage(pData, data_size, timeOut , WAITED_READ_CHECKPERIOD_MSEC);
 }
 
 /**
@@ -83,28 +83,28 @@ bool SerialRx::readNext(byte* pByte){
 	bool messReceived = false;
 
 	if (!pSerialPort->isListening()){
-		MPRINTLN("NOT LISTEN");
+		DPRINTLN("NOT LISTEN");
 		return messReceived;
 	}
 	if (pSerialPort->available()> 0) {
 			lastByte= pSerialPort->read();
 			 pByte[0] =lastByte;
-			MPRINTSVAL("byte: " ,lastByte);
+			DPRINTSVAL("byte: " ,lastByte);
 			if (dataCollect) {
 				if (dataCount < bufferSize) {
 					pRecBuffer[dataCount]=lastByte;
 					dataCount++;
 				}else {
-					MPRINTSVAL("BUFFER OVERFLOW: DATA SIZE >=" ,bufferSize - sizeof serPostamble );
+					DPRINTSVAL("BUFFER OVERFLOW: DATA SIZE >=" ,bufferSize - sizeof serPostamble );
 					dataCollect=false;
 				}
 
 			}
 
 			if ( lastByte == serPreamble[preAmCount] ) {
-				//MPRINTSVAL("serPreamble COUNT:",preAmCount);
+				//DPRINTSVAL("serPreamble COUNT:",preAmCount);
 				if (preAmCount == (sizeof serPreamble) -1 ) {
-					MPRINTLN("serPreamble COMPLETE");
+					DPRINTLN("serPreamble COMPLETE");
 					preAmCount=0;
 					dataCollect=true;
 					dataCount=0;
@@ -114,17 +114,17 @@ bool SerialRx::readNext(byte* pByte){
 			}else{
 				preAmCount=0;
 				if (lastByte == serPreamble[preAmCount]) {
-					//MPRINTSVAL("serPreamble COUNT:",preAmCount);
+					//DPRINTSVAL("serPreamble COUNT:",preAmCount);
 					preAmCount++;
 				}
 			}
 
 			if ( lastByte == serPostamble[postAmCount] ) {
-						//MPRINTSVAL("serPostamble COUNT:",postAmCount);
+						//DPRINTSVAL("serPostamble COUNT:",postAmCount);
 						if (postAmCount == (sizeof serPostamble) -1 ) {
-							MPRINTLN("serPostamble COMPLETE");
+							DPRINTLN("serPostamble COMPLETE");
 							prevDataCount = dataCount-sizeof serPostamble;
-							MPRINTSVAL("MESSAGE SIZE: "  ,prevDataCount);
+							DPRINTSVAL("MESSAGE SIZE: "  ,prevDataCount);
 
 							if (updateCallback && dataCollect) {
 								updateCallback(pRecBuffer,prevDataCount );
@@ -132,7 +132,7 @@ bool SerialRx::readNext(byte* pByte){
 							}
 
 							messReceived = true;
-							MPRINTLN("messReceived = true;");
+							DPRINTLN("messReceived = true;");
 							postAmCount=0;
 							dataCollect=false;
 							dataCount=0;
@@ -142,7 +142,7 @@ bool SerialRx::readNext(byte* pByte){
 			}else{
 				postAmCount=0;
 				if (lastByte == serPostamble[postAmCount]) {
-					//MPRINTSVAL("serPostamble COUNT:",preAmCount);
+					//DPRINTSVAL("serPostamble COUNT:",preAmCount);
 					postAmCount++;
 				}
 

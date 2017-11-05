@@ -9,13 +9,10 @@
  *  comments see SoftSerialTx.h
  */
 
-#include "SerialTx.h"
-
 #include "Arduino.h"
 #include <SoftwareSerial.h>
-#include "SoftSerial.h"
-#include <src/tools.h> //see ToolsLib2
-#include <src/tools.h> // see ToolsLib2
+#include <tools.h> //see ToolsLib2
+#include "SerialMsg.h"
 
 
 
@@ -45,5 +42,5 @@ void SerialTx::sendData(byte* data, size_t datasize) {
 	pSerialPort->write(serPreamble,sizeof serPreamble);
 	pSerialPort->write(data,datasize);
 	pSerialPort->write(serPostamble,sizeof serPostamble);
-	MPRINTLN("write data");
+	DPRINTLN("write data");
 }
