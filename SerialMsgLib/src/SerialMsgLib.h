@@ -8,11 +8,12 @@
  * be free to use different pre- and postamble
  */
 
-#ifndef SERIALMSG_H_
-#define SERIALMSG_H_
+#ifndef SERIALMSGLIB_H_
+#define SERIALMSGLIB_H_
 
-#define PREAMBLE   {14,23,32,41}
-#define POSTAMBLE  {96,87,78,69}
-#define WAITED_READ_CHECKPERIOD_MSEC 10
+#include "SerialTx.h"
+#include "SerialRx.h"
+#include "SerialPort.h"
+#include "SoftSerialPort.h"
 
 #endif /* SERIALMSG_H_ */

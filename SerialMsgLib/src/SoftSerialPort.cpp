@@ -5,8 +5,11 @@
  *      Author: User
  */
 
-#include <SoftwareSerial.h>
+#include "SerialMsg.h"
 #include "SoftSerialPort.h"
+#include <SoftwareSerial.h>
+
+
 
 
 SoftSerialPort::SoftSerialPort(byte pinRx ,byte pinRy) {

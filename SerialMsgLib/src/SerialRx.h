@@ -11,8 +11,10 @@
 #define SERIALRX_H_
 #include "Arduino.h"
 #include <SoftwareSerial.h>
-
 #include "SerialMsg.h"
+#include "SerialPort.h"
+
+
 
 class SerialRx {
 public:

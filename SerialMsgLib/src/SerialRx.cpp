@@ -13,6 +13,8 @@
 #include <tools.h> //see ToolsLib2
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
+#include "SerialRx.h"
+
 
 
 SerialRx::SerialRx(SerialPort* pSerialPort,size_t maxDataSize) {

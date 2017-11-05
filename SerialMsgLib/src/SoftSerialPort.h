@@ -10,7 +10,9 @@
 
 #include "Arduino.h"
 #include <SoftwareSerial.h>
+#include "SerialMsg.h"
 #include "SerialPort.h"
+
 
 
 class SoftSerialPort: public SerialPort {

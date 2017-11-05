@@ -10,7 +10,7 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
-//#include "SerialPort.h"
+#include "SerialPort.h"
 
 class SerialTx {
 public:

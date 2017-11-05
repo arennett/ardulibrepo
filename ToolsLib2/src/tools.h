@@ -6,9 +6,7 @@
 
 // uncomment to switch off all messages
 // #define MPRINT_OFF
-
-
-// uncomment ti switch on debug messages
+// comment ti switch on debug messages
 // #define DPRINT_ON
 
 

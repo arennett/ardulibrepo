@@ -15,13 +15,13 @@ public:
 	SerialPort();
 	virtual ~SerialPort();
 
-	virtual byte read();
-	virtual bool write(byte b);
-	virtual size_t write(byte* bb, size_t len);
-	virtual void begin(long speed);
-	virtual bool listen();
-	virtual int  available();
-	virtual bool isListening();
+	virtual byte read()=0;
+	virtual bool write(byte b)=0;
+	virtual size_t write(byte* bb, size_t len)=0;
+	virtual void begin(long speed)=0;
+	virtual bool listen()=0;
+	virtual int  available()=0;
+	virtual bool isListening()=0;
 
 
 };
