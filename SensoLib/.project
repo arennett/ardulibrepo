@@ -46,5 +46,10 @@
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/variants/standard</locationURI>
 		</link>
+		<link>
+			<name>libraries/ToolsLib2</name>
+			<type>2</type>
+			<location>G:/git/ardulibrepo/ToolsLib2</location>
+		</link>
 	</linkedResources>
 </projectDescription>
