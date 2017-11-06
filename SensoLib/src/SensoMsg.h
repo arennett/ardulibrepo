@@ -52,7 +52,8 @@ public:
 
 	void writeTo(SerialPort* pSerialPort) {
 		pSerialPort->write(serPreamble,sizeof serPreamble);
-		pSerialPort->write(data,datasize);
+		pSerialPort->write(p
+		pSerialPort->write(pMsgHdr->pData,pMsgHdr->dataSize);
 		pSerialPort->write(serPostamble,sizeof serPostamble);
 		DPRINTLN("write data");
 
