@@ -6,6 +6,8 @@
 #ifndef _SENSOMESSAGE_H
 #define	_SENSOMESSAGE_H
 #include "Arduino.h"
+#include "SerialMsg.h"
+#include "SerialPort.h"
 
 enum {
 	CMD_NULL = 0, CMD_SET_LED, CMD_SET_NEO_PIXEL_CMD, CMD_SET_DSP
@@ -19,52 +21,89 @@ typedef struct SensoMsgHdr {
 	byte subcmd = CMDSUB_NULL;
 	int bitArray = 0;
 	size_t dataSize; // if more data follows
+	byte* pData=NULL;
 } tSensoMsgHdr;
 
 class SensoMsg {
 public:
+
+	/**
+	 * recdata   header, userdata
+	 */
+	SensoMsg(byte* recdata) {
+		pMsgHdr=recdata;
+
+	}
+
+	SensoMsg(byte cmd, byte subcmd, void* pData, size_t datlen) {
+		pMsgHdr=new tSensoMsgHdr;
+		pMsgHdr->dataSize=datlen;
+		pMsgHdr->pData = (byte*) pData;
+	}
+
+	SensoMsg(byte cmd, byte subcmd, void* pData, size_t datlen) {
+		pMsgHdr=new tSensoMsgHdr;
+		pMsgHdr->dataSize=datlen;
+		pMsgHdr->pData = (byte*) pData;
+	}
+
+
+
+
+	void writeTo(SerialPort* pSerialPort) {
+		pSerialPort->write(serPreamble,sizeof serPreamble);
+		pSerialPort->write(p
+		pSerialPort->write(pMsgHdr->pData,pMsgHdr->dataSize);
+		pSerialPort->write(serPostamble,sizeof serPostamble);
+		DPRINTLN("write data");
+
+	}
+
+
 	size_t getDataSize() {
-		return msgHdr.dataSize;
+		return pMsgHdr->dataSize;
 	}
 
 	tSensoMsgHdr getMsgHdr() {
-		return msgHdr;
+		return pMsgHdr;
 	}
 
 	void setCmd(byte cmd) {
-		this->msgHdr.cmd = cmd;
+		this->pMsgHdr->cmd = cmd;
 	}
 	;
 	byte getCmd() {
-		return this->msgHdr.cmd;
+		return this->pMsgHdr->cmd;
 	}
 	;
 	void setSubCmd(byte subcmd) {
-		this->msgHdr.subcmd = subcmd;
+		this->pMsgHdr->subcmd = subcmd;
 	}
 	;
 
 	byte getSubCmd() {
-		return this->msgHdr.subcmd;
+		return this->pMsgHdr->subcmd;
 	}
 
 	int getBitArray() {
-		return msgHdr.bitArray;
+		return pMsgHdr->bitArray;
 	}
 
 	void setBit(byte num) {
 		if (num < 16) {
-			bitWrite(msgHdr.bitArray, num, 1);
+			bitWrite(pMsgHdr->bitArray, num, 1);
 		}
 	}
 	bool isBitSet(byte num) {
 		if (num < 16) {
-			return (msgHdr.bitArray & (1 << num));
+			return (pMsgHdr->bitArray & (1 << num));
 		}
 	}
 
+
+
 private:
-	tSensoMsgHdr msgHdr;
+	tSensoMsgHdr* pMsgHdr;
 
 };
 
