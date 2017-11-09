@@ -7,6 +7,7 @@
  *
  * be free to use different pre- and postamble
  */
+#include "Arduino.h"
 
 #ifndef SERIALMSG_H_
 #define SERIALMSG_H_
