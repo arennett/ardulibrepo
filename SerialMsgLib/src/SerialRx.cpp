@@ -55,7 +55,7 @@ bool SerialRx::readNext(){
 
 bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut ,unsigned long checkPeriod){
 	DPRINTLN("waitOnMessage");
-	long restOfTime= timeOut;
+	unsigned long restOfTime= timeOut;
 	data_size=0;
 	pData = pRecBuffer;
 
