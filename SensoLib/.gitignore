@@ -1,1 +1,4 @@
-/.settings/
+/Release/
+/libraries/
+/core/
+/.settings/ 
