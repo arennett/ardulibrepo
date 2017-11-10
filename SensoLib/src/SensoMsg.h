@@ -6,8 +6,9 @@
 #ifndef _SENSOMESSAGE_H
 #define	_SENSOMESSAGE_H
 #include "Arduino.h"
-#include "SerialMsg.h"
-#include "SerialPort.h"
+#include <SerialMsgLib.h>
+#include <SerialPort.h>
+#include <tools.h>
 
 enum {
 	CMD_NULL = 0, CMD_SET_LED, CMD_SET_NEO_PIXEL_CMD, CMD_SET_DSP
@@ -30,80 +31,43 @@ public:
 	/**
 	 * recdata   header, userdata
 	 */
-	SensoMsg(byte* recdata) {
-		pMsgHdr=recdata;
+	SensoMsg(bool send);
 
-	}
+	virtual ~SensoMsg();
 
-	SensoMsg(byte cmd, byte subcmd, void* pData, size_t datlen) {
-		pMsgHdr=new tSensoMsgHdr;
-		pMsgHdr->dataSize=datlen;
-		pMsgHdr->pData = (byte*) pData;
-	}
+	void  receive(byte* pData ,size_t len) ;
+	void send(SerialPort* pSerialPort);
 
-	SensoMsg(byte cmd, byte subcmd, void* pData, size_t datlen) {
-		pMsgHdr=new tSensoMsgHdr;
-		pMsgHdr->dataSize=datlen;
-		pMsgHdr->pData = (byte*) pData;
-	}
+	size_t getDataSize();
 
+	void setDataSize(size_t size);
 
+	tSensoMsgHdr* getMsgHdr();
 
+	void setCmd(byte cmd);
 
-	void writeTo(SerialPort* pSerialPort) {
-		pSerialPort->write(serPreamble,sizeof serPreamble);
-		pSerialPort->write(p
-		pSerialPort->write(pMsgHdr->pData,pMsgHdr->dataSize);
-		pSerialPort->write(serPostamble,sizeof serPostamble);
-		DPRINTLN("write data");
+	byte getCmd();
 
-	}
+	void setSubCmd(byte subcmd);
 
+	byte getSubCmd();
 
-	size_t getDataSize() {
-		return pMsgHdr->dataSize;
-	}
+	int  getBitArray();
 
-	tSensoMsgHdr getMsgHdr() {
-		return pMsgHdr;
-	}
+	void setBitArray(int bits);
 
-	void setCmd(byte cmd) {
-		this->pMsgHdr->cmd = cmd;
-	}
-	;
-	byte getCmd() {
-		return this->pMsgHdr->cmd;
-	}
-	;
-	void setSubCmd(byte subcmd) {
-		this->pMsgHdr->subcmd = subcmd;
-	}
-	;
+	byte* getData();
 
-	byte getSubCmd() {
-		return this->pMsgHdr->subcmd;
-	}
+	void setData(byte* pData);
 
-	int getBitArray() {
-		return pMsgHdr->bitArray;
-	}
+	void setBit(byte num);
 
-	void setBit(byte num) {
-		if (num < 16) {
-			bitWrite(pMsgHdr->bitArray, num, 1);
-		}
-	}
-	bool isBitSet(byte num) {
-		if (num < 16) {
-			return (pMsgHdr->bitArray & (1 << num));
-		}
-	}
-
-
+	bool isBitSet(byte num);
 
 private:
 	tSensoMsgHdr* pMsgHdr;
+
+	bool deleteMsgHdr = false;
 
 };
 
