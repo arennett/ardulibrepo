@@ -53,8 +53,8 @@ public:
 
 private:
 	SerialPort* pSerialPort;
-	//byte serPreamble[4]  = PREAMBLE;
-	//byte serPostamble[4] = POSTAMBLE;
+	byte serPreamble[4]  = PREAMBLE;
+	byte serPostamble[4] = POSTAMBLE;
 };
 
 #endif /* SERIALTX_H_ */
