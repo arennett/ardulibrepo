@@ -25,12 +25,15 @@ byte* rpDat;
 
 void loop() {
 
-	// for nonwaited receiving, readNext is called in every loop
+	// nonwaited receiving
+	// readNext is called in every loop
 	// also you have to set a callback function, see setup
 	serialRx.readNext();
 
 
+
 	// waited receiving
+	// if time expired before message received, waitOnMessage returns false
 	MPRINTLN("waiting ...");
 	if (serialRx.waitOnMessage(rpDat, dataSize, 5000)) {
 		MPRINTSVAL("receive message on wait ...size: ", dataSize);
