@@ -16,5 +16,7 @@
 #define POSTAMBLE  {96,87,78,69}
 #define WAITED_READ_CHECKPERIOD_MSEC 10
 
+extern byte serPreamble[4];
+extern byte serPostamble[4];
 
 #endif /* SERIALMSG_H_ */

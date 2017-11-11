@@ -11,15 +11,19 @@
 #include <tools.h>
 
 enum {
-	CMD_NULL = 0, CMD_SET_LED, CMD_SET_NEO_PIXEL_CMD, CMD_SET_DSP
+	CMD_NULL = 0,
+	CMD_SET_LED,
+	CMD_SET_NEO_PIXEL_CMD,
+	CMD_SET_DSP,
+	CMD_SET_DSP_CLEAR,
+	CMD_SET_DSP_RECT,
+	CMD_SET_DSP_CIRCLE
 } tSensoCmd;
-enum {
-	CMDSUB_NULL = 0, CMDSUB_SET_DSP_CLEAR, CMDSUB_SET_DSP_RECT, CMDSUB_DSP_WRITE
-} tSensoSubCmd;
 
 typedef struct SensoMsgHdr {
-	byte cmd = CMD_NULL;
-	byte subcmd = CMDSUB_NULL;
+	unsigned long aktId=0;
+	tSensoCmd cmd = CMD_NULL;
+	byte par = 0;
 	int bitArray = 0;
 	size_t dataSize; // if more data follows
 	byte* pData=NULL;
@@ -36,7 +40,7 @@ public:
 	virtual ~SensoMsg();
 
 	void  receive(byte* pData ,size_t len) ;
-	void send(SerialPort* pSerialPort);
+	void send(SerialTx* pSerialTx);
 
 	size_t getDataSize();
 
@@ -48,9 +52,9 @@ public:
 
 	byte getCmd();
 
-	void setSubCmd(byte subcmd);
+	void setPar(byte par);
 
-	byte getSubCmd();
+	byte getPar();
 
 	int  getBitArray();
 
@@ -66,8 +70,9 @@ public:
 
 private:
 	tSensoMsgHdr* pMsgHdr;
-
+	bool sendType = false;
 	bool deleteMsgHdr = false;
+	unsigned long aktId=0;
 
 };
 

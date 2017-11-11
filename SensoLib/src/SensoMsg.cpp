@@ -6,10 +6,12 @@
  */
 
 #include "stddef.h"
+#include <SerialMsg.h>
 #include "SensoMsg.h"
 
 	SensoMsg::SensoMsg(bool send) {
 		pMsgHdr=NULL;
+		this->sendType=send;
 		deleteMsgHdr=false;
 		if  (send) {
 			pMsgHdr = new tSensoMsgHdr();
@@ -25,24 +27,27 @@
 
 	}
 	void  SensoMsg::receive(byte* pData ,size_t len){
-		if (send) {
-			MPRINTLN("ERROR SensoMsg::receive not allowed");
+		if (sendType) {
+			MPRINTLN("ERROR SensoMsg::receive - receive not allowed");
 			return;
 		}
-		pMsgHdr=pData;
+		pMsgHdr=(tSensoMsgHdr*)pData;
 		if (len != pMsgHdr->dataSize) {
-			MPRINTSVAL("WARNING: SensoMsg::receive len <> pMsgHdr->dataSize : " ,pMsgHdr->dataSize);
+			MPRINTSVAL("WARNING: SensoMsg::receive - len <> pMsgHdr->dataSize : " ,pMsgHdr->dataSize);
 		}
 	}
 
-	void SensoMsg::send(SerialPort* pSerialPort) {
-		if (!send) {
-			MPRINTLN("WARNING SensoMsg::send a received message");
+	void SensoMsg::send(SerialTx* pSerialTx) {
+		if (!pMsgHdr) {
+			MPRINTLN("WARNING SensoMsg::send - no message found");
 		}
 
-		pSerialPort->write(serPreamble,sizeof serPreamble);
-		pSerialPort->write(pMsgHdr->pData,pMsgHdr->dataSize);
-		pSerialPort->write(serPostamble,sizeof serPostamble);
+		if (!sendType) {
+			MPRINTLN("WARNING SensoMsg::send - you send a received message");
+		}
+
+		pMsgHdr->aktId=aktId++;
+		pSerialTx->sendData(pMsgHdr->pData,pMsgHdr->dataSize);
 		int s=pMsgHdr->dataSize;
 		byte* p = pMsgHdr->pData;
 		DPRINTLN("SensoMsg::send: ");
@@ -72,13 +77,13 @@
 		return this->pMsgHdr->cmd;
 	}
 	;
-	void SensoMsg::setSubCmd(byte subcmd) {
-		this->pMsgHdr->subcmd = subcmd;
+	void SensoMsg::setPar(byte par) {
+		this->pMsgHdr->par= par;
 	}
 	;
 
-	byte SensoMsg::getSubCmd() {
-		return this->pMsgHdr->subcmd;
+	byte SensoMsg::getPar() {
+		return this->pMsgHdr->par;
 	}
 
 	int SensoMsg::getBitArray() {

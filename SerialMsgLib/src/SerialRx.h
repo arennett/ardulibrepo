@@ -114,8 +114,7 @@ private:
 	byte prevDataCount=0;
 	bool dataCollect=false;
 	size_t bufferSize=0;
-	byte serPreamble[4]  = PREAMBLE;
-	byte serPostamble[4] = POSTAMBLE;
+
 	byte lastByte ;
 
 };
