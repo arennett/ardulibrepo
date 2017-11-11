@@ -10,7 +10,7 @@
 #include <SerialPort.h>
 #include <tools.h>
 
-enum {
+typedef enum {
 	CMD_NULL = 0,
 	CMD_SET_LED,
 	CMD_SET_NEO_PIXEL_CMD,
