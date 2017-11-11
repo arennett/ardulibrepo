@@ -1,10 +1,6 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
-
-
-
-#include <SerialMsg.h>
-
+#include <SerialMsgLib.h>
 #include <tools.h>
 
 
