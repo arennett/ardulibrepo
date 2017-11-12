@@ -32,8 +32,8 @@
 			return;
 		}
 		pMsgHdr=(tSensoMsgHdr*)pData;
-		if (len != pMsgHdr->dataSize) {
-			MPRINTSVAL("WARNING: SensoMsg::receive - len <> pMsgHdr->dataSize : " ,pMsgHdr->dataSize);
+		if (len != (sizeof (tSensoMsgHdr) + pMsgHdr->dataSize)) {
+			MPRINTLN("WARNING: SensoMsg::receive - len != (sizeof (tSensoMsgHdr) + pMsgHdr->dataSize)");
 		}
 	}
 
@@ -47,15 +47,37 @@
 		}
 
 		pMsgHdr->aktId=aktId++;
-		pSerialTx->sendData(pMsgHdr->pData,pMsgHdr->dataSize);
-		int s=pMsgHdr->dataSize;
-		byte* p = pMsgHdr->pData;
-		DPRINTLN("SensoMsg::send: ");
-		for (;s--;p++) {
-			DPRINTHEX(pData);
+
+		pSerialTx->sendPreamble();
+		pSerialTx->sendRawData((byte*)pMsgHdr,sizeof (tSensoMsgHdr));
+		if (pMsgHdr->pData) {
+			pSerialTx->sendRawData(pMsgHdr->pData,pMsgHdr->dataSize);
 		}
-		DPRINTLN("");
+		pSerialTx->sendPostamble();
+
+		int s=pMsgHdr->dataSize;
+		DPRINTSVAL("SensoMsg::send: -cmd: ",pMsgHdr->cmd);
+		if (pMsgHdr->pData) {
+			DPRINTLN("SensoMsg::send: extra data");
+			byte* p = pMsgHdr->pData;
+
+			for (;s--;p++) {
+				DPRINTHEX(*p);DPRINT(" ");
+			}
+			DPRINTLN("");
+		}
 	}
+
+	void SensoMsg::mprint() {
+			MPRINTLN("SensoMsg::mprint(){");
+			MPRINTSVAL("aktid:		",pMsgHdr->aktId);
+			MPRINTSVAL("cmd:		",pMsgHdr->cmd);
+			MPRINTSVAL("par:		",pMsgHdr->par);
+			MPRINTSVAL("bittarray:	",pMsgHdr->bitArray);
+			MPRINTSVAL("datasize:	",pMsgHdr->dataSize);
+			MPRINTLN("}");
+
+		}
 
 	void SensoMsg::setDataSize(size_t size) {
 		pMsgHdr->dataSize=size;;

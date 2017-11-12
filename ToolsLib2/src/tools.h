@@ -2,8 +2,6 @@
 #define tools_h
 
 
-
-
 // uncomment to switch off all messages
 // #define MPRINT_OFF
 // comment ti switch on debug messages
@@ -13,7 +11,7 @@
 #ifndef MPRINT_OFF
 
 	#define MPRINT(x)   	Serial.print((x))
-	#define MPRINTHEX(x)   	Serial.print((x,HEX))
+	#define MPRINTHEX(x)   	Serial.print((x),HEX)
 	#define MPRINTLN(x) 	Serial.println((x))
 
 	#define MPRINTS(x)   	MPRINT(F(x))

@@ -42,6 +42,8 @@ public:
 	void  receive(byte* pData ,size_t len) ;
 	void send(SerialTx* pSerialTx);
 
+	void mprint();
+
 	size_t getDataSize();
 
 	void setDataSize(size_t size);

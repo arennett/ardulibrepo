@@ -44,6 +44,14 @@ public:
 	void sendData(byte* data, size_t datasize);
 
 
+	void sendRawData(byte* data, size_t datasize);
+
+	void SerialTx::sendPreamble();
+
+	void SerialTx::sendPostamble() ;
+
+
+
 	/**
 	 * SoftwareSerial* getSoftSerial();
 	 * <returns: pointer on internal serial port

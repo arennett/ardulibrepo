@@ -43,8 +43,26 @@ SerialPort* SerialTx::getSerialPort(){
 
 void SerialTx::sendData(byte* data, size_t datasize) {
 
-	pSerialPort->write(serPreamble,sizeof serPreamble);
-	pSerialPort->write(data,datasize);
-	pSerialPort->write(serPostamble,sizeof serPostamble);
-	DPRINTLN("write data");
+	sendPreamble();
+	sendRawData(data,datasize);
+	sendPostamble();
 }
+
+void SerialTx::sendRawData(byte* data, size_t datasize) {
+	pSerialPort->write(data,datasize);
+	DPRINTSVAL("SerialTx::sendRawData - size:",datasize);
+}
+
+void SerialTx::sendPreamble() {
+	pSerialPort->write(serPreamble,sizeof serPreamble);
+	DPRINTLN("SerialTx::sendPreamble");
+}
+
+void SerialTx::sendPostamble() {
+	pSerialPort->write(serPostamble,sizeof serPostamble);
+	DPRINTLN("SerialTx::sendPostamble");
+}
+
+
+
+

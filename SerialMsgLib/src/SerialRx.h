@@ -13,19 +13,21 @@
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
 #include "SerialPort.h"
+#include "SoftSerialPort.h"
 
 
 
 class SerialRx {
 public:
 	/**
-	 * SoftSerialRx(byte pinRx,byte pinTy,size_t maxDataSize);
+	 * SerialRx(byte pinRx,byte pinTy,size_t maxDataSize);
 	 * > constructor
 	 * pinRx  		...serial rx pin number
 	 * pinrRy 		...serial tx pin number
 	 * maxDataSize 	...data size, to create an internal buffer (dataSize + postamble size)
 	 */
 	SerialRx(SerialPort* pSerialPort,size_t maxDataSize);
+
 
 
 	/**

@@ -27,7 +27,6 @@ SerialRx::SerialRx(SerialPort* pSerialPort,size_t maxDataSize) {
 
 
 
-
 SerialRx::~SerialRx() {
 	delete pRecBuffer;
 
