@@ -8,14 +8,18 @@
 #include "SerialHeader.h"
 #include "SerialHeaderRx.h"
 
-SerialHeaderRx::SerialHeaderRx(SerialPort* pSerialPort, size_t maxDataSize,
-		byte addr) {
+SerialHeaderRx::SerialHeaderRx(SerialPort* pSerialPort, size_t maxDataSize) {
 	this->pSerialPort = pSerialPort;
 	this->pSerialRx = new SerialRx(pSerialPort,maxDataSize + sizeof(tSerialHeader));
-	//this->addrFrom = addr;
-	pSerialRx->setUpdateCallback(internalCallBack);
+	pSerialRx->setSerialHeaderRx(this);
 
 }
+
+SerialHeaderRx::~SerialHeaderRx(){
+	delete pSerialRx;
+}
+
+
 
 void SerialHeaderRx::setUpdateCallback(
 		void (*ptr)(byte* pData, size_t data_size), byte addr) {

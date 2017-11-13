@@ -46,9 +46,9 @@ public:
 
 	void sendRawData(byte* data, size_t datasize);
 
-	void SerialTx::sendPreamble();
+	void sendPreamble();
 
-	void SerialTx::sendPostamble() ;
+	void sendPostamble();
 
 
 

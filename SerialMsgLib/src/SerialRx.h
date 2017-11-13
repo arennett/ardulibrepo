@@ -14,6 +14,7 @@
 #include "SerialMsg.h"
 #include "SerialPort.h"
 #include "SoftSerialPort.h"
+#include "SerialHeaderRx.h"
 
 
 
@@ -32,13 +33,26 @@ public:
 
 	/**
 	 * void setUpdateCallback(void (*ptr)(byte* data, size_t data_size));
-	 * > registering a callback method
+	 * > registering a static callback method
 	 * > method will be called when data is completely received
 	 * > see also readNext()
 	 * pData 		...pointer on the received data
 	 * data_size 	...what you think ? ;-)
 	 */
-	void setUpdateCallback(void (*ptr)(byte* pData, size_t data_size));
+	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size));
+
+
+	/**
+	 *   void setSerialHeaderRx(SerialHeaderRx* pSerialHeaderRx);
+	 * > registering a serialHeaderRx
+	 * > serialHeaderRx is for advanced rx with a header (addressable)
+	 * > serialHeaderRx will be called when data is completely received
+	 * > serialHeaderRx will call the user callback functions
+	 * > see also SerialHeaderRx
+	 *  pSerialHeaderRx  ...pointer on the SerialHeaderRx object
+	 */
+	void setSerialHeaderRx(SerialHeaderRx* pSerialHeaderRx) ;
+
 
 	/**
 	 * void begin(long speed);
@@ -108,16 +122,16 @@ public:
 	virtual ~SerialRx();
 private:
 	void (*updateCallback)(byte* data, size_t data_size);
-	byte* pRecBuffer;
-	SerialPort* pSerialPort;
+	byte* pRecBuffer=NULL;
+	SerialPort* pSerialPort= NULL;;
 	byte preAmCount=0;
 	byte postAmCount=0;
 	byte dataCount=0;
 	byte prevDataCount=0;
 	bool dataCollect=false;
 	size_t bufferSize=0;
-
-	byte lastByte ;
+	byte lastByte=0;
+	SerialHeaderRx* pSerialHeaderRx = NULL;
 
 };
 

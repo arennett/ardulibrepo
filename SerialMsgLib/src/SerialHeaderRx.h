@@ -26,7 +26,7 @@ typedef struct {
 
 class SerialHeaderRx {
 public:
-	SerialHeaderRx(SerialPort* pSerialPort,size_t maxDataSize,byte addr);
+	SerialHeaderRx(SerialPort* pSerialPort,size_t maxDataSize);
 	virtual ~SerialHeaderRx();
 
 	void setUpdateCallback(void (*ptr)(byte* pData, size_t data_size),byte addr);
@@ -37,7 +37,6 @@ private:
 	SerialPort* pSerialPort = NULL;
 	SerialRx* pSerialRx = NULL;
 	tCallBackMapper *pCallBackMapperList =NULL;
-
 
 };
 
