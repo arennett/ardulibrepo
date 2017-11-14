@@ -14,9 +14,9 @@
 #include "SerialMsg.h"
 #include "SerialPort.h"
 #include "SoftSerialPort.h"
-#include "SerialHeaderRx.h"
+//#include "SerialHeaderRx.h"
 
-
+class SerialHeaderRx; // forward declaration"
 
 class SerialRx {
 public:
@@ -51,6 +51,7 @@ public:
 	 * > see also SerialHeaderRx
 	 *  pSerialHeaderRx  ...pointer on the SerialHeaderRx object
 	 */
+
 	void setSerialHeaderRx(SerialHeaderRx* pSerialHeaderRx) ;
 
 
@@ -121,7 +122,7 @@ public:
 	 */
 	virtual ~SerialRx();
 private:
-	void (*updateCallback)(byte* data, size_t data_size);
+	void (*updateCallback)(const byte* data, size_t data_size);
 	byte* pRecBuffer=NULL;
 	SerialPort* pSerialPort= NULL;;
 	byte preAmCount=0;

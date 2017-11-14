@@ -6,51 +6,71 @@
  */
 
 #include "SerialHeader.h"
+#include "SerialRx.h"
 #include "SerialHeaderRx.h"
 
 SerialHeaderRx::SerialHeaderRx(SerialPort* pSerialPort, size_t maxDataSize) {
 	this->pSerialPort = pSerialPort;
 	this->pSerialRx = new SerialRx(pSerialPort,maxDataSize + sizeof(tSerialHeader));
-	pSerialRx->setSerialHeaderRx(this);
+	((SerialRx*)pSerialRx)->setSerialHeaderRx(this);
 
 }
 
 SerialHeaderRx::~SerialHeaderRx(){
 	delete pSerialRx;
+	deleteCallBackList();
 }
-
-
 
 void SerialHeaderRx::setUpdateCallback(
-		void (*ptr)(byte* pData, size_t data_size), byte addr) {
-	tCallBackMapper* pNextMapper = pCallBackMapperList;
-
-	if (pNextMapper == NULL) {
-		pNextMapper = new tCallBackMapper();
-	} else {
-		while (pNextMapper->pNext != NULL) {
-			pNextMapper = (tCallBackMapper*)pNextMapper->pNext;
-		}
-		pNextMapper->pNext = new tCallBackMapper();
-		pNextMapper = (tCallBackMapper*)pNextMapper->pNext;
+	void (*ptr)(const byte* pData, size_t data_size), byte addr) {
+	tCallBackMapper* pLast = getLastCallBackMapperEntry();
+	tCallBackMapper* pNext =new tCallBackMapper();;
+	if (pLast == NULL) {
+		pCallBackMapperList=pNext;
+	}else{
+		pLast->pNext=pNext;
 	}
-	pNextMapper->addr = addr;
-	pNextMapper->pUserCallBack = ptr;
-
+	pNext->addr = addr;
+	pNext->pUserCallBack = ptr;
 }
 
-void SerialHeaderRx::internalCallBack(byte* pData, size_t data_size) {
+void SerialHeaderRx::internalCallBack(const byte* pData, size_t data_size) {
 	tSerialHeader* pSerialHeader;
 	pSerialHeader=(tSerialHeader*)pData;
-	byte* pUserData = pData + sizeof(pSerialHeader);
-	tCallBackMapper* pNextMapper = pCallBackMapperList;
+	const byte* pUserData = pData + sizeof(pSerialHeader);
+	tCallBackMapper* pNext = pCallBackMapperList;
 
-		while (pNextMapper != NULL) {
-			if (pSerialHeader->addrTo==pNextMapper->addr) {
-				pNextMapper->pUserCallBack(pUserData,data_size-sizeof (tSerialHeader));
-			}
-			pNextMapper =(tCallBackMapper*) pNextMapper->pNext;
+	while (pNext != NULL) {
+		if (pSerialHeader->addrTo==pNext->addr) {
+			pNext->pUserCallBack(pUserData,data_size-sizeof (tSerialHeader));
 		}
+		pNext =(tCallBackMapper*) pNext->pNext;
+	}
+}
+
+tCallBackMapper* SerialHeaderRx::getLastCallBackMapperEntry() {
+	tCallBackMapper* pLast= pCallBackMapperList;
+	while (pLast != NULL && pLast->pNext !=NULL) {
+		pLast =(tCallBackMapper*) pLast->pNext;
+	}
+	return pLast;
+}
+
+void SerialHeaderRx::deleteCallBackList(){
+	/* recursive way ->bad
+	if (pEntry!=NULL) {
+		if (((tCallBackMapper*)pEntry)->pNext !=NULL) {
+			deleteCallBackList(((tCallBackMapper*)pEntry)->pNext);
+		}
+		delete pEntry;
+	}
+	*/
+	tCallBackMapper* pLastEntry;
+	while ((pLastEntry=getLastCallBackMapperEntry())!=NULL) {
+		delete pLastEntry;
+	}
 
 }
+
+
 

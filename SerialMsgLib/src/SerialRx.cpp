@@ -13,6 +13,7 @@
 #include <tools.h> //see ToolsLib2
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
+#include "SerialHeaderRx.h"
 #include "SerialRx.h"
 
 
