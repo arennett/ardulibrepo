@@ -52,6 +52,7 @@ public:
 
 
 
+
 	/**
 	 * SoftwareSerial* getSoftSerial();
 	 * <returns: pointer on internal serial port

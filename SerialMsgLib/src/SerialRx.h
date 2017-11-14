@@ -14,8 +14,6 @@
 #include "SerialMsg.h"
 #include "SerialPort.h"
 #include "SoftSerialPort.h"
-//#include "SerialHeaderRx.h"
-
 class SerialHeaderRx; // forward declaration"
 
 class SerialRx {
