@@ -38,16 +38,39 @@ public:
 
 
 	/**
-	 * void sendData(byte* data, size_t datasize);
-	 * > like Serial.begin , inits serial connection
+	 * void sendData(byte* pDdata, size_t datasize);
+	 * - sends a byte array to a the serialport
+	 *   SerialTx adds a preamble and a postamble
+	 *   to the data.
+	 * > pData address of the the byte array
+	 * > size of data
 	 */
-	void sendData(byte* data, size_t datasize);
+	void sendData(byte* pData, size_t datasize);
+
+	/*
+	 * void sendRawData(byte* pData, size_t datasize);
+	 * - sends rawData to the SerialPort
+	 * - if you like to send multiple dataobjects
+	 * - 1 sendPreamble()
+	 * - 2 send the dataobjects whith sendRawData
+	 * - 3 sendPostamble ()
+	 *
+	 * > pData		address of the the byte array
+	 * > datasize	size of data
+	 */
+	void sendRawData(byte* pData, size_t datasize);
 
 
-	void sendRawData(byte* data, size_t datasize);
-
+	/**
+	 * void sendPreamble();
+	 * - sends the preamble to the serial port
+	 */
 	void sendPreamble();
 
+	/**
+	 * void sendPreamble();
+	 * - sends the prostamble to the serial port
+	 */
 	void sendPostamble();
 
 

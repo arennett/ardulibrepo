@@ -12,6 +12,7 @@
 #include "SerialRx.h"
 #include "SerialPort.h"
 #include "SoftSerialPort.h"
+#include "SerialHeaderTx.h"
 
 typedef struct {
 	byte addr;
@@ -29,12 +30,11 @@ public:
 	 * here the user registers one ore more static callback methods
 	 * the callback method is only called if the received addrTo is equal to addr
 	 */
-	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size),
-			byte addr);
+	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size),byte addr);
 
 	/**
 	 * void internalCallBack(const byte* pData, size_t data_size);
-	 * - is called by serialTx when serialTx receives a message
+	 * - is called by serialRx when serialRx receives a message
 	 */
 	void internalCallBack(const byte* pData, size_t data_size);
 
@@ -109,7 +109,13 @@ public:
 	SerialPort* getSerialPort() {
 		return pSerialRx->getSerialPort();
 	}
-	;
+
+	/**
+	 * SerialHeaderTx is called when a
+	 * message receives to check if an answer came in
+	 *
+	 */
+	void setSerialHeaderTx(SerialHeaderTx* pSerialHeaderTx);
 
 private:
 
@@ -126,7 +132,8 @@ private:
 	void deleteCallBackList();
 
 	SerialRx* pSerialRx = NULL;
-	tCallBackMapper *pCallBackMapperList = NULL;
+	SerialHeaderTx 	*pSerialHeaderTx		= NULL;
+	tCallBackMapper *pCallBackMapperList 	= NULL;
 
 
 };

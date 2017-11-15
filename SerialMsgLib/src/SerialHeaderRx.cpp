@@ -9,6 +9,7 @@
 #include "SerialHeader.h"
 #include "SerialRx.h"
 #include "SerialHeaderRx.h"
+#include "SerialHeaderTx.h"
 
 SerialHeaderRx::SerialHeaderRx(SerialPort* pSerialPort, size_t maxDataSize) {
 	this->pSerialRx = new SerialRx(pSerialPort,
@@ -39,6 +40,12 @@ void SerialHeaderRx::setUpdateCallback(
 void SerialHeaderRx::internalCallBack(const byte* pData, size_t data_size) {
 	tSerialHeader* pSerialHeader;
 	pSerialHeader = (tSerialHeader*) pData;
+
+	/* for confirmation telegrams*/
+	if (pSerialHeaderTx!=NULL) {
+		pSerialHeaderTx->internalCallBack(pData, data_size);
+	}
+
 	const byte* pUserData = pData + sizeof(pSerialHeader);
 	tCallBackMapper* pNext = pCallBackMapperList;
 
@@ -51,30 +58,37 @@ void SerialHeaderRx::internalCallBack(const byte* pData, size_t data_size) {
 }
 
 bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
-		unsigned long timeout, unsigned long checkPeriod,byte addr) {
+		unsigned long timeout, unsigned long checkPeriod, byte addr) {
 	DPRINTLN("SerialHeaderRx::waitOnMessage");
 	tSerialHeader* pHeader;
 	unsigned long endMillis = millis() + timeout;
 
 	while (millis() < endMillis) {
-		if (pSerialRx->waitOnMessage(pData, data_size, endMillis-millis(),checkPeriod)) {
+		if (pSerialRx->waitOnMessage(pData, data_size, endMillis - millis(),
+				checkPeriod)) {
 			pHeader = (tSerialHeader*) pData;
-			if (pHeader->addrTo==addr) {
-				MPRINTSVAL("SerialHeaderRx::waitOnMessage -message received ,addr: ",pHeader->addrTo); DPRINTSVAL("restOfTime: " ,endMillis-millis());
+			if (pHeader->addrTo == addr) {
+				MPRINTSVAL(
+						"SerialHeaderRx::waitOnMessage -message received ,addr: ",
+						pHeader->addrTo);
+				DPRINTSVAL("restOfTime: " ,endMillis-millis());
 				return true;
-			}else {
-				MPRINTSVAL("SerialHeaderRx::waitOnMessage -unknown! message received ,addr:",pHeader->addrTo); DPRINTSVAL("restOfTime: " ,endMillis-millis());
+			} else {
+				MPRINTSVAL(
+						"SerialHeaderRx::waitOnMessage -unknown! message received ,addr:",
+						pHeader->addrTo);
+				DPRINTSVAL("restOfTime: " ,endMillis-millis());
 			}
 		}
-	}
-	DPRINTSVAL("TIMEOUT! restOfTime:" ,endMillis-millis());
+	} DPRINTSVAL("TIMEOUT! restOfTime:" ,endMillis-millis());
 	return false;
 
 }
 
 bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 		unsigned long timeout, byte addr) {
-		return waitOnMessage(pData,data_size,timeout, WAITED_READ_CHECKPERIOD_MSEC,addr);
+	return waitOnMessage(pData, data_size, timeout,
+			WAITED_READ_CHECKPERIOD_MSEC, addr);
 }
 
 tCallBackMapper* SerialHeaderRx::getLastCallBackMapperEntry() {
