@@ -9,18 +9,20 @@
 #define SERIALHEADERTX_H_
 
 #include "Arduino.h"
+#include "SerialHeader.h"
 #include "SerialTx.h"
 
 
 
 #define MAXACBS 10
 typedef struct {
-	unsigned long aktid;
+	tAktId aktid;
 	int  maxRetries; // -1  ... infintity
 	bool confirmed;
 	byte cmd;
 	byte fromAddr;
 	byte toAddr;
+	void* pNext =NULL;
 } tAcb;
 
 class SerialHeaderRx;
@@ -53,14 +55,13 @@ public:
 	 * > pData address of the the byte array
 	 * > size of data
 	 */
-	void send(byte fromAddr,byte toAddr, byte cmd ,byte *pData,bool confirm=false );
-	void send(byte fromAddr,byte toAddr, byte cmd ,unsigned long& aktid,byte *pData,bool confirm=false );
-	bool sendAnswer(byte fromAddr,byte toAddr, byte cmd ,unsigned long onAktid,byte *pData,bool confirm=false);
+	tAktId send(byte fromAddr,byte toAddr, byte cmd ,byte *pData);
+	bool  reply(byte fromAddr,byte toAddr, byte cmd ,tAktId onAktid,byte *pData);
 	bool sendAndWait(byte fromAddr,byte toAddr, byte cmd ,byte *pData);
-	bool isConfirmed(unsigned long aktid);
-	bool sendCR(byte fromAddr,byte toAddr,unsigned long& aktid);
-	bool sendACK(byte fromAddr,byte toAddr);
-	bool sendNAK(byte fromAddr,byte toAddr);
+	bool isConfirmed(tAktId aktid);
+	tAktId sendCR(byte fromAddr,byte toAddr);
+	tAktId sendACK(byte fromAddr,byte toAddr);
+	tAktId sendNAK(byte fromAddr,byte toAddr);
 
 
 	/* internal callback from SerialHeaderRx */
@@ -70,10 +71,17 @@ public:
 
 	virtual ~SerialHeaderTx();
 private:
+	tAcb* createAcb(tAktId aktid);
+	tAcb* getLastAcbEntry();
+	tAcb* getAcbEntry(tAktId aktid);
+	void  deleteAcbEntry(tAktId aktid);
+	tAcb* deleteAcbList();
+
 	SerialTx* pSerialTx;
 	SerialHeaderRx* pSerialHeaderRx;
-	unsigned long aktid = 2;
-	tAcb  	acb[];
+	tSerialHeader sHeader;
+	tAktId aktidTx = 0;
+	tAcb*  pAcbList;
 };
 
 #endif /* SERIALHEADERTX_H_ */
