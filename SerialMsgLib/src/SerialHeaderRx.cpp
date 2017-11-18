@@ -23,6 +23,8 @@ SerialHeaderRx::~SerialHeaderRx() {
 	deleteCallBackList();
 }
 
+/* for each addr one call back
+ * callback must be installed before setReady(addr) is called*/
 void SerialHeaderRx::setUpdateCallback(
 		void (*ptr)(const byte* pData, size_t data_size), byte addr) {
 	tCallBackMapper* pLast = getLastCallBackMapperEntry();
@@ -37,20 +39,52 @@ void SerialHeaderRx::setUpdateCallback(
 	pNext->pUserCallBack = ptr;
 }
 
-void SerialHeaderRx::internalCallBack(const byte* pData, size_t data_size) {
+bool SerialHeaderRx::isReadyToConnect(byte addr) {
+	tCallBackMapper* pCallBackMapper = getCallBackMapperEntry(addr);
+	return pCallBackMapper && (pCallBackMapper->status == CALLBACKMAPPER_STATUS_READY);
+}
+
+bool SerialHeaderRx::setConnected(bool connected, byte addr) {
+	tCallBackMapper* pCallBackMapper = getCallBackMapperEntry(addr);
+	if (isReadyToConnect(addr) && connected){
+		pCallBackMapper->status =CALLBACKMAPPER_STATUS_NOT_CONNECTED;
+		return true;
+	}
+	return false;
+}
+
+void SerialHeaderRx::internalReceive(const byte* pData, size_t data_size) {
 	tSerialHeader* pSerialHeader;
+	byte cmd=pSerialHeader->cmd;
 	pSerialHeader = (tSerialHeader*) pData;
 
-	/* for confirmation telegrams*/
+	/* for received replies*/
+
 	if (pSerialHeaderTx!=NULL) {
-		pSerialHeaderTx->internalCallBack(pData, data_size);
+
+		bool reply = (cmd == SERIALHEADER_CMD_ACK  || cmd == SERIALHEADER_CMD_NAK
+		                ||cmd == SERIALHEADER_CMD_DREP || cmd == SERIALHEADER_CMD_DRAQ  );
+		if(reply) {
+			pSerialHeaderTx->internalCallBack(pData, data_size);
+		}
+
 	}
 
 	const byte* pUserData = pData + sizeof(pSerialHeader);
 	tCallBackMapper* pNext = pCallBackMapperList;
 
+	if (cmd == SERIALHEADER_CMD_CR){
+		if (isReadyToConnect(pSerialHeader->toAddr)) { //add and readystatus from CallBackMapper
+			pSerialHeaderTx->replyACK(pSerialHeader->aktid);
+
+		}else{
+			pSerialHeaderTx->replyNAK(pSerialHeader->aktid);
+		}
+		return;
+	}
+
 	while (pNext != NULL) {
-		if (pSerialHeader->addrTo == pNext->addr) {
+		if (pSerialHeader->toAddr == pNext->addr) {
 			pNext->pUserCallBack(pUserData, data_size - sizeof(tSerialHeader));
 		}
 		pNext = (tCallBackMapper*) pNext->pNext;
@@ -58,7 +92,7 @@ void SerialHeaderRx::internalCallBack(const byte* pData, size_t data_size) {
 }
 
 bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
-		unsigned long timeout, unsigned long checkPeriod, byte addr) {
+		unsigned long timeout, unsigned long checkPeriod, byte addr,tAktId onAktId) {
 	DPRINTLN("SerialHeaderRx::waitOnMessage");
 	tSerialHeader* pHeader;
 	unsigned long endMillis = millis() + timeout;
@@ -67,16 +101,16 @@ bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 		if (pSerialRx->waitOnMessage(pData, data_size, endMillis - millis(),
 				checkPeriod)) {
 			pHeader = (tSerialHeader*) pData;
-			if (pHeader->addrTo == addr) {
+			if (pHeader->toAddr == addr && (onAktId > 0)? (onAktId==pHeader->aktid): true ) {
 				MPRINTSVAL(
 						"SerialHeaderRx::waitOnMessage -message received ,addr: ",
-						pHeader->addrTo);
+						pHeader->toAddr);
 				DPRINTSVAL("restOfTime: " ,endMillis-millis());
 				return true;
 			} else {
 				MPRINTSVAL(
 						"SerialHeaderRx::waitOnMessage -unknown! message received ,addr:",
-						pHeader->addrTo);
+						pHeader->toAddr);
 				DPRINTSVAL("restOfTime: " ,endMillis-millis());
 			}
 		}
@@ -86,9 +120,9 @@ bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 }
 
 bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
-		unsigned long timeout, byte addr) {
+		unsigned long timeout, byte addr,tAktId onAktId) {
 	return waitOnMessage(pData, data_size, timeout,
-			WAITED_READ_CHECKPERIOD_MSEC, addr);
+			WAITED_READ_CHECKPERIOD_MSEC, addr,onAktId);
 }
 
 tCallBackMapper* SerialHeaderRx::getLastCallBackMapperEntry() {
@@ -97,6 +131,14 @@ tCallBackMapper* SerialHeaderRx::getLastCallBackMapperEntry() {
 		pLast = (tCallBackMapper*) pLast->pNext;
 	}
 	return pLast;
+}
+tCallBackMapper* SerialHeaderRx::getCallBackMapperEntry(byte addr){
+	tCallBackMapper* pCbm = pCallBackMapperList;
+	while (pCbm != NULL && pCbm->addr != addr) {
+		pCbm = (tCallBackMapper*) pCbm->pNext;
+	}
+	return pCbm;
+
 }
 
 void SerialHeaderRx::deleteCallBackList() {

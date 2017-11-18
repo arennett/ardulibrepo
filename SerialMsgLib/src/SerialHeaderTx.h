@@ -12,24 +12,28 @@
 #include "SerialHeader.h"
 #include "SerialTx.h"
 
-
-
 #define MAXACBS 10
 typedef struct {
 	tAktId aktid;
-	int  maxRetries; // -1  ... infintity
-	bool confirmed;
 	byte cmd;
 	byte fromAddr;
 	byte toAddr;
-	void* pNext =NULL;
+#define	ACB_STATUS_CREATED		0
+#define	ACB_STATUS_WAIT_FOR_TX  1
+#define ACB_STATUS_WAIT_FOR_RX	2
+#define ACB_STATUS_CLOSED		3
+#define ACB_STATUS_CONNECTED	4
+
+	byte status = ACB_STATUS_CREATED;
+	unsigned int cntRetries = 0;
+	unsigned long timeStamp = 0;
+	void* pNext = NULL;
 } tAcb;
 
 class SerialHeaderRx;
 
 class SerialHeaderTx {
 public:
-
 
 	/**
 	 * SerialHeaderTx(SerialPort* serialPort);
@@ -55,33 +59,34 @@ public:
 	 * > pData address of the the byte array
 	 * > size of data
 	 */
-	tAktId send(byte fromAddr,byte toAddr, byte cmd ,byte *pData);
-	bool  reply(byte fromAddr,byte toAddr, byte cmd ,tAktId onAktid,byte *pData);
-	bool sendAndWait(byte fromAddr,byte toAddr, byte cmd ,byte *pData);
-	bool isConfirmed(tAktId aktid);
-	tAktId sendCR(byte fromAddr,byte toAddr);
-	tAktId sendACK(byte fromAddr,byte toAddr);
-	tAktId sendNAK(byte fromAddr,byte toAddr);
-
+	tAktId send(byte fromAddr, byte toAddr, byte cmd, byte *pData,
+			size_t dataSize, tAktId aktId = 0);
+	void reply(byte cmd, tAktId onAktid, byte *pData, size_t dataSize);bool sendAndWait(
+			byte fromAddr, byte toAddr, byte cmd, byte *pData, size_t dataSize,
+			tAktId aktId = 0, unsigned long int timeout);
+	tAktId sendCR(byte fromAddr, byte toAddr);
+	void replyACK(tAktId onAktId);
+	void replyNAK(tAktId onAktId);
 
 	/* internal callback from SerialHeaderRx */
 	void internalCallBack(const byte* pData, size_t data_size);
 
-
-
 	virtual ~SerialHeaderTx();
 private:
 	tAcb* createAcb(tAktId aktid);
+	tAcb* createOrUseAcb(byte cmd, byte fromAddr, byte toAddr, tAktId aktidTx);
+	void mprintAcb(tAcb* pAcb);
+	void mprintAcbList();
 	tAcb* getLastAcbEntry();
 	tAcb* getAcbEntry(tAktId aktid);
-	void  deleteAcbEntry(tAktId aktid);
-	tAcb* deleteAcbList();
+	unsigned int getCountAcbEntries();bool deleteAcbEntry(tAktId aktid);
+	void deleteAcbList();
 
 	SerialTx* pSerialTx;
 	SerialHeaderRx* pSerialHeaderRx;
 	tSerialHeader sHeader;
 	tAktId aktidTx = 0;
-	tAcb*  pAcbList;
+	tAcb* pAcbList;
 };
 
 #endif /* SERIALHEADERTX_H_ */

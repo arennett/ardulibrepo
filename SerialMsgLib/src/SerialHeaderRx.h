@@ -16,6 +16,13 @@
 
 typedef struct {
 	byte addr;
+#define  CALLBACKMAPPER_STATUS_NOT_READY  0
+#define  CALLBACKMAPPER_STATUS_READY 2
+#define  CALLBACKMAPPER_STATUS_NOT_DISCONECTED 3
+#define  CALLBACKMAPPER_STATUS_NOT_CONNECTED 4
+
+
+	byte status;
 	void (*pUserCallBack)(const byte* data, size_t data_size);
 	void* pNext = NULL;
 } tCallBackMapper;
@@ -27,16 +34,33 @@ public:
 
 	/*
 	 * void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size),byte addr);
-	 * here the user registers one ore more static callback methods
-	 * the callback method is only called if the received addrTo is equal to addr
+	 * - here the user registers one ore more static callback methods
+	 * - the callback method is only called if the received addrTo is equal to addr
+	 * - you can register one callback per receiver addr
+	 * > (*ptr) static call back function ptr
+	 * > addr   addr of receiver
 	 */
 	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size),byte addr);
 
 	/**
-	 * void internalCallBack(const byte* pData, size_t data_size);
+	 * void internalReceive(const byte* pData, size_t data_size);
 	 * - is called by serialRx when serialRx receives a message
 	 */
-	void internalCallBack(const byte* pData, size_t data_size);
+	void internalReceive(const byte* pData, size_t data_size);
+
+
+	/*
+	 * void isReadyToConnect(byte addr);
+	 * - the receiver is ready and expects a connection request
+	 * - this is typically the last command in the setup and must
+	 * - be called after the setUpdateCallback for this addr
+	 * > addr addr of the receiver
+	 * < true if receiver is ready
+	 */
+	bool isReadyToConnect(byte addr);
+
+
+
 
 	/**
 	 * void begin(long speed);
@@ -73,9 +97,10 @@ public:
 	 * data_size 	...reference data size
 	 * timeout		...timeout msecs
 	 * checkPeriod  ...time until next read trial is done
+	 * onAktId      ...if > 0 the aktId is checked, we expect a reply
 	 */
 	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout,
-			unsigned long checkPeriod, byte addr);
+			unsigned long checkPeriod, byte addr,tAktId onAktId);
 
 	/**
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
@@ -84,11 +109,11 @@ public:
 	 * ppData 		...reference for : pointer on the received data
 	 * data_size 	...reference data size
 	 * timeout		...timeout msecs
-	 *
+	 * onAktId      ...if > 0 the aktId is checked, we expect a reply
 	 *
 	 */
 	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout,
-			byte addr);
+			byte addr,tAktId onAktId);
 
 	/**
 	 * bool listen ();
@@ -125,6 +150,14 @@ private:
 	 * < returns the last entry or null if list is empty*/
 	tCallBackMapper* getLastCallBackMapperEntry();
 
+
+	/*
+	 * tCallBackMapper* getCallBackMapperEntry(byte addr);
+	 * - get the CallBackMapper for addr
+	 * > addr of the receiver
+	 */
+	tCallBackMapper* getCallBackMapperEntry(byte addr);
+
 	/*
 	 * void deleteCallBackList(){
 	 * - deletes all entries from  the list
@@ -135,6 +168,14 @@ private:
 	SerialHeaderTx 	*pSerialHeaderTx		= NULL;
 	tCallBackMapper *pCallBackMapperList 	= NULL;
 
+
+	/*
+	 *void setConnected(bool connected);
+	 * - after CR is received the receiver call back entry
+	 *  is set on status connected
+	 *  > true if connected status was set
+	 */
+	bool setConnected(bool connected,byte addr)
 
 };
 
