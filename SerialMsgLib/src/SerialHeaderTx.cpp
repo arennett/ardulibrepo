@@ -203,11 +203,13 @@ tAktId SerialHeaderTx::sendCR(byte fromAddr, byte toAddr){
 	return send(fromAddr,toAddr,SERIALHEADER_CMD_CR,NULL,0,0);
 }
 
-tAktId SerialHeaderTx::connect(byte localAddr, byte remoteAddr){
+void SerialHeaderTx::connect(byte localAddr, byte remoteAddr){
 	pSerialHeaderRx->setConnectionStatus(localAddr, remoteAddr, CONNECTION_STATUS_READY);
 }
 
-bool   waitOnConnectionsUp(unsigned int timeout);
+bool   SerialHeaderTx::waitOnConnectionsUp(unsigned int timeout){
+	return pSerialHeaderRx->waitOnConnectionsUp(timeout);
+}
 
 
 void SerialHeaderTx::replyACK(tAktId onAktId){

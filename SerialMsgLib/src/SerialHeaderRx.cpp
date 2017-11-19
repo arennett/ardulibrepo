@@ -118,6 +118,43 @@ void SerialHeaderRx::internalReceive(const byte* pData, size_t data_size) {
 	}
 }
 
+bool SerialHeaderRx::waitOnConnectionsUp(unsigned int timeout){
+	bool up = false;
+	tCcb* pCcb =this->pCcbList;
+	if (timeout==0){
+		timeout= WAITED_READ_TIMEOUT_DEFAULT_MSEC;
+	};
+	unsigned long endMillis = millis() + timeout;
+		up=true;
+	if (pCcb) {
+		bool up = true;;
+		while (millis() < endMillis) {
+			if (pCcb->status!=CONNECTION_STATUS_CONNECTED) {
+				up=false;
+			}
+			if (!pCcb->pNext) { // the last one
+				if(up) { // all connections must be up
+					MPRINTLN("SerialHeaderRx::waitOnConnectionsUp: UP");
+					return up;
+				}
+				up=true; // next trial
+				pCcb=pCcbList;
+				delay(10);
+			}else{
+				pCcb= pCcb->pNext;
+			}
+
+		}
+	}
+	if (millis() >= endMillis) {
+		MPRINTLN("SerialHeaderRx::waitOnConnectionsUp: TIMEOUT");
+	}else{
+		MPRINTLN("SerialHeaderRx::waitOnConnectionsUp: NO CONNECTION FOUND");
+	}
+	return false; // no connections or timeout
+}
+
+
 bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 		unsigned long timeout, unsigned long checkPeriod, byte addr,tAktId onAktId) {
 	DPRINTLN("SerialHeaderRx::waitOnMessage");

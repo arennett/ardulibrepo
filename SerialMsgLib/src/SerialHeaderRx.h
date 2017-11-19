@@ -94,8 +94,7 @@ public:
 
 	inline bool readNext(byte* b) {
 		return pSerialRx->readNext(b);
-	}
-	;
+	};
 
 	/**
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
@@ -122,6 +121,15 @@ public:
 	 */
 	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout,
 			byte addr,tAktId onAktId);
+
+
+	/*
+	 * SerialHeaderTx::waitOnConnectionsUp(unsigned int timeout)
+	 * waits until all connection are up
+	 * > timeout : wait max timeout in msecs
+	 */
+	bool waitOnConnectionsUp(unsigned long timeout);
+
 
 	/**
 	 * bool listen ();
@@ -155,6 +163,8 @@ public:
 	byte getConnectionStatus(byte localAddr, byte remoteAddr);
 
 	bool isConnected(byte localAddr,byte remoteAddr);
+
+	bool waitOnConnectionsUp(unsigned int timeout);
 
 protected:
 

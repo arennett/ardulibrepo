@@ -70,7 +70,7 @@ public:
 	void internalReceive(const byte* pData, size_t data_size);
 	virtual ~SerialHeaderTx();
 
-	tAktId SerialHeaderTx::connect(byte fromAddr, byte toAddr);
+	void connect(byte fromAddr, byte toAddr);
 	bool   waitOnConnectionsUp(unsigned int timeout);
 
 protected:
