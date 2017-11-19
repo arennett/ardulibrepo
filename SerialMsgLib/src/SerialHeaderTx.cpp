@@ -59,8 +59,8 @@ void SerialHeaderTx::mprintAcbList() {
 	MPRINTSVAL("ACBLIST Count: ",getCountAcbEntries());
 	tAcb* pAcb= pAcbList;
 	while(pAcb){
-		mprintAcb(acb);
-		pAcb =pAcb->pNext;
+		mprintAcb(pAcb);
+		pAcb =(tAcb*)pAcb->pNext;
 	}
 };
 
@@ -193,7 +193,7 @@ void SerialHeaderTx::reply(byte cmd ,tAktId onAktid,byte *pData, size_t dataSize
 	send(pHeader->toAddr, pHeader->fromAddr,cmd, pData, dataSize, onAktid);
 }
 
-bool SerialHeaderTx::sendAndWait(byte fromAddr, byte toAddr, byte cmd,	byte *pData, size_t datasize,tAktId onAktId,unsigned long int timeout) {
+bool SerialHeaderTx::sendAndWait(byte fromAddr, byte toAddr, byte cmd,	byte *pData, size_t datasize,unsigned long int timeout,tAktId onAktId) {
 	send(fromAddr,toAddr,cmd,pData,datasize,onAktId);
 	return pSerialHeaderRx->waitOnMessage(pData, datasize, timeout, toAddr, onAktId);
 }
@@ -202,14 +202,22 @@ bool SerialHeaderTx::sendAndWait(byte fromAddr, byte toAddr, byte cmd,	byte *pDa
 tAktId SerialHeaderTx::sendCR(byte fromAddr, byte toAddr){
 	return send(fromAddr,toAddr,SERIALHEADER_CMD_CR,NULL,0,0);
 }
+
+tAktId SerialHeaderTx::connect(byte fromAddr, byte toAddr){
+	if (isC(fromAddr,toAddr,SERIALHEADER_CMD_CR,NULL,0,0);
+}
+
+
+
 void SerialHeaderTx::replyACK(tAktId onAktId){
-	reply(SERIALHEADER_CMD_ACK, onAktId,NULL, 0)
-};
+	reply(SERIALHEADER_CMD_ACK, onAktId,NULL, 0);
+}
 void SerialHeaderTx::replyNAK(tAktId onAktId){
-	reply(SERIALHEADER_CMD_NAK, onAktId,NULL, 0)
-};
+	reply(SERIALHEADER_CMD_NAK, onAktId,NULL, 0);
+}
+
 /* internal callback from SerialHeaderRx */
-void SerialHeaderTx::internalCallBack(const byte* pData, size_t data_size){
+void SerialHeaderTx::internalReceive(const byte* pData, size_t data_size){
 	tSerialHeader* pHeader = (tSerialHeader*) pData;
 
 
@@ -229,7 +237,11 @@ void SerialHeaderTx::internalCallBack(const byte* pData, size_t data_size){
 			    	   MPRINTSVAL("CONNECTED FROM: ",pAcb->fromAddr);
 			    	   MPRINTSVAL("            TO: ",pAcb->toAddr);
 			    	   pAcb->status=ACB_STATUS_CONNECTED;
-			    	   // for a connection the acb is permanent
+			    	   // for a connection the acb is permanent???? NO!!!!
+			    	   // status connect true in connection entry
+			    	   // former callBackMap Entry in RX
+			    	   // YES MUCH BETTER  !!!!!!!!
+
 			    }else{
 			    	pAcb->status=ACB_STATUS_CLOSED;
 					MPRINTLN("ACB closed");
@@ -238,16 +250,20 @@ void SerialHeaderTx::internalCallBack(const byte* pData, size_t data_size){
 			    }
 
 		}else{
-			MPRINTSVAL("SerialHeaderTx acb not found: ",pHeader->aktid);
+			MPRINTSVAL("SerialHeaderTx::internalReceive> acb not found: ",pHeader->aktid);
+		}
+
+		if(data_size >0 ){
+			MPRINTSVAL("SerialHeaderTx::internalReceive> data found: ",pHeader->aktid);
+
 		}
 
 
 	}else{
-		MPRINTLN("SerialHeaderTx received a no-reply-message");
+		MPRINTLN("SerialHeaderTx::internalReceive> received a no-reply-message");
 
 	}
 
 
 
-}
 }

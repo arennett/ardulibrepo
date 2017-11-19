@@ -13,6 +13,7 @@
 #include "SerialTx.h"
 
 #define MAXACBS 10
+
 typedef struct {
 	tAktId aktid;
 	byte cmd;
@@ -61,32 +62,36 @@ public:
 	 */
 	tAktId send(byte fromAddr, byte toAddr, byte cmd, byte *pData,
 			size_t dataSize, tAktId aktId = 0);
-	void reply(byte cmd, tAktId onAktid, byte *pData, size_t dataSize);bool sendAndWait(
-			byte fromAddr, byte toAddr, byte cmd, byte *pData, size_t dataSize,
-			tAktId aktId = 0, unsigned long int timeout);
+	void reply(byte cmd, tAktId onAktid, byte *pData, size_t dataSize);
+	bool sendAndWait(byte fromAddr, byte toAddr, byte cmd, byte *pData, size_t dataSize,
+					 unsigned long int timeout,tAktId aktId = 0);
 	tAktId sendCR(byte fromAddr, byte toAddr);
 	void replyACK(tAktId onAktId);
 	void replyNAK(tAktId onAktId);
 
 	/* internal callback from SerialHeaderRx */
-	void internalCallBack(const byte* pData, size_t data_size);
-
+	void internalReceive(const byte* pData, size_t data_size);
 	virtual ~SerialHeaderTx();
+
+protected:
+	void mprintAcbList();
+	tAcb* getAcbEntry(tAktId aktid);
+	bool deleteAcbEntry(tAktId aktid);
+
 private:
 	tAcb* createAcb(tAktId aktid);
 	tAcb* createOrUseAcb(byte cmd, byte fromAddr, byte toAddr, tAktId aktidTx);
 	void mprintAcb(tAcb* pAcb);
-	void mprintAcbList();
+
 	tAcb* getLastAcbEntry();
-	tAcb* getAcbEntry(tAktId aktid);
-	unsigned int getCountAcbEntries();bool deleteAcbEntry(tAktId aktid);
+	unsigned int getCountAcbEntries();
 	void deleteAcbList();
 
 	SerialTx* pSerialTx;
 	SerialHeaderRx* pSerialHeaderRx;
 	tSerialHeader sHeader;
 	tAktId aktidTx = 0;
-	tAcb* pAcbList;
+	tAcb* pAcbList =NULL;
 };
 
 #endif /* SERIALHEADERTX_H_ */

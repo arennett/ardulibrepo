@@ -11,6 +11,7 @@
 #include "Arduino.h"
 
 
+
 #define SERIALHEADER_CMD_NAK	240	 // < NOT ACKNOWLEDGED
 #define SERIALHEADER_CMD_ACK	241	 // < ACKNOWLEDGED
 #define SERIALHEADER_CMD_LIVE	243	 // > LIVE    			  Rx: ACK / NAK

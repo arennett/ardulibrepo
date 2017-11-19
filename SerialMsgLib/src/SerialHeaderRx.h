@@ -18,8 +18,8 @@ typedef struct {
 	byte addr;
 #define  CALLBACKMAPPER_STATUS_NOT_READY  0
 #define  CALLBACKMAPPER_STATUS_READY 2
-#define  CALLBACKMAPPER_STATUS_NOT_DISCONECTED 3
-#define  CALLBACKMAPPER_STATUS_NOT_CONNECTED 4
+#define  CALLBACKMAPPER_STATUS_DISCONNECTED 3
+#define  CALLBACKMAPPER_STATUS_CONNECTED 4
 
 
 	byte status;
@@ -93,9 +93,10 @@ public:
 	/**
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
 	 * > waits until complete message is received or timeout is expired
+	 * >
 	 * ppData 		...reference for : pointer on the received data
 	 * data_size 	...reference data size
-	 * timeout		...timeout msecs
+	 * timeout		...timeout msecs / 0 = DEFAULT_WAIT_ON_MESSAGE_TIMEOUT
 	 * checkPeriod  ...time until next read trial is done
 	 * onAktId      ...if > 0 the aktId is checked, we expect a reply
 	 */
@@ -104,8 +105,8 @@ public:
 
 	/**
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
-	 * > waits until complete message is received or timeout is expired
-	 * > the checkPeriod is 10msec
+	 * - waits until complete message is received or timeout is expired
+	 * - the default checkPeriod is 10msec
 	 * ppData 		...reference for : pointer on the received data
 	 * data_size 	...reference data size
 	 * timeout		...timeout msecs
@@ -117,9 +118,9 @@ public:
 
 	/**
 	 * bool listen ();
-	 * >if multiple software serials are used, listen
-	 * >activate this software serial connection
-	 * >since they are concurrent
+	 * - if multiple software serials are used, listen
+	 * - activate this software serial connection
+	 * - since they are concurrent
 	 * <returns: true ...if other connection was deactivated
 	 */
 	inline bool listen() {
@@ -172,10 +173,17 @@ private:
 	/*
 	 *void setConnected(bool connected);
 	 * - after CR is received the receiver call back entry
-	 *  is set on status connected
-	 *  > true if connected status was set
+	 *  is set on status connected if receiver is ready
+	 *  to connected
+	 *  see isReadyToConnected()
+	 *  If the receiver is disconnected (connected=false)
+	 *  you must setReadyToConnected(true) before you
+	 *  can reconnect;
+	 *
 	 */
-	bool setConnected(bool connected,byte addr)
+	void setConnected(bool connected,byte addr);
+
+	bool isConnected(byte addr);
 
 };
 

@@ -60,9 +60,16 @@ bool SerialRx::readNext(){
 
 bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut ,unsigned long checkPeriod){
 	DPRINTLN("waitOnMessage");
-	unsigned long restOfTime= timeOut;
+
 	data_size=0;
 	pData = pRecBuffer;
+	if (checkPeriod==0){
+		checkPeriod = WAITED_READ_CHECKPERIOD_MSEC;
+	}
+	if (timeOut==0) {
+		timeOut=WAITED_READ_TIMEOUT_DEFAULT_MSEC;
+	}
+	unsigned long restOfTime= timeOut;
 
 	while (restOfTime >= checkPeriod) {
 		if (readNext()) {
@@ -80,7 +87,7 @@ bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long tim
 }
 
 bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut){
-	return SerialRx::waitOnMessage(pData, data_size, timeOut , WAITED_READ_CHECKPERIOD_MSEC);
+	return SerialRx::waitOnMessage(pData, data_size, timeOut , 0);
 }
 
 /**
@@ -139,7 +146,7 @@ bool SerialRx::readNext(byte* pByte){
 							}
 
 							if (pSerialHeaderRx && dataCollect ) {
-								pSerialHeaderRx->internalCallBack(pRecBuffer, prevDataCount);
+								pSerialHeaderRx->internalReceive(pRecBuffer, prevDataCount);
 							}
 
 							messReceived = true;

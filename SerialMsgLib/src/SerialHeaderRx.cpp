@@ -10,6 +10,7 @@
 #include "SerialRx.h"
 #include "SerialHeaderRx.h"
 #include "SerialHeaderTx.h"
+#include "SerialMsg.h"
 
 SerialHeaderRx::SerialHeaderRx(SerialPort* pSerialPort, size_t maxDataSize) {
 	this->pSerialRx = new SerialRx(pSerialPort,
@@ -44,15 +45,19 @@ bool SerialHeaderRx::isReadyToConnect(byte addr) {
 	return pCallBackMapper && (pCallBackMapper->status == CALLBACKMAPPER_STATUS_READY);
 }
 
-bool SerialHeaderRx::setConnected(bool connected, byte addr) {
+void SerialHeaderRx::setConnected(bool connected, byte addr) {
 	tCallBackMapper* pCallBackMapper = getCallBackMapperEntry(addr);
-	if (isReadyToConnect(addr) && connected){
-		pCallBackMapper->status =CALLBACKMAPPER_STATUS_NOT_CONNECTED;
-		return true;
+	if (connected){
+		if (isReadyToConnect(addr) ){
+			pCallBackMapper->status =CALLBACKMAPPER_STATUS_CONNECTED;
+		}
+	}else{
+		pCallBackMapper->status =CALLBACKMAPPER_STATUS_DISCONNECTED;
 	}
-	return false;
+
 }
 
+//is called by serialRx when serialRx receives a message
 void SerialHeaderRx::internalReceive(const byte* pData, size_t data_size) {
 	tSerialHeader* pSerialHeader;
 	byte cmd=pSerialHeader->cmd;
@@ -65,23 +70,27 @@ void SerialHeaderRx::internalReceive(const byte* pData, size_t data_size) {
 		bool reply = (cmd == SERIALHEADER_CMD_ACK  || cmd == SERIALHEADER_CMD_NAK
 		                ||cmd == SERIALHEADER_CMD_DREP || cmd == SERIALHEADER_CMD_DRAQ  );
 		if(reply) {
-			pSerialHeaderTx->internalCallBack(pData, data_size);
+			pSerialHeaderTx->internalReceive(pData, data_size);
 		}
 
 	}
 
-	const byte* pUserData = pData + sizeof(pSerialHeader);
-	tCallBackMapper* pNext = pCallBackMapperList;
 
 	if (cmd == SERIALHEADER_CMD_CR){
 		if (isReadyToConnect(pSerialHeader->toAddr)) { //add and readystatus from CallBackMapper
 			pSerialHeaderTx->replyACK(pSerialHeader->aktid);
+			setConnected(true,pSerialHeader->toAddr);
 
 		}else{
 			pSerialHeaderTx->replyNAK(pSerialHeader->aktid);
 		}
 		return;
 	}
+
+
+	const byte* pUserData = pData + sizeof(pSerialHeader);
+		tCallBackMapper* pNext = pCallBackMapperList;
+
 
 	while (pNext != NULL) {
 		if (pSerialHeader->toAddr == pNext->addr) {
@@ -95,6 +104,9 @@ bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 		unsigned long timeout, unsigned long checkPeriod, byte addr,tAktId onAktId) {
 	DPRINTLN("SerialHeaderRx::waitOnMessage");
 	tSerialHeader* pHeader;
+	if (timeout==0){
+		timeout= WAITED_READ_TIMEOUT_DEFAULT_MSEC;
+	};
 	unsigned long endMillis = millis() + timeout;
 
 	while (millis() < endMillis) {
@@ -121,8 +133,7 @@ bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 
 bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 		unsigned long timeout, byte addr,tAktId onAktId) {
-	return waitOnMessage(pData, data_size, timeout,
-			WAITED_READ_CHECKPERIOD_MSEC, addr,onAktId);
+	return waitOnMessage(pData, data_size, timeout,0, addr,onAktId);
 }
 
 tCallBackMapper* SerialHeaderRx::getLastCallBackMapperEntry() {
