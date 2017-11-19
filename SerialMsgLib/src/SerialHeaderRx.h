@@ -178,6 +178,11 @@ public:
 	 */
 	tCcb* getCcbEntry(byte localAddr ,byte remoteAddr,bool create=false);
 
+	void mprintCcbList();
+
+	void mprintCcb(tCcb* pCcb);
+
+
 
 protected:
 
@@ -198,6 +203,8 @@ private:
 	 * - deletes all entries from  the list
 	 */
 	void deleteCcbList();
+
+
 
 	SerialRx* pSerialRx = NULL;
 	SerialHeaderTx 	*pSerialHeaderTx		= NULL;

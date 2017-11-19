@@ -77,6 +77,7 @@ public:
 	 */
 	void addConnection(byte fromAddr, byte toAddr,bool master);
 	bool   connect(unsigned long timeout=WAITED_READ_TIMEOUT_DEFAULT_MSEC, unsigned long reqPeriod=100);
+	SerialHeaderRx* pSerialHeaderRx;
 
 protected:
 	void mprintAcbList();
@@ -93,7 +94,7 @@ private:
 	void deleteAcbList();
 
 	SerialTx* pSerialTx;
-	SerialHeaderRx* pSerialHeaderRx;
+
 	tSerialHeader sHeader;
 	tAktId aktidTx = 0;
 	tAcb* pAcbList =NULL;

@@ -44,9 +44,9 @@ bool SerialHeaderRx::isConnected(byte localAddr,byte remoteAddr) {
 
 
 tCcb* SerialHeaderRx::setConnectionStatus(byte localAddr, byte remoteAddr,byte status) {
-	tCcb* pCallBackMapper = getCcbEntry(localAddr,remoteAddr,true);
-	pCallBackMapper->status =status;
-	return pCallBackMapper;
+	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,true);
+	pCcb->status =status;
+	return pCcb;
 }
 
 byte SerialHeaderRx::getConnectionStatus(byte localAddr, byte remoteAddr){
@@ -133,7 +133,8 @@ bool SerialHeaderRx::connect(unsigned long int timeout, unsigned long int reqPer
 
 			if (pCcb->status!=CONNECTION_STATUS_CONNECTED) {
 				if (pCcb->master) {
-					if (millis() > reqMillis) {
+					if (millis() < reqMillis) {
+
 						pSerialHeaderTx->sendCR(pCcb->localAddr,pCcb->remoteAddr);
 						reqMillis = millis() + reqPeriod;
 					}
@@ -142,7 +143,7 @@ bool SerialHeaderRx::connect(unsigned long int timeout, unsigned long int reqPer
 			}
 			if (!pCcb->pNext) { // the last one
 				if(up) { // all connections must be up
-					MPRINTLN("SerialHeaderRx::waitOnConnectionsUp: UP");
+					MPRINTLN("SerialHeaderRx::connect: UP");
 					return up;
 				}
 				up=true; // next trial
@@ -155,9 +156,9 @@ bool SerialHeaderRx::connect(unsigned long int timeout, unsigned long int reqPer
 		}
 	}
 	if (millis() >= endMillis) {
-		MPRINTLN("SerialHeaderRx::waitOnConnectionsUp: TIMEOUT");
+		MPRINTLN("SerialHeaderRx::connect: TIMEOUT");
 	}else{
-		MPRINTLN("SerialHeaderRx::waitOnConnectionsUp: NO CONNECTION FOUND");
+		MPRINTLN("SerialHeaderRx::connect: NO CONNECTION FOUND");
 	}
 	return up; // no connections or timeout
 }
@@ -208,13 +209,27 @@ tCcb* SerialHeaderRx::getLastCcbEntry() {
 }
 tCcb* SerialHeaderRx::getCcbEntry(byte localAddr,byte remoteAddr,bool create){
 	tCcb* pCcb = pCcbList;
-	while (pCcb != NULL && pCcb->localAddr != localAddr && pCcb->remoteAddr != remoteAddr ) {
+	while (!pCcb){
+	   if( pCcb->localAddr == localAddr && pCcb->remoteAddr == remoteAddr ) {
+		   // found
+		   return pCcb;
+	   }
 		pCcb = (tCcb*) pCcb->pNext;
 	}
-	if (!pCcb && create) {
+
+	// not found
+	if(create){
 		pCcb=getLastCcbEntry();
-		pCcb->pNext= new tCcb();
-		pCcb=(tCcb*)pCcb->pNext;
+		if (!pCcb ) { //emplTy List
+			pCcbList= new tCcb();
+			pCcb=pCcbList;
+			MPRINTLN("SerialHeaderRx::getCcbEntry> FIRST Ccb created");
+		}else {
+			pCcb->pNext= new tCcb();
+			pCcb=(tCcb*)pCcb->pNext;
+
+			MPRINTLN("SerialHeaderRx::getCcbEntry> ANOTHER Ccb created");
+		}
 		pCcb->localAddr=localAddr;
 		pCcb->remoteAddr=remoteAddr;
 	}
@@ -236,4 +251,22 @@ void SerialHeaderRx::deleteCcbList() {
 	}
 
 }
+
+void SerialHeaderRx::mprintCcb(tCcb* pCcb){
+	MPRINTLN("CCB      :" );
+	MPRINTSVAL("local     : " ,pCcb->remoteAddr);
+	MPRINTSVAL("remote    : " ,pCcb->localAddr);
+	MPRINTSVAL("status    : " ,pCcb->status);
+	MPRINTLN("--------------------");
+};
+
+void SerialHeaderRx::mprintCcbList() {
+	MPRINTLN("--------------------");
+	tCcb* pCcb= pCcbList;
+	while(pCcb){
+		mprintCcb(pCcb);
+		pCcb =(tCcb*)pCcb->pNext;
+	}
+};
+
 

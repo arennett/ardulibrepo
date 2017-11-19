@@ -148,6 +148,10 @@ void SerialHeaderTx::deleteAcbList() {
 
 tAktId SerialHeaderTx::send(byte fromAddr, byte toAddr, byte cmd, byte *pData, size_t dataSize,tAktId aktId) {
 	memset(&this->sHeader, 0, sizeof(tSerialHeader));
+	MPRINTSVAL("SerialHeaderTx::send : cmd > ", cmd);
+	MPRINTSVAL("SerialHeaderTx::send : from > ",fromAddr);
+	MPRINTSVAL("SerialHeaderTx::send : to > ",  toAddr);
+
     if(aktId ==0) {// no reply ..new aktidTx
 		if (aktidTx < MAX_AKTID) {
 			aktidTx++;
