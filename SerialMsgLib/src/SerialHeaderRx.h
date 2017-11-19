@@ -22,6 +22,7 @@ typedef struct { //Connection Control Block
 	#define  CONNECTION_STATUS_DISCONNECTED 3
 	#define  CONNECTION_STATUS_CONNECTED 	4
 	byte status=0;
+	bool master=false;
 	void (*pUserCallBack)(const byte* data, size_t data_size);
 	void* pNext = NULL;
 } tCcb;
@@ -127,8 +128,9 @@ public:
 	 * SerialHeaderTx::waitOnConnectionsUp(unsigned int timeout)
 	 * waits until all connection are up
 	 * > timeout : wait max timeout in msecs
+	 * > period  : trial period for a master connection request
 	 */
-	bool waitOnConnectionsUp(unsigned long timeout);
+	bool connect(unsigned long timeout,unsigned long reqPeriod);
 
 
 	/**
@@ -158,13 +160,24 @@ public:
 	 */
 	void setSerialHeaderTx(SerialHeaderTx* pSerialHeaderTx);
 
-	bool setConnectionStatus(byte localAddr, byte remoteAddr,byte status);
+	tCcb* setConnectionStatus(byte localAddr, byte remoteAddr,byte status);
 
 	byte getConnectionStatus(byte localAddr, byte remoteAddr);
 
 	bool isConnected(byte localAddr,byte remoteAddr);
 
-	bool waitOnConnectionsUp(unsigned int timeout);
+
+	bool connect(unsigned int timeout=WAITED_READ_TIMEOUT_DEFAULT_MSEC, unsigned long int reqPeriod=100);
+
+	/*
+	 * tCallBackMapper* getCallBackMapperEntry(byte addr);
+	 * - get the CallBackMapper for addr
+	 * > localAddr
+	 * > remoteAddr
+	 * > create if nothing found
+	 */
+	tCcb* getCcbEntry(byte localAddr ,byte remoteAddr,bool create=false);
+
 
 protected:
 
@@ -179,14 +192,6 @@ private:
 	tCcb* getLastCcbEntry();
 
 
-	/*
-	 * tCallBackMapper* getCallBackMapperEntry(byte addr);
-	 * - get the CallBackMapper for addr
-	 * > localAddr
-	 * > remoteAddr
-	 * > create if nothing found
-	 */
-	tCcb* getCcbEntry(byte localAddr ,byte remoteAddr,bool create=false);
 
 	/*
 	 * void deleteCcbList(){

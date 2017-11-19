@@ -43,10 +43,10 @@ bool SerialHeaderRx::isConnected(byte localAddr,byte remoteAddr) {
 }
 
 
-bool SerialHeaderRx::setConnectionStatus(byte localAddr, byte remoteAddr,byte status) {
+tCcb* SerialHeaderRx::setConnectionStatus(byte localAddr, byte remoteAddr,byte status) {
 	tCcb* pCallBackMapper = getCcbEntry(localAddr,remoteAddr,true);
 	pCallBackMapper->status =status;
-	return true;
+	return pCallBackMapper;
 }
 
 byte SerialHeaderRx::getConnectionStatus(byte localAddr, byte remoteAddr){
@@ -118,18 +118,26 @@ void SerialHeaderRx::internalReceive(const byte* pData, size_t data_size) {
 	}
 }
 
-bool SerialHeaderRx::waitOnConnectionsUp(unsigned int timeout){
+bool SerialHeaderRx::connect(unsigned long int timeout, unsigned long int reqPeriod){
 	bool up = false;
 	tCcb* pCcb =this->pCcbList;
 	if (timeout==0){
 		timeout= WAITED_READ_TIMEOUT_DEFAULT_MSEC;
 	};
 	unsigned long endMillis = millis() + timeout;
+	unsigned long reqMillis =0;
 		up=true;
 	if (pCcb) {
 		bool up = true;;
 		while (millis() < endMillis) {
+
 			if (pCcb->status!=CONNECTION_STATUS_CONNECTED) {
+				if (pCcb->master) {
+					if (millis() > reqMillis) {
+						pSerialHeaderTx->sendCR(pCcb->localAddr,pCcb->remoteAddr);
+						reqMillis = millis() + reqPeriod;
+					}
+				}
 				up=false;
 			}
 			if (!pCcb->pNext) { // the last one
@@ -141,7 +149,7 @@ bool SerialHeaderRx::waitOnConnectionsUp(unsigned int timeout){
 				pCcb=pCcbList;
 				delay(10);
 			}else{
-				pCcb= pCcb->pNext;
+				pCcb= (tCcb*)pCcb->pNext;
 			}
 
 		}
@@ -151,7 +159,7 @@ bool SerialHeaderRx::waitOnConnectionsUp(unsigned int timeout){
 	}else{
 		MPRINTLN("SerialHeaderRx::waitOnConnectionsUp: NO CONNECTION FOUND");
 	}
-	return false; // no connections or timeout
+	return up; // no connections or timeout
 }
 
 

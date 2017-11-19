@@ -70,8 +70,13 @@ public:
 	void internalReceive(const byte* pData, size_t data_size);
 	virtual ~SerialHeaderTx();
 
-	void connect(byte fromAddr, byte toAddr);
-	bool   waitOnConnectionsUp(unsigned int timeout);
+	/*
+	 * void connect(byte fromAddr, byte toAddr,bool master);
+	 * adds a connection (tCcb) to the tx
+	 * > if master
+	 */
+	void addConnection(byte fromAddr, byte toAddr,bool master);
+	bool   connect(unsigned long timeout=WAITED_READ_TIMEOUT_DEFAULT_MSEC, unsigned long reqPeriod=100);
 
 protected:
 	void mprintAcbList();

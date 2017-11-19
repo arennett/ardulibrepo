@@ -203,12 +203,14 @@ tAktId SerialHeaderTx::sendCR(byte fromAddr, byte toAddr){
 	return send(fromAddr,toAddr,SERIALHEADER_CMD_CR,NULL,0,0);
 }
 
-void SerialHeaderTx::connect(byte localAddr, byte remoteAddr){
-	pSerialHeaderRx->setConnectionStatus(localAddr, remoteAddr, CONNECTION_STATUS_READY);
+void SerialHeaderTx::addConnection(byte localAddr, byte remoteAddr,bool master){
+	tCcb* pCcb=pSerialHeaderRx->setConnectionStatus(localAddr, remoteAddr, CONNECTION_STATUS_READY);
+	pCcb->master=master;
+
 }
 
-bool   SerialHeaderTx::waitOnConnectionsUp(unsigned int timeout){
-	return pSerialHeaderRx->waitOnConnectionsUp(timeout);
+bool   SerialHeaderTx::connect(unsigned long timeout, unsigned long reqPeriod){
+	return pSerialHeaderRx->connect(timeout,reqPeriod);
 }
 
 
