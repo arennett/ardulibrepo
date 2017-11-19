@@ -169,7 +169,7 @@ tAktId SerialHeaderTx::send(byte fromAddr, byte toAddr, byte cmd, byte *pData, s
 		pAcb->cmd=cmd;
 		pAcb->fromAddr=fromAddr;
 		pAcb->toAddr=toAddr;
-		pAcb->status=ACB_STATUS_WAIT_FOR_RX;
+		pAcb->status=ACB_STATUS_OPEN;
 		pAcb->timeStamp=millis();
 	}
 	sHeader.cmd=cmd;
@@ -203,10 +203,11 @@ tAktId SerialHeaderTx::sendCR(byte fromAddr, byte toAddr){
 	return send(fromAddr,toAddr,SERIALHEADER_CMD_CR,NULL,0,0);
 }
 
-tAktId SerialHeaderTx::connect(byte fromAddr, byte toAddr){
-	if (isC(fromAddr,toAddr,SERIALHEADER_CMD_CR,NULL,0,0);
+tAktId SerialHeaderTx::connect(byte localAddr, byte remoteAddr){
+	pSerialHeaderRx->setConnectionStatus(localAddr, remoteAddr, CONNECTION_STATUS_READY);
 }
 
+bool   waitOnConnectionsUp(unsigned int timeout);
 
 
 void SerialHeaderTx::replyACK(tAktId onAktId){
@@ -233,10 +234,10 @@ void SerialHeaderTx::internalReceive(const byte* pData, size_t data_size){
 		if(pAcb && pAcb->toAddr == pHeader->fromAddr) {
 				// Action closed
 
-			    if (pAcb->cmd==SERIALHEADER_CMD_CR) {
+			    if (pAcb->cmd==SERIALHEADER_CMD_ACK) {
+			    	   pSerialHeaderRx->setConnectionStatus(pAcb->fromAddr, pAcb->toAddr, CONNECTION_STATUS_CONNECTED);
 			    	   MPRINTSVAL("CONNECTED FROM: ",pAcb->fromAddr);
 			    	   MPRINTSVAL("            TO: ",pAcb->toAddr);
-			    	   pAcb->status=ACB_STATUS_CONNECTED;
 			    	   // for a connection the acb is permanent???? NO!!!!
 			    	   // status connect true in connection entry
 			    	   // former callBackMap Entry in RX

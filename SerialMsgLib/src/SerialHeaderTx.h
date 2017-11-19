@@ -20,11 +20,8 @@ typedef struct {
 	byte fromAddr;
 	byte toAddr;
 #define	ACB_STATUS_CREATED		0
-#define	ACB_STATUS_WAIT_FOR_TX  1
-#define ACB_STATUS_WAIT_FOR_RX	2
-#define ACB_STATUS_CLOSED		3
-#define ACB_STATUS_CONNECTED	4
-
+#define ACB_STATUS_CLOSED		1
+#define ACB_STATUS_OPEN			2
 	byte status = ACB_STATUS_CREATED;
 	unsigned int cntRetries = 0;
 	unsigned long timeStamp = 0;
@@ -72,6 +69,9 @@ public:
 	/* internal callback from SerialHeaderRx */
 	void internalReceive(const byte* pData, size_t data_size);
 	virtual ~SerialHeaderTx();
+
+	tAktId SerialHeaderTx::connect(byte fromAddr, byte toAddr);
+	bool   waitOnConnectionsUp(unsigned int timeout);
 
 protected:
 	void mprintAcbList();

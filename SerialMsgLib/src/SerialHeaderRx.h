@@ -14,18 +14,17 @@
 #include "SoftSerialPort.h"
 #include "SerialHeaderTx.h"
 
-typedef struct {
-	byte addr;
-#define  CALLBACKMAPPER_STATUS_NOT_READY  0
-#define  CALLBACKMAPPER_STATUS_READY 2
-#define  CALLBACKMAPPER_STATUS_DISCONNECTED 3
-#define  CALLBACKMAPPER_STATUS_CONNECTED 4
-
-
-	byte status;
+typedef struct { //Connection Control Block
+	byte localAddr;
+	byte remoteAddr;    //remote address
+	#define  CONNECTION_STATUS_NOT_READY  	1
+	#define  CONNECTION_STATUS_READY 		2
+	#define  CONNECTION_STATUS_DISCONNECTED 3
+	#define  CONNECTION_STATUS_CONNECTED 	4
+	byte status=0;
 	void (*pUserCallBack)(const byte* data, size_t data_size);
 	void* pNext = NULL;
-} tCallBackMapper;
+} tCcb;
 
 class SerialHeaderRx {
 public:
@@ -38,9 +37,16 @@ public:
 	 * - the callback method is only called if the received addrTo is equal to addr
 	 * - you can register one callback per receiver addr
 	 * > (*ptr) static call back function ptr
-	 * > addr   addr of receiver
+	 * > byte localAddr   addr of local receiver
+	 * > byte remoteAddr  addr of remote transmitter
 	 */
-	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size),byte addr);
+	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size),byte localAddr ,byte remoteAddr);
+
+
+	/*
+	 * create a new Connection
+	 */
+	void createConnection(byte localAddr,byte remoteAddr);
 
 	/**
 	 * void internalReceive(const byte* pData, size_t data_size);
@@ -54,10 +60,11 @@ public:
 	 * - the receiver is ready and expects a connection request
 	 * - this is typically the last command in the setup and must
 	 * - be called after the setUpdateCallback for this addr
-	 * > addr addr of the receiver
+	 * > localAddr addr of local
+	 * > remoteAddr addr of remote
 	 * < true if receiver is ready
 	 */
-	bool isReadyToConnect(byte addr);
+	bool isReadyToConnect(byte localAddr,byte remoteAddr);
 
 
 
@@ -143,47 +150,48 @@ public:
 	 */
 	void setSerialHeaderTx(SerialHeaderTx* pSerialHeaderTx);
 
+	bool setConnectionStatus(byte localAddr, byte remoteAddr,byte status);
+
+	byte getConnectionStatus(byte localAddr, byte remoteAddr);
+
+	bool isConnected(byte localAddr,byte remoteAddr);
+
+protected:
+
+
+
 private:
 
 	/**
 	 * void getLastCallBackMapperEntry();
 	 * - iterates through the mapper list, and returns the last entry
 	 * < returns the last entry or null if list is empty*/
-	tCallBackMapper* getLastCallBackMapperEntry();
+	tCcb* getLastCcbEntry();
 
 
 	/*
 	 * tCallBackMapper* getCallBackMapperEntry(byte addr);
 	 * - get the CallBackMapper for addr
-	 * > addr of the receiver
+	 * > localAddr
+	 * > remoteAddr
+	 * > create if nothing found
 	 */
-	tCallBackMapper* getCallBackMapperEntry(byte addr);
+	tCcb* getCcbEntry(byte localAddr ,byte remoteAddr,bool create=false);
 
 	/*
-	 * void deleteCallBackList(){
+	 * void deleteCcbList(){
 	 * - deletes all entries from  the list
 	 */
-	void deleteCallBackList();
+	void deleteCcbList();
 
 	SerialRx* pSerialRx = NULL;
 	SerialHeaderTx 	*pSerialHeaderTx		= NULL;
-	tCallBackMapper *pCallBackMapperList 	= NULL;
+	tCcb *pCcbList 	= NULL;
 
 
-	/*
-	 *void setConnected(bool connected);
-	 * - after CR is received the receiver call back entry
-	 *  is set on status connected if receiver is ready
-	 *  to connected
-	 *  see isReadyToConnected()
-	 *  If the receiver is disconnected (connected=false)
-	 *  you must setReadyToConnected(true) before you
-	 *  can reconnect;
-	 *
-	 */
-	void setConnected(bool connected,byte addr);
 
-	bool isConnected(byte addr);
+
+
 
 };
 
