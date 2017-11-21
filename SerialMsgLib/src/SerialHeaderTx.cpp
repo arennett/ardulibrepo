@@ -208,9 +208,7 @@ tAktId SerialHeaderTx::sendCR(byte fromAddr, byte toAddr){
 }
 
 void SerialHeaderTx::addConnection(byte localAddr, byte remoteAddr,bool master){
-	tCcb* pCcb=pSerialHeaderRx->setConnectionStatus(localAddr, remoteAddr, CONNECTION_STATUS_READY);
-	pCcb->master=master;
-
+	pSerialHeaderRx->addConnection(localAddr,remoteAddr,master);
 }
 
 bool   SerialHeaderTx::connect(unsigned long timeout, unsigned long reqPeriod){

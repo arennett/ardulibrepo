@@ -24,27 +24,56 @@ SerialHeaderRx::~SerialHeaderRx() {
 	deleteCcbList();
 }
 
+void SerialHeaderRx::addConnection(byte localAddr, byte remoteAddr,bool master){
+	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,true);
+	pCcb->status = CONNECTION_STATUS_NOT_READY;
+	pCcb->master=master;
+}
+
+
+
+
 /* for each addr one call back
  * callback must be installed before setReady(addr) is called*/
 void SerialHeaderRx::setUpdateCallback(
-		void (*ptr)(const byte* pData, size_t data_size), byte localAddr, byte remoteAddr) {
-	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,true);
+	void (*ptr)(const byte* pData, size_t data_size), byte localAddr, byte remoteAddr) {
+	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,false);
+	if (!pCcb) {
+		MPRINTLN("SerialHeaderRx::isReadyToConnect :Connection not found: ");
+		MPRINT(localAddr);MPRINT("-");MPRINTLN(remoteAddr);
+		return;
+	}
+
 	pCcb->pUserCallBack = ptr;
 }
 
 bool SerialHeaderRx::isReadyToConnect(byte localAddr,byte remoteAddr) {
-	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,true);
+	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,false);
+	if (!pCcb) {
+		MPRINTLN("SerialHeaderRx::isReadyToConnect :Connection not found: ");
+		MPRINT(localAddr);MPRINT("-");MPRINTLN(remoteAddr);
+		return NULL;
+	}
 	return pCcb && (pCcb->status == CONNECTION_STATUS_READY);
 }
 
 bool SerialHeaderRx::isConnected(byte localAddr,byte remoteAddr) {
-	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,true);
+	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,false);
+		if (!pCcb) {
+			MPRINTLN("SerialHeaderRx::isConnected :Connection not found: ");
+			MPRINT(localAddr);MPRINT("-");MPRINTLN(remoteAddr);
+		    return false;
+		}
 	return pCcb && (pCcb->status == CONNECTION_STATUS_CONNECTED);
 }
 
-
 tCcb* SerialHeaderRx::setConnectionStatus(byte localAddr, byte remoteAddr,byte status) {
-	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,true);
+	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,false);
+	if (!pCcb) {
+		MPRINTLN("SerialHeaderRx::setConnectionStatus :Connection not found: ");
+		MPRINT(localAddr);MPRINT("-");MPRINTLN(remoteAddr);
+	    return NULL;
+	}
 	pCcb->status =status;
 	return pCcb;
 }
@@ -164,8 +193,8 @@ bool SerialHeaderRx::connect(unsigned long int timeout, unsigned long int reqPer
 }
 
 
-bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
-		unsigned long timeout, unsigned long checkPeriod, byte addr,tAktId onAktId) {
+bool SerialHeaderRx::waitOnMessage(byte*& rpData, size_t& rdata_size,
+		unsigned long timeout, unsigned long checkPeriod, byte toAddr,tAktId onAktId) {
 	DPRINTLN("SerialHeaderRx::waitOnMessage");
 	tSerialHeader* pHeader;
 	if (timeout==0){
@@ -174,18 +203,18 @@ bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 	unsigned long endMillis = millis() + timeout;
 
 	while (millis() < endMillis) {
-		if (pSerialRx->waitOnMessage(pData, data_size, endMillis - millis(),
+		if (pSerialRx->waitOnMessage(rpData, rdata_size, endMillis - millis(),
 				checkPeriod)) {
-			pHeader = (tSerialHeader*) pData;
-			if (pHeader->toAddr == addr && (onAktId > 0)? (onAktId==pHeader->aktid): true ) {
+			pHeader = (tSerialHeader*) rpData;
+			if (pHeader->toAddr == toAddr && (onAktId > 0)? (onAktId==pHeader->aktid): true ) {
 				MPRINTSVAL(
-						"SerialHeaderRx::waitOnMessage -message received ,addr: ",
+						"SerialHeaderRx::waitOnMessage -message received ,toAddr: ",
 						pHeader->toAddr);
 				DPRINTSVAL("restOfTime: " ,endMillis-millis());
 				return true;
 			} else {
 				MPRINTSVAL(
-						"SerialHeaderRx::waitOnMessage -unknown! message received ,addr:",
+						"SerialHeaderRx::waitOnMessage -unknown! message received ,toAddr:",
 						pHeader->toAddr);
 				DPRINTSVAL("restOfTime: " ,endMillis-millis());
 			}
@@ -195,9 +224,9 @@ bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
 
 }
 
-bool SerialHeaderRx::waitOnMessage(byte*& pData, size_t& data_size,
-		unsigned long timeout, byte addr,tAktId onAktId) {
-	return waitOnMessage(pData, data_size, timeout,0, addr,onAktId);
+bool SerialHeaderRx::waitOnMessage(byte*& rpData, size_t& rdata_size,
+		unsigned long timeout, byte toAddr,tAktId onAktId) {
+	return waitOnMessage(rpData, rdata_size, timeout,0, toAddr,onAktId);
 }
 
 tCcb* SerialHeaderRx::getLastCcbEntry() {
@@ -253,20 +282,20 @@ void SerialHeaderRx::deleteCcbList() {
 }
 
 void SerialHeaderRx::mprintCcb(tCcb* pCcb){
-	MPRINTLN("CCB      :" );
+	  MPRINTLN("CCB-----------------");
 	MPRINTSVAL("local     : " ,pCcb->remoteAddr);
 	MPRINTSVAL("remote    : " ,pCcb->localAddr);
 	MPRINTSVAL("status    : " ,pCcb->status);
-	MPRINTLN("--------------------");
+	  MPRINTLN("--------------------");
 };
 
 void SerialHeaderRx::mprintCcbList() {
-	MPRINTLN("--------------------");
-	tCcb* pCcb= pCcbList;
-	while(pCcb){
+	  MPRINTLN("--------------------");
+	  tCcb* pCcb= pCcbList;
+	  while(pCcb){
 		mprintCcb(pCcb);
 		pCcb =(tCcb*)pCcb->pNext;
-	}
+	  }
 };
 
 

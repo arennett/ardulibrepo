@@ -45,29 +45,32 @@ public:
 
 
 	/*
-	 * create a new Connection
+	 * 	void addConnection(byte localAddr, byte remoteAddr,bool master);
+	 * creates a new Connection and adds it to the
+	 * internal list of connections. Both communication endpoints have
+	 * to create at least one connection
+	 * > localAddr   addr of local  comm. endpoint
+	 * > remoteAdrr  addr of remote comm. endpoint
+	 * > master if true localAddr sends ConnectionRequest to remote AR
 	 */
-	void createConnection(byte localAddr,byte remoteAddr);
+	void addConnection(byte localAddr, byte remoteAddr,bool master);
 
 	/**
 	 * void internalReceive(const byte* pData, size_t data_size);
 	 * - is called by serialRx when serialRx receives a message
+	 * - serialRx is the underlying receiver
 	 */
 	void internalReceive(const byte* pData, size_t data_size);
 
 
 	/*
-	 * void isReadyToConnect(byte addr);
-	 * - the receiver is ready and expects a connection request
-	 * - this is typically the last command in the setup and must
-	 * - be called after the setUpdateCallback for this addr
-	 * > localAddr addr of local
-	 * > remoteAddr addr of remote
+	 * bool isReadyToConnect(byte localAddr,byte remoteAddr);
+	 * - the client is ready and expects a connection request
+	 * > localAddr  addr of local  endpoint
+	 * > remoteAddr addr of remote endpoint
 	 * < true if receiver is ready
 	 */
 	bool isReadyToConnect(byte localAddr,byte remoteAddr);
-
-
 
 
 	/**
@@ -77,7 +80,7 @@ public:
 	void begin(long speed);
 
 	/**
-	 * readNext();
+	 * bool readNext();
 	 * > reads next byte into the buffer
 	 * < return : true when data complete and callBack was called
 	 */
@@ -98,35 +101,39 @@ public:
 	};
 
 	/**
-	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
+	 * ool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout,
+			unsigned long checkPeriod, byte addr,tAktId onAktId);
 	 * > waits until complete message is received or timeout is expired
 	 * >
-	 * ppData 		...reference for : pointer on the received data
-	 * data_size 	...reference data size
+	 * rpData 		...reference for : pointer on the received data
+	 * rdata_size 	...reference data size
 	 * timeout		...timeout msecs / 0 = DEFAULT_WAIT_ON_MESSAGE_TIMEOUT
 	 * checkPeriod  ...time until next read trial is done
+	 * toAddr		...address of the message
 	 * onAktId      ...if > 0 the aktId is checked, we expect a reply
 	 */
-	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout,
-			unsigned long checkPeriod, byte addr,tAktId onAktId);
+	bool waitOnMessage(byte*& rpData, size_t& rdata_size, unsigned long timeout,
+			unsigned long checkPeriod, byte toAddr,tAktId onAktId);
 
 	/**
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
 	 * - waits until complete message is received or timeout is expired
 	 * - the default checkPeriod is 10msec
 	 * ppData 		...reference for : pointer on the received data
-	 * data_size 	...reference data size
+	 * rdata_size 	...reference data size
 	 * timeout		...timeout msecs
+	 * toAddr		...address of the message
 	 * onAktId      ...if > 0 the aktId is checked, we expect a reply
 	 *
 	 */
-	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout,
-			byte addr,tAktId onAktId);
+	bool waitOnMessage(byte*& rpData, size_t& rdata_size, unsigned long timeout,
+			byte toAdddr,tAktId onAktId);
 
 
 	/*
-	 * SerialHeaderTx::waitOnConnectionsUp(unsigned int timeout)
-	 * waits until all connection are up
+	 * connect(unsigned long timeout,unsigned long reqPeriod);
+	 * waits until all connections are up
+	 * both sides (master, client) have
 	 * > timeout : wait max timeout in msecs
 	 * > period  : trial period for a master connection request
 	 */
