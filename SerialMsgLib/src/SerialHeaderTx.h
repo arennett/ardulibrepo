@@ -47,6 +47,8 @@ public:
 	 */
 	SerialHeaderTx(SerialHeaderRx* pSerialHeaderRx);
 
+
+
 	/**
 	 *   send(byte fromAddr,byte toAddr, byte cmd ,byte *pData,bool confirm=false );
 	 * - sends a byte array to a the serialport
@@ -70,14 +72,39 @@ public:
 	void internalReceive(const byte* pData, size_t data_size);
 	virtual ~SerialHeaderTx();
 
-	/*
-	 * void connect(byte fromAddr, byte toAddr,bool master);
-	 * adds a connection (tCcb) to the tx
-	 * > if master
+
+	/**
+	 * bool listen ();
+	 * - if multiple software serials are used, listen
+	 * - activate this software serial connection
+	 * - since they are concurrent
+	 * < returns	...true, if other connection was deactivated
 	 */
-	void addConnection(byte fromAddr, byte toAddr,bool master);
-	bool   connect(unsigned long timeout=WAITED_READ_TIMEOUT_DEFAULT_MSEC, unsigned long reqPeriod=100);
-	SerialHeaderRx* pSerialHeaderRx;
+	inline bool listen() {
+		return pSerialTx->listen();
+	}
+
+
+	/**
+	 *  SerialPort* getSerialPort()
+	 * < returns   ...pointer on serial port
+	 */
+	inline SerialPort* getSerialPort() {
+		return pSerialTx->getSerialPort();
+	}
+
+
+	/**
+	 * SerialHeaderRx* getRx()
+	 * < returns the receiver
+	 */
+	inline SerialHeaderRx* getRx() {
+		if(!pSerialHeaderRx) {
+			MPRINTLN("SerialHeaderRx* getRx()  no tranceiver found");
+		}
+		return pSerialHeaderRx;
+	}
+
 
 protected:
 	void mprintAcbList();
@@ -85,19 +112,20 @@ protected:
 	bool deleteAcbEntry(tAktId aktid);
 
 private:
+	SerialHeaderRx* pSerialHeaderRx;
+	SerialTx* pSerialTx;
+	tSerialHeader sHeader;
+	tAktId aktidTx = 0;
+	tAcb* pAcbList =NULL;
+
 	tAcb* createAcb(tAktId aktid);
 	tAcb* createOrUseAcb(byte cmd, byte fromAddr, byte toAddr, tAktId aktidTx);
 	void mprintAcb(tAcb* pAcb);
-
 	tAcb* getLastAcbEntry();
 	unsigned int getCountAcbEntries();
 	void deleteAcbList();
 
-	SerialTx* pSerialTx;
-
-	tSerialHeader sHeader;
-	tAktId aktidTx = 0;
-	tAcb* pAcbList =NULL;
 };
+
 
 #endif /* SERIALHEADERTX_H_ */

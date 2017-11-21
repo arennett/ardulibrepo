@@ -31,8 +31,6 @@ void SerialHeaderRx::addConnection(byte localAddr, byte remoteAddr,bool master){
 }
 
 
-
-
 /* for each addr one call back
  * callback must be installed before setReady(addr) is called*/
 void SerialHeaderRx::setUpdateCallback(
@@ -51,7 +49,7 @@ bool SerialHeaderRx::isReadyToConnect(byte localAddr,byte remoteAddr) {
 	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,false);
 	if (!pCcb) {
 		MPRINTLN("SerialHeaderRx::isReadyToConnect :Connection not found: ");
-		MPRINT(localAddr);MPRINT("-");MPRINTLN(remoteAddr);
+		MPRINTHEX(localAddr);MPRINT("-");MPRINTHEX(remoteAddr);
 		return NULL;
 	}
 	return pCcb && (pCcb->status == CONNECTION_STATUS_READY);
@@ -61,21 +59,21 @@ bool SerialHeaderRx::isConnected(byte localAddr,byte remoteAddr) {
 	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,false);
 		if (!pCcb) {
 			MPRINTLN("SerialHeaderRx::isConnected :Connection not found: ");
-			MPRINT(localAddr);MPRINT("-");MPRINTLN(remoteAddr);
+			MPRINTHEX(localAddr);MPRINT("-");MPRINTHEX(remoteAddr);
 		    return false;
 		}
 	return pCcb && (pCcb->status == CONNECTION_STATUS_CONNECTED);
 }
 
-tCcb* SerialHeaderRx::setConnectionStatus(byte localAddr, byte remoteAddr,byte status) {
+bool SerialHeaderRx::setConnectionStatus(byte localAddr, byte remoteAddr,byte status) {
 	tCcb* pCcb = getCcbEntry(localAddr,remoteAddr,false);
 	if (!pCcb) {
 		MPRINTLN("SerialHeaderRx::setConnectionStatus :Connection not found: ");
-		MPRINT(localAddr);MPRINT("-");MPRINTLN(remoteAddr);
-	    return NULL;
+		MPRINTHEX(localAddr);MPRINT("-");MPRINTHEX(remoteAddr);
+	    return false;
 	}
 	pCcb->status =status;
-	return pCcb;
+	return true;
 }
 
 byte SerialHeaderRx::getConnectionStatus(byte localAddr, byte remoteAddr){
@@ -88,7 +86,9 @@ byte SerialHeaderRx::getConnectionStatus(byte localAddr, byte remoteAddr){
 }
 
 
-//is called by serialRx when serialRx receives a message
+/* Is called by serialRx when serialRx receives a message
+ *
+ */
 void SerialHeaderRx::internalReceive(const byte* pData, size_t data_size) {
 	tSerialHeader* pSerialHeader=(tSerialHeader*) pData;
 

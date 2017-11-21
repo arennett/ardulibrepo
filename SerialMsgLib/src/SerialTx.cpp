@@ -35,6 +35,9 @@ void SerialTx::begin(long speed){
 
 }
 
+bool SerialTx::listen () {
+	return  pSerialPort->listen();
+}
 
 SerialPort* SerialTx::getSerialPort(){
 	return pSerialPort;

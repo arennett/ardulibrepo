@@ -29,6 +29,13 @@ typedef struct { //Connection Control Block
 
 class SerialHeaderRx {
 public:
+
+	/*
+	 * SerialHeaderRx(SerialPort* pSerialPort, size_t maxDataSize);
+	 * - Receiver for SerialHeader Messages
+	 * > pSerialPort  	...SerialPort for receiving messages
+	 * > maxDataSize	...max datasize of user data (without header)
+	 */
 	SerialHeaderRx(SerialPort* pSerialPort, size_t maxDataSize);
 	virtual ~SerialHeaderRx();
 
@@ -65,7 +72,7 @@ public:
 
 	/*
 	 * bool isReadyToConnect(byte localAddr,byte remoteAddr);
-	 * - the client is ready and expects a connection request
+	 * - the endpoint is ready and expects a connection request
 	 * > localAddr  addr of local  endpoint
 	 * > remoteAddr addr of remote endpoint
 	 * < true if receiver is ready
@@ -75,13 +82,13 @@ public:
 
 	/**
 	 * void begin(long speed);
-	 * > like Serial.begin , inits serial connection
-	 */
+	 * - like Serial.begin , inits serial connection
+	 * > speed
 	void begin(long speed);
 
 	/**
 	 * bool readNext();
-	 * > reads next byte into the buffer
+	 * - reads next byte into the buffer
 	 * < return : true when data complete and callBack was called
 	 */
 	inline bool readNext() {
@@ -91,9 +98,9 @@ public:
 
 	/**
 	 * bool readNext(byte* b);
-	 * > reads next byte into the buffer
+	 * - reads next byte into the buffer
+	 * > b	...current byte
 	 * < return : true when data complete and callBack was called
-	 * b	...current byte (can be data or pre-/postamble bytes
 	 */
 
 	inline bool readNext(byte* b) {
@@ -101,16 +108,16 @@ public:
 	};
 
 	/**
-	 * ool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout,
+	 * bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout,
 			unsigned long checkPeriod, byte addr,tAktId onAktId);
-	 * > waits until complete message is received or timeout is expired
-	 * >
-	 * rpData 		...reference for : pointer on the received data
-	 * rdata_size 	...reference data size
-	 * timeout		...timeout msecs / 0 = DEFAULT_WAIT_ON_MESSAGE_TIMEOUT
-	 * checkPeriod  ...time until next read trial is done
-	 * toAddr		...address of the message
-	 * onAktId      ...if > 0 the aktId is checked, we expect a reply
+	 * -    waits until complete message is received or timeout is expired
+	 * > rpData 		...reference for : pointer on the received data
+	 * > rdata_size 	...reference data size
+	 * > timeout		...timeout msecs / 0 = DEFAULT_WAIT_ON_MESSAGE_TIMEOUT
+	 * > checkPeriod  	...time until next read trial is done
+	 * > toAddr			...address of the message
+	 * > onAktId      	...if > 0 the aktId is checked, we expect a reply
+	 * < returns 		...true if message was received before timeout expired
 	 */
 	bool waitOnMessage(byte*& rpData, size_t& rdata_size, unsigned long timeout,
 			unsigned long checkPeriod, byte toAddr,tAktId onAktId);
@@ -119,19 +126,19 @@ public:
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
 	 * - waits until complete message is received or timeout is expired
 	 * - the default checkPeriod is 10msec
-	 * ppData 		...reference for : pointer on the received data
-	 * rdata_size 	...reference data size
-	 * timeout		...timeout msecs
-	 * toAddr		...address of the message
-	 * onAktId      ...if > 0 the aktId is checked, we expect a reply
-	 *
+	 * > ppData 		...reference for : pointer on the received data
+	 * > rdata_size 	...reference data size
+	 * > timeout		...timeout msecs
+	 * > toAddr			...address of the message
+	 * > onAktId      	...if > 0 the aktId is checked, we expect a reply
+	 * < returns 		...true if message was received before timeout expired
 	 */
 	bool waitOnMessage(byte*& rpData, size_t& rdata_size, unsigned long timeout,
 			byte toAdddr,tAktId onAktId);
 
 
 	/*
-	 * connect(unsigned long timeout,unsigned long reqPeriod);
+	 * bool connect(unsigned long timeout,unsigned long reqPeriod);
 	 * waits until all connections are up
 	 * both sides (master, client) have
 	 * > timeout : wait max timeout in msecs
@@ -145,29 +152,35 @@ public:
 	 * - if multiple software serials are used, listen
 	 * - activate this software serial connection
 	 * - since they are concurrent
-	 * <returns: true ...if other connection was deactivated
+	 * < returns	...true, if other connection was deactivated
 	 */
+
 	inline bool listen() {
 		return pSerialRx->listen();
-	}
-	;
+	};
 
 	/**
-	 *  SerialPort* getSerialPort()
-	 * <returns: pointer on internal port
+	 * SerialPort* getSerialPort()
+	 * < returns: pointer on internal port
 	 */
-	SerialPort* getSerialPort() {
+	inline SerialPort* getSerialPort() {
 		return pSerialRx->getSerialPort();
 	}
 
 	/**
-	 * SerialHeaderTx is called when a
-	 * message receives to check if an answer came in
-	 *
+	 * void setSerialHeaderTx(SerialHeaderTx* pSerialHeaderTx);
+	 * set the Tranceiver
+	 * pSerialHeaderTx is called back (see internalReceive)
+	 * when a reply was received
+	 * > pSerialHeaderTx 	... the SerialHeaderTx instance
 	 */
 	void setSerialHeaderTx(SerialHeaderTx* pSerialHeaderTx);
 
-	tCcb* setConnectionStatus(byte localAddr, byte remoteAddr,byte status);
+	/*
+	 * bool setConnectionStatus(byte localAddr, byte remoteAddr,byte status);
+	 *
+	 */
+	bool setConnectionStatus(byte localAddr, byte remoteAddr,byte status);
 
 	byte getConnectionStatus(byte localAddr, byte remoteAddr);
 
@@ -188,6 +201,19 @@ public:
 	void mprintCcbList();
 
 	void mprintCcb(tCcb* pCcb);
+
+	/**
+	 * SerialHeaderTx* getTx()
+	 * < returns the transmitter
+	 */
+
+	inline SerialHeaderTx* getTx() {
+		if(!pSerialHeaderTx) {
+			MPRINTLN("SerialHeaderTx* getTx()  no receiver found");
+		}
+		return pSerialHeaderTx;
+	}
+
 
 
 

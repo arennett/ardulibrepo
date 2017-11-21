@@ -38,6 +38,15 @@ public:
 
 
 	/**
+	 * bool listen ();
+	 * - if multiple software serials are used, listen
+	 * - activate this software serial connection
+	 * - since they are concurrent
+	 * < returns	...true, if other connection was deactivated
+	 */
+	bool SerialTx::listen ();
+
+	/**
 	 * void sendData(byte* pDdata, size_t datasize);
 	 * - sends a byte array to a the serialport
 	 *   SerialTx adds a preamble and a postamble
