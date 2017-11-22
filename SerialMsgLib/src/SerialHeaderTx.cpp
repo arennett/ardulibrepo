@@ -22,8 +22,7 @@ SerialHeaderTx::SerialHeaderTx(SerialPort* pSerialPort) {
 SerialHeaderTx::SerialHeaderTx(SerialHeaderRx* pSerialHeaderRx) {
 	this->pSerialTx = new SerialTx(pSerialHeaderRx->getSerialPort());
 	this->pSerialHeaderRx = pSerialHeaderRx;
-	this->pSerialHeaderRx->setSerialHeaderTx(this);
-
+	pSerialHeaderRx->setSerialHeaderTx(this);
 }
 
 SerialHeaderTx::~SerialHeaderTx() {
@@ -153,7 +152,7 @@ tAktId SerialHeaderTx::send(byte fromAddr, byte toAddr, byte cmd, byte *pData,
 		size_t dataSize, tAktId aktId) {
 	memset(&this->sHeader, 0, sizeof(tSerialHeader));
 	MPRINT("SerialHeaderTx::send> cmd: ");	MPRINT(cmd);
-	MPRINT("from: ");MPRINT(fromAddr);MPRINT("to: ");MPRINTLN(toAddr);
+	MPRINT(" from: ");MPRINTHEX(fromAddr);MPRINT(" to: ");MPRINTHEX(toAddr);MPRINTLN("");
 
 	if (aktId == 0) { // no reply ..new aktidTx
 		if (aktidTx < MAX_AKTID) {
@@ -165,7 +164,7 @@ tAktId SerialHeaderTx::send(byte fromAddr, byte toAddr, byte cmd, byte *pData,
 	bool reply_expected = (cmd == SERIALHEADER_CMD_LIVE || cmd == SERIALHEADER_CMD_CR
 			|| cmd == SERIALHEADER_CMD_DREQ);
 	if (reply_expected) {
-		MPRINT("SerialHeaderTx::send> reply expected");
+		MPRINTLN("SerialHeaderTx::send> reply expected");
 		//create acb (action control block)
 		tAcb* pAcb = NULL;
 		if (cmd == SERIALHEADER_CMD_LIVE || cmd == SERIALHEADER_CMD_CR) {
@@ -277,6 +276,7 @@ bool SerialHeaderTx::internalReceive(const byte* pData, size_t data_size) {
 	} else {
 		MPRINTSVAL("SerialHeaderTx::internalReceive> acb not found: ",
 		pHeader->aktid);
+		usercallBack=false;
 	}
 
 	if (data_size > 0) {
@@ -284,5 +284,6 @@ bool SerialHeaderTx::internalReceive(const byte* pData, size_t data_size) {
 				pHeader->aktid);
 
 	}
+	return usercallBack;
 
 }

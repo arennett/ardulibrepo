@@ -9,6 +9,7 @@
 #define SERIALHEADERTX_H_
 
 #include "Arduino.h"
+#include <tools.h>
 #include "SerialHeader.h"
 #include "SerialTx.h"
 

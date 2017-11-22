@@ -9,6 +9,7 @@
 #define SERIALHEADERRX_H_
 
 #include <stddef.h>
+#include <tools.h>
 #include "SerialRx.h"
 #include "SerialPort.h"
 #include "SoftSerialPort.h"
@@ -84,6 +85,7 @@ public:
 	 * void begin(long speed);
 	 * - like Serial.begin , inits serial connection
 	 * > speed
+	 */
 	void begin(long speed);
 
 	/**
@@ -137,14 +139,7 @@ public:
 			byte toAdddr,tAktId onAktId);
 
 
-	/*
-	 * bool connect(unsigned long timeout,unsigned long reqPeriod);
-	 * waits until all connections are up
-	 * both sides (master, client) have
-	 * > timeout : wait max timeout in msecs
-	 * > period  : trial period for a master connection request
-	 */
-	bool connect(unsigned long timeout,unsigned long reqPeriod);
+
 
 
 	/**
@@ -186,8 +181,14 @@ public:
 
 	bool isConnected(byte localAddr,byte remoteAddr);
 
-
-	bool connect(unsigned int timeout=WAITED_READ_TIMEOUT_DEFAULT_MSEC, unsigned long int reqPeriod=100);
+	/*
+	 * bool connect(unsigned long timeout,unsigned long reqPeriod);
+	 * waits until all connections are up
+	 * both sides (master, client) have
+	 * > timeout : wait max timeout in msecs
+	 * > rePeriod  : trial period for a master connection request
+	 */
+	bool connect(unsigned long timeout=WAITED_READ_TIMEOUT_DEFAULT_MSEC, unsigned long reqPeriod=100);
 
 	/*
 	 * tCallBackMapper* getCallBackMapperEntry(byte addr);

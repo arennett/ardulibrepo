@@ -44,7 +44,7 @@ public:
 	 * - since they are concurrent
 	 * < returns	...true, if other connection was deactivated
 	 */
-	bool SerialTx::listen ();
+	bool listen ();
 
 	/**
 	 * void sendData(byte* pDdata, size_t datasize);
