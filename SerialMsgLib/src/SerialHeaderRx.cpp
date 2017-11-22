@@ -95,7 +95,7 @@ void SerialHeaderRx::internalReceive(const byte* pData, size_t data_size) {
 	byte cmd=pSerialHeader->cmd;
 	/* for received replies*/
 
-	if (getConnectionStatus(pSerialHeader->toAddr,pSerialHeader->fromAddr)!=CONNECTION_STATUS_CONNECTED) {
+	if (!isConnected(pSerialHeader->toAddr,pSerialHeader->fromAddr)) {
 		if ((cmd != SERIALHEADER_CMD_ACK) &&
 			(cmd != SERIALHEADER_CMD_NAK) &&
 			(cmd != SERIALHEADER_CMD_CR)) {
@@ -105,36 +105,42 @@ void SerialHeaderRx::internalReceive(const byte* pData, size_t data_size) {
 		return;
 	}
 
-	if (pSerialHeaderTx!=NULL) {
-		bool reply = (cmd == SERIALHEADER_CMD_ACK  || cmd == SERIALHEADER_CMD_NAK
-		                ||cmd == SERIALHEADER_CMD_DREP || cmd == SERIALHEADER_CMD_DRAQ  );
-		if(reply) {
-			pSerialHeaderTx->internalReceive(pData, data_size);
+
+	// protocol requests from remote
+	 if (getTx()) {
+		 if (cmd == SERIALHEADER_CMD_CR){
+			if ( isReadyToConnect(pSerialHeader->toAddr,pSerialHeader->fromAddr) ) { //add and readystatus from CallBackMapper
+				getTx()->replyACK(pSerialHeader->aktid);
+				setConnectionStatus(pSerialHeader->toAddr, pSerialHeader->fromAddr, CONNECTION_STATUS_CONNECTED);
+			}else{
+				getTx()->replyNAK(pSerialHeader->aktid);
+			}
 			return;
 		}
-	}
-	if (cmd == SERIALHEADER_CMD_CR){
-		if (isReadyToConnect(pSerialHeader->toAddr,pSerialHeader->fromAddr)) { //add and readystatus from CallBackMapper
-			pSerialHeaderTx->replyACK(pSerialHeader->aktid);
-			setConnectionStatus(pSerialHeader->toAddr, pSerialHeader->fromAddr, CONNECTION_STATUS_CONNECTED);
-		}else{
-			pSerialHeaderTx->replyNAK(pSerialHeader->aktid);
+
+		 if (isConnected(pSerialHeader->toAddr,pSerialHeader->fromAddr)){
+			if (cmd == SERIALHEADER_CMD_CD){
+				pSerialHeaderTx->replyACK(pSerialHeader->aktid);
+				setConnectionStatus(pSerialHeader->toAddr, pSerialHeader->fromAddr, CONNECTION_STATUS_DISCONNECTED);
+			}else if (cmd == SERIALHEADER_CMD_LIVE){
+				pSerialHeaderTx->replyACK(pSerialHeader->aktid);
+			}
+			return;
+	 	 }// of isConnected
+
+	 }//getTx()
+
+	 //protocol replies from remote
+
+	if(cmd == SERIALHEADER_CMD_ACK  || cmd == SERIALHEADER_CMD_NAK || cmd == SERIALHEADER_CMD_DREP ) {
+		if (getTx()){
+			if (!pSerialHeaderTx->internalReceive(pData, data_size)){
+					return ; //no user callback for receiveid reply  needed;
+			}
 		}
-		return;
 	}
 
-	if (cmd == SERIALHEADER_CMD_CD){
-			pSerialHeaderTx->replyACK(pSerialHeader->aktid);
-			setConnectionStatus(pSerialHeader->toAddr, pSerialHeader->fromAddr, CONNECTION_STATUS_DISCONNECTED);
-		return;
-	}
-
-	if (cmd == SERIALHEADER_CMD_LIVE){
-		if (isConnected(pSerialHeader->toAddr,pSerialHeader->fromAddr)){
-			pSerialHeaderTx->replyACK(pSerialHeader->aktid);
-		}
-	}
-
+	// user request /reply
 	const byte* pUserData = pData + sizeof(pSerialHeader);
 		tCcb* pNext = pCcbList;
 

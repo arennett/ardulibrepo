@@ -69,7 +69,7 @@ public:
 	void replyNAK(tAktId onAktId);
 
 	/* internal callback from SerialHeaderRx */
-	void internalReceive(const byte* pData, size_t data_size);
+	bool internalReceive(const byte* pData, size_t data_size);
 	virtual ~SerialHeaderTx();
 
 
@@ -107,8 +107,23 @@ public:
 
 
 protected:
+	/**
+	 * void mprintAcbList();
+	 * - prints acb list to standard serial
+	 */
 	void mprintAcbList();
+
+	/**
+	 * tAcb* getAcbEntry(tAktId aktid);
+	 * >aktid	...action id
+	 * < returns acb
+	 */
 	tAcb* getAcbEntry(tAktId aktid);
+
+	/**
+	 * bool deleteAcbEntry(tAktId aktid);
+	 * >aktid	...action id
+	 */
 	bool deleteAcbEntry(tAktId aktid);
 
 private:
@@ -118,12 +133,12 @@ private:
 	tAktId aktidTx = 0;
 	tAcb* pAcbList =NULL;
 
-	tAcb* createAcb(tAktId aktid);
-	tAcb* createOrUseAcb(byte cmd, byte fromAddr, byte toAddr, tAktId aktidTx);
-	void mprintAcb(tAcb* pAcb);
-	tAcb* getLastAcbEntry();
+	tAcb* 	createAcb(tAktId aktid);
+	tAcb* 	createOrUseAcb(byte cmd, byte fromAddr, byte toAddr, tAktId aktidTx);
+	void 	mprintAcb(tAcb* pAcb);
+	tAcb* 	getLastAcbEntry();
 	unsigned int getCountAcbEntries();
-	void deleteAcbList();
+	void 	deleteAcbList();
 
 };
 
