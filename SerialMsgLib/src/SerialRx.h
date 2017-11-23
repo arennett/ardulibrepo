@@ -16,6 +16,7 @@
 #include "SoftSerialPort.h"
 class SerialHeaderRx; // forward declaration"
 
+
 class SerialRx {
 public:
 	/**
