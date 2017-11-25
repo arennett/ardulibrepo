@@ -12,6 +12,14 @@
 
 class SerialPort {
 public:
+	/*
+	 * static SerialPort* GetNextPort(SerialPort* port) ;
+	 * return the port after port.
+	 * at the end of the list, it return the first port
+	 */
+	static SerialPort* GetNextPort(SerialPort* port) ;
+	static SerialPort* GetPortList() ;
+	static SerialPort* pSerialPortList = NULL;
 	SerialPort();
 	virtual ~SerialPort();
 
@@ -22,8 +30,14 @@ public:
 	virtual bool listen()=0;
 	virtual int  available()=0;
 	virtual bool isListening()=0;
+	void* pNext = NULL;
+	byte id;
+private:
 
 
 };
+
+
+
 
 #endif /* SERIALPORT_H_ */

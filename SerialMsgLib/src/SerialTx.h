@@ -17,12 +17,21 @@ public:
 
 
 	/**
-	 * SoftSerialTx(byte pinRx,byte pinTx)
+	 * SerialTx()
 	 * > constructor for serial message transmitter
-	 * > using an external SerialPort port
-
 	 */
+
+	SerialTx();
+
+	/**
+	 * SerialTx()
+	 * - constructor for serial message transmitter
+	 * - using an external SerialPort port
+	 * >pSerialPort			*
+	*/
 	SerialTx(SerialPort* pSerialPort);
+
+
 	/**
 	 * ~SoftSerialTx() {
 	 * > Destructor
@@ -30,11 +39,9 @@ public:
 	virtual ~SerialTx();
 
 
-	/**
-	 * void begin(long speed)
-	 * > like Serial.begin , inits serial connection
-	 */
-	void begin(long speed);
+
+	bool setPort(SerialPort* pSerialPort);
+
 
 
 	/**

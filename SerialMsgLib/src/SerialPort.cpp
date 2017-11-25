@@ -7,10 +7,22 @@
 
 #include "SerialPort.h"
 
+static SerialPort* SerialPort::GetNextPort(SerialPort* pPort ) {
+       if (pPort==NULL) {
+    	   return pSerialPortList;
+       }
+      return (pPort->pNext) ? ( SerialPort*) pPort->pNext : pSerialPortList;
+}
+static SerialPort* SerialPort::GetPortList() {
+	return pSerialPortList;
+}
+
 SerialPort::SerialPort() {
-	// TODO Auto-generated constructor stub
+	this->id=0;
 
 }
+
+
 
 SerialPort::~SerialPort() {
 	// TODO Auto-generated destructor stub

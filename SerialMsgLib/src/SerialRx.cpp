@@ -13,19 +13,22 @@
 #include <tools.h> //see ToolsLib2
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
-#include "SerialHeaderRx.h"
 #include "SerialRx.h"
 
 
 
-SerialRx::SerialRx(SerialPort* pSerialPort,size_t maxDataSize) {
-	this->pSerialPort =pSerialPort;
+SerialRx::SerialRx() {
 	updateCallback= NULL;
-	this->bufferSize  = maxDataSize + sizeof serPostamble;
-	pRecBuffer = new byte[bufferSize];
+	this->bufferSize  = 0;
+	pRecBuffer = NULL;
 	lastByte=0;
 }
 
+SerialRx::SerialRx(size_t maxDataSize) {
+	updateCallback= NULL;
+	lastByte=0;
+	createBuffer(maxDataSize);
+}
 
 
 SerialRx::~SerialRx() {
@@ -33,7 +36,20 @@ SerialRx::~SerialRx() {
 
 }
 
-void SerialRx::setUpdateCallback(void (*ptr)(const byte* data, size_t data_size)){
+void SerialRx::createBuffer(size_t maxDataSize){
+	if(pRecBuffer){
+		delete pRecBuffer;
+	}
+	this->bufferSize  = maxDataSize + sizeof serPostamble;
+	pRecBuffer = new byte[bufferSize];
+}
+
+bool SerialRx::setPort(SerialPort* pSerialPort) {
+	this->pSerialPort =pSerialPort;
+	return listen();
+}
+
+void SerialRx::setUpdateCallback(void (*ptr)(const byte* data, size_t data_size,SerialPort* pSerialPort)){
 	updateCallback=ptr;
 }
 
@@ -41,10 +57,6 @@ void SerialRx::setSerialHeaderRx(SerialHeaderRx* pSerialHeaderRx){
 	this->pSerialHeaderRx=pSerialHeaderRx;
 }
 
-void SerialRx::begin(long speed){
-	pSerialPort->begin(speed);
-
-}
 
 bool SerialRx::listen () {
 	return  pSerialPort->listen();
@@ -87,7 +99,7 @@ bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long tim
 }
 
 bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut){
-	return SerialRx::waitOnMessage(pData, data_size, timeOut , 0);
+	return waitOnMessage(pData, data_size, timeOut , 0);
 }
 
 /**
@@ -143,10 +155,6 @@ bool SerialRx::readNext(byte* pByte){
 							if (updateCallback && dataCollect) {
 								updateCallback(pRecBuffer,prevDataCount );
 
-							}
-
-							if (pSerialHeaderRx && dataCollect ) {
-								pSerialHeaderRx->internalReceive(pRecBuffer, prevDataCount);
 							}
 
 							messReceived = true;

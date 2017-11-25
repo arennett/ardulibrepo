@@ -12,15 +12,17 @@
 
 
 
-SoftSerialPort::SoftSerialPort(byte pinRx ,byte pinRy) {
+SoftSerialPort::SoftSerialPort(byte pinRx ,byte pinRy,byte id) {
 	pSoftwareSerial =new SoftwareSerial(pinRx,pinRy);
 	deleteSoftwareSerial=true;
+	this->id=id;
 }
 
 
-SoftSerialPort::SoftSerialPort(SoftwareSerial* pSoftwareSerial) {
+SoftSerialPort::SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte id) {
 	this->pSoftwareSerial= pSoftwareSerial;
 	deleteSoftwareSerial=false;
+	this->id=id;
 }
 
 SoftSerialPort::~SoftSerialPort(){

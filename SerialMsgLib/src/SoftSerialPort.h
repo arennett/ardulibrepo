@@ -17,8 +17,8 @@
 
 class SoftSerialPort: public SerialPort {
 public:
-	SoftSerialPort(byte pinRx, byte pinTx);
-	SoftSerialPort(SoftwareSerial* pSoftwareSerial);
+	SoftSerialPort(byte pinRx, byte pinTx,byte id=0);
+	SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte id=0);
 	virtual ~SoftSerialPort();
 
 	virtual byte read();

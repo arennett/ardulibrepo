@@ -19,15 +19,38 @@ class SerialHeaderRx; // forward declaration"
 
 class SerialRx {
 public:
-	/**
-	 * SerialRx(byte pinRx,byte pinTy,size_t maxDataSize);
-	 * > constructor
-	 * pinRx  		...serial rx pin number
-	 * pinrRy 		...serial tx pin number
-	 * maxDataSize 	...data size, to create an internal buffer (dataSize + postamble size)
-	 */
-	SerialRx(SerialPort* pSerialPort,size_t maxDataSize);
 
+	/*
+	 *  SerialRx()
+	 *  receiver without buffer
+	 *  use createBuffer to create a receivebuffer a buffer
+	 */
+	SerialRx();
+
+
+	/**
+	 * SerialRx(size_t maxDataSize);
+	 * - constructor
+	 * > maxDataSize 	...data size, to create an internal buffer (dataSize + postamble size)
+	 */
+	SerialRx(size_t maxDataSize);
+
+
+	/**
+	 * void createBuffer(size_t maxDatasize);
+	 * - existing buffer is deleted
+	 * - new buffer is created
+	 * > maxDatasize	...size of longest expected message
+	 */
+	void createBuffer(size_t maxDatasize);
+
+
+	/**
+	 * void setPort(SerialPort* pSerialPort);
+	 * - Set the the port for for listen
+	 * > returns true if another port was deactivated
+	 */
+	bool setPort(SerialPort* pSerialPort);
 
 
 	/**
@@ -37,8 +60,9 @@ public:
 	 * > see also readNext()
 	 * pData 		...pointer on the received data
 	 * data_size 	...what you think ? ;-)
+	 * pSerialPort  ...the port from which the message was received
 	 */
-	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size));
+	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size,SerialPort* pSerialPort));
 
 
 	/**
@@ -53,12 +77,6 @@ public:
 
 	void setSerialHeaderRx(SerialHeaderRx* pSerialHeaderRx) ;
 
-
-	/**
-	 * void begin(long speed);
-	 * > like Serial.begin , inits serial connection
-	 */
-	void begin(long speed);
 
 	/**
 	 * readNext();

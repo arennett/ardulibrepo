@@ -20,9 +20,12 @@
 
 
 
-SerialTx::SerialTx(SerialPort* pSerialPort){
-	this->pSerialPort = pSerialPort;
+SerialTx::SerialTx(){
 
+}
+
+SerialTx::SerialTx(SerialPort* pSerialPort){
+	setPort(pSerialPort);
 }
 
 
@@ -30,10 +33,11 @@ SerialTx::~SerialTx() {
 
 }
 
-void SerialTx::begin(long speed){
-	pSerialPort->begin(speed);
-
+bool SerialTx::setPort(SerialPort* pSerialPort) {
+	this->pSerialPort =pSerialPort;
+	return listen();
 }
+
 
 bool SerialTx::listen () {
 	return  pSerialPort->listen();

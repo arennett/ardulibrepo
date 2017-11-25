@@ -11,21 +11,28 @@
 #include "Arduino.h"
 
 
+typedef enum {
+				// application and internal use
+				CMD_NAK	=240,	//  < NOT ACKNOWLEDGED
+				CMD_ACK,		// 	< ACKNOWLEDGED
 
-#define SERIALHEADER_CMD_NAK	240	 // < NOT ACKNOWLEDGED
-#define SERIALHEADER_CMD_ACK	241	 // < ACKNOWLEDGED
-#define SERIALHEADER_CMD_LIVE	243	 // > LIVE    			  Rx: ACK / NAK
-#define SERIALHEADER_CMD_CR		244  // > CONNECTION REQUEST  Rx: ACK / NAK
-#define SERIALHEADER_CMD_CD		245  // > CONNECTION DOWN
-#define SERIALHEADER_CMD_DATA	246  // > USER DATA			  Rx: ACK /NAK
-#define SERIALHEADER_CMD_DREQ	247  // > DATA REQUEST        Rx: DREP / DRAQ / ACK
-#define SERIALHEADER_CMD_DREP	248  // < DATA RESPONSE
+				// internal use
+				CMD_LIVE,		//	> LIVE
+				CMD_CR,			// 	> CONNECTION REQUEST
+				CMD_CD, 		//	> CONNECTION DOWN
+				CMD_AFA,			//	> ASK FOR ADDRESS
 
 
+				// application use
+				CMD_ACD,		//	> Application Command	(opt. data)
+				CMD_ARQ,		//	> Application Request  	(opt. data)
+				CMD_ARP		 	//	> Application Reply   	(opt. data)
+} tSerialCmd;
 typedef unsigned int tAktId;
 #define MAX_AKTID  65535
 
 
+// internal use
 typedef struct{
 	byte fromAddr=0;
 	byte toAddr=0;
@@ -33,6 +40,8 @@ typedef struct{
 	byte cmd=0;
 	byte par=0;
 } tSerialHeader;
+
+#define SERIALHEADER_SIZE  sizeof(tSerialHeader);
 
 
 

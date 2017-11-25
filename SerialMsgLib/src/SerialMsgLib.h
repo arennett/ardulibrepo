@@ -11,13 +11,9 @@
 #ifndef SERIALMSGLIB_H_
 #define SERIALMSGLIB_H_
 
-#include "SerialTx.h"
-#include "SerialRx.h"
 #include "SerialPort.h"
 #include "SoftSerialPort.h"
-#include "SerialHeaderTx.h"
-#include "SerialHeaderRx.h"
-
+#include "SerialNode.h"
 
 
 
