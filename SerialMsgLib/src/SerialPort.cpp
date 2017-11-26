@@ -7,15 +7,9 @@
 
 #include "SerialPort.h"
 
-static SerialPort* SerialPort::GetNextPort(SerialPort* pPort ) {
-       if (pPort==NULL) {
-    	   return pSerialPortList;
-       }
-      return (pPort->pNext) ? ( SerialPort*) pPort->pNext : pSerialPortList;
-}
-static SerialPort* SerialPort::GetPortList() {
-	return pSerialPortList;
-}
+
+static SerialPort* SerialPort::pSerialPortList=NULL;
+
 
 SerialPort::SerialPort() {
 	this->id=0;

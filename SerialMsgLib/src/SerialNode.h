@@ -9,6 +9,8 @@
 #include "SerialTx.h"
 #include "SerialRx.h"
 #include "SerialHeader.h"
+#include "AcbList.h"
+
 
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
@@ -25,8 +27,6 @@ typedef struct { //Connection Control Block
 	bool master=false;
 } tCcb;
 
-SerialTx  serialTx ;
-SerialRx  serialRx ;
 
 
 
@@ -39,6 +39,10 @@ class SerialNode {
 
 
 public:
+
+	static SerialTx  serialTx ;
+	static SerialRx  serialRx ;
+
 
 	/**
 	 * void Update(byte* pMessage,size_t messageSize,SerialPort *pPort);
@@ -66,6 +70,13 @@ public:
 	 * < the next aktid for send
 	 */
 	static unsigned int GetNextAktId();
+
+
+	/*
+	 * < return the node list
+	 */
+	static SerialNode* GetNodeList();
+
 
 
 	/**
@@ -102,6 +113,16 @@ public:
 	 */
 	void setPort(SerialPort* pPort);
 
+
+	/*
+	 * void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize);
+	 * is called by the static Update Routine if a message for
+	 * this node comes in
+	 */
+	void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize);
+
+
+
 	/*
 	 * bool send(tSerialHeader* pHeader,byte* pData,byte datasize);
 	 * sends a message to the remote node.
@@ -110,16 +131,16 @@ public:
 	 * 				CMD_ACD  	... user command , you can use par 	, data opt.
 	 * 				CMD_ARQ		... user request , you can use par	, data opt.
 	 * 				CMD_ARP		...	user reply   , you can use par	, data opt.
+	 * > replyOn    aktid 		... aktid of the received message, see SerialHeader
 	 * > par		parameter or subcommand for commands  ACD,ARQ,ARP
 	 *
 	 * > pData		optionally data
 	 * > datasize	size of data
-	 * > replyOn    aktid 		... aktid of the received message, see SerialHeader
 	 * > replyTo	0x00		... send to connected remote address
 	 * 				0x**  		... send to unconnected node
 	 * < return 	aktid		... > 0 if message was sent
 	 */
-	tAktId send(tSerialCmd cmd,byte par=0,byte* pData=NULL,byte datasize=0,tAktId replyOn=0, byte replyTo=0);
+	tAktId send(tSerialCmd cmd,tAktId replyOn=0,byte par=0,byte* pData=NULL,byte datasize=0, byte replyTo=0);
 
 
 	/**
@@ -140,31 +161,39 @@ public:
 	void setReceiveCallBack(void (*ptr)(tSerialHeader* pHeader,byte* pData,size_t datasize));
 
 
+	bool isReadyToConnect() ;
+
+	bool isConnected() ;
+
+
 	void* pNext=NULL; 	// next SerialNode , alle nodes are in a linked list
 	tCcb* pCcb = NULL;	// connection data
 	void (*pCallBack)(tSerialHeader* pHeader,byte* pData,size_t datasize)=NULL; // user callback
-	static SerialNode* pNodeList=NULL;
+
+
+
+
 
 private:
 
+	static AcbList acbList;
+	static SerialNode* pSerialNodeList;
+	static unsigned int serialNodeAktId;
 
 	/*
-	 * called bye
+	 * called by static Update
 	 */
-	bool internalReceive(byte*& pData,size_t datasize);
+
 
 
 	SerialPort* pSerialPort =NULL; // if set, tx and rx only use this port
 								   // otherwise they send and listen on all ports
 
-
-
-
 };
 
 
 
-void serialRxCallBack(byte* pData, size_t datasize);
+
 
 
 #endif /* SERIALNODE_H_ */
