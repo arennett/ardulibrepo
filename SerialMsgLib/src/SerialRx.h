@@ -14,7 +14,8 @@
 #include "SerialMsg.h"
 #include "SerialPort.h"
 #include "SoftSerialPort.h"
-class SerialHeaderRx; // forward declaration"
+
+
 
 
 class SerialRx {
@@ -62,20 +63,9 @@ public:
 	 * data_size 	...what you think ? ;-)
 	 * pSerialPort  ...the port from which the message was received
 	 */
-	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size,SerialPort* pSerialPort));
+	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size,SerialPort* pPort));
 
 
-	/**
-	 *   void setSerialHeaderRx(SerialHeaderRx* pSerialHeaderRx);
-	 * > registering a serialHeaderRx
-	 * > serialHeaderRx is for advanced rx with a header (addressable)
-	 * > serialHeaderRx will be called when data is completely received
-	 * > serialHeaderRx will call the user callback functions
-	 * > see also SerialHeaderRx
-	 *  pSerialHeaderRx  ...pointer on the SerialHeaderRx object
-	 */
-
-	void setSerialHeaderRx(SerialHeaderRx* pSerialHeaderRx) ;
 
 
 	/**
@@ -84,6 +74,15 @@ public:
 	 * < return : true when data complete and callBack was called
 	 */
 	bool readNext();
+
+
+	/*
+	 * void readNextOnAllPorts() ;
+	 * for all instantiated SerialPorts
+	 * read next byte into the port buffer
+	 */
+	void readNextOnAllPorts() ;
+
 
 	/**
 	 * bool readNext(byte* b);
@@ -127,10 +126,11 @@ public:
 	bool listen ();
 
 	/**
-	 *  SerialPort* getSerialPort()
-	 * <returns: pointer on internal port
+	 *  SerialPort* getPort()
+	 * <returns: pointer on port which
+	 * was set , see setPort();
 	 */
-	 SerialPort* getSerialPort();
+	 SerialPort* getPort();
 
 	/**
 	 * ~SoftSerialRx();
@@ -140,16 +140,9 @@ public:
 	virtual ~SerialRx();
 private:
 	void (*updateCallback)(const byte* data, size_t data_size);
-	byte* pRecBuffer=NULL;
-	SerialPort* pSerialPort= NULL;;
-	byte preAmCount=0;
-	byte postAmCount=0;
-	byte dataCount=0;
-	byte prevDataCount=0;
-	bool dataCollect=false;
-	size_t bufferSize=0;
-	byte lastByte=0;
-	SerialHeaderRx* pSerialHeaderRx = NULL;
+
+	SerialPort* pPort= NULL; 		// current port
+	tSerialRxState* pState = NULL;	// all variables to be saved when switching to another port
 
 };
 

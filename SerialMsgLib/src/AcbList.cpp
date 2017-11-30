@@ -12,91 +12,102 @@ AcbList::AcbList() {
 
 }
 
-	tAcb* 	AcbList::getRoot(){
-		return pRoot;
+tAcb* AcbList::getRoot() {
+	return pRoot;
+}
+tAcb* AcbList::createAcb(tAktId aktId) {
+	tAcb* pLast = getLastAcbEntry();
+	tAcb* pNext = new tAcb();
+	;
+	if (pLast == NULL) {
+		pRoot = pNext;
+	} else {
+		pLast->pNext = pNext;
 	}
-	tAcb* 	AcbList::createAcb(tAktId aktId) {
-		tAcb* pLast = getLastAcbEntry();
-		tAcb* pNext = new tAcb();
-		;
-		if (pLast == NULL) {
-			pRoot = pNext;
-		} else {
-			pLast->pNext = pNext;
+	pNext->aktid = aktId;
+	return pNext;
+
+}
+
+tAcb* AcbList::createOrUseAcb(byte cmd, tAddr fromAddr, tAddr toAddr,
+		tAktId aktId) {
+	tAcb* pAcb = pRoot;
+	while (pAcb) {
+		if (pAcb->cmd == cmd && pAcb->fromAddr == fromAddr
+				&& pAcb->toAddr == toAddr) {
+			pAcb->aktid = aktId;
+			pAcb->cntRetries++;
+			break;
 		}
-		pNext->aktid = aktId;
-		return pNext;
+		pAcb = (tAcb*) pAcb->pNext;
 
 	}
-	tAcb* 	AcbList::createOrUseAcb(byte cmd, byte fromAddr, byte toAddr, tAktId aktId){
-		tAcb* pAcb = pRoot;
-			while (pAcb) {
-				if (pAcb->cmd == cmd && pAcb->fromAddr == fromAddr
-						&& pAcb->toAddr == toAddr) {
-					pAcb->aktid = aktId;
-					pAcb->cntRetries++;
+	if (!pAcb) {
+		pAcb = createAcb(aktId);
+	}
+	//pAcb->timeStamp = millis();
+	return pAcb;
+}
+
+tAcb* AcbList::getAcbEntry(tAktId aktId) {
+	tAcb* pAcb = pRoot;
+	while (pAcb && pAcb->aktid != aktId) {
+		pAcb = (tAcb*) pAcb->pNext;
+	}
+	return pAcb;
+}
+
+//void 	mprintAcb(tAcb* pAcb);
+tAcb* AcbList::getLastAcbEntry() {
+	tAcb* pLast = pRoot;
+	while (pLast && pLast->pNext) {
+		pLast = (tAcb*) pLast->pNext;
+	}
+	return pLast;
+}
+
+unsigned int AcbList::count(){
+	tAcb* p = pRoot;
+	unsigned int cnt= 0;
+	while (p ) {
+		++cnt;
+		p= (tAcb*) p->pNext;
+	}
+	return cnt;;
+}
+
+//unsigned int AcbList::getCountAcbEntries();
+
+void AcbList::deleteAcbList() {
+	tAcb* pLastEntry;
+	while ((pLastEntry = getLastAcbEntry()) != NULL) {
+		delete pLastEntry;
+	}
+}
+
+bool AcbList::deleteAcbEntry(tAktId aktId) {
+
+	tAcb* pAcb = getAcbEntry(aktId);
+	if (pAcb) {
+		if (pAcb->pNext) {
+			tAcb* pPrev = pRoot;
+			while (pPrev && pPrev->pNext) {
+				if (pPrev->pNext == pAcb) {
 					break;
 				}
-				pAcb = (tAcb*) pAcb->pNext;
-
+				pPrev = (tAcb*) pPrev->pNext;
 			}
-			if (!pAcb) {
-				pAcb = createAcb(aktId);
+			if (pPrev) {
+				pPrev->pNext = pAcb->pNext;
+				delete pAcb;
 			}
-			//pAcb->timeStamp = millis();
-			return pAcb;
-	}
-
-	tAcb* AcbList::getAcbEntry(tAktId aktId) {
-		tAcb* pAcb = pRoot;
-		while (pAcb && pAcb->aktid != aktId) {
-			pAcb = (tAcb*) pAcb->pNext;
 		}
-		return pAcb;
+		return true;
+	} else {
+
+		return false;
 	}
-
-	//void 	mprintAcb(tAcb* pAcb);
-tAcb* AcbList::getLastAcbEntry(){
-		tAcb* pLast = pRoot;
-		while (pLast && pLast->pNext) {
-			pLast = (tAcb*) pLast->pNext;
-		}
-		return pLast;
-	}
-
-	//unsigned int AcbList::getCountAcbEntries();
-
-	void 	AcbList::deleteAcbList(){
-		tAcb* pLastEntry;
-		while ((pLastEntry = getLastAcbEntry()) != NULL) {
-			delete pLastEntry;
-		}
-	}
-
-	bool AcbList::deleteAcbEntry(tAktId aktId) {
-
-		tAcb* pAcb = getAcbEntry(aktId);
-		if (pAcb) {
-			if (pAcb->pNext) {
-				tAcb* pPrev = pRoot;
-				while (pPrev && pPrev->pNext) {
-					if (pPrev->pNext == pAcb) {
-						break;
-					}
-					pPrev = (tAcb*) pPrev->pNext;
-				}
-				if (pPrev) {
-					pPrev->pNext = pAcb->pNext;
-					delete pAcb;
-				}
-			}
-			return true;
-		} else {
-
-			return false;
-		}
-	}
-
+}
 
 AcbList::~AcbList() {
 	deleteAcbList();

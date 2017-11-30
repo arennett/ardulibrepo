@@ -32,10 +32,31 @@ typedef unsigned int tAktId;
 #define MAX_AKTID  65535
 
 
-// internal use
+class tAddr {
+public:
+		tAddr(){};
+		~tAddr(){};
+
+		tAddr (byte sysid,byte nodeid) {
+			sysId =sysid;
+			nodeId=nodeid;
+		}
+		byte  sysId=0;
+		byte  nodeId=0;
+
+		bool operator==(const tAddr& right) const{
+			return (sysId == right.sysId) && (nodeId == right.nodeId);
+		}
+
+		bool operator!=(const tAddr& right)const{
+			return !operator==(right);
+		}
+} ;
+
+
 typedef struct{
-	byte fromAddr=0;
-	byte toAddr=0;
+	tAddr fromAddr;
+	tAddr toAddr;
 	tAktId aktid=0;
 	byte cmd=0;
 	byte par=0;

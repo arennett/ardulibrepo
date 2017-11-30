@@ -61,7 +61,7 @@ public:
 	 * > pData address of the the byte array
 	 * > size of data
 	 */
-	void sendData(byte* pData, size_t datasize);
+	void sendData(const byte* pData, size_t datasize);
 
 	/*
 	 * void sendRawData(byte* pData, size_t datasize);
@@ -74,7 +74,7 @@ public:
 	 * > pData		address of the the byte array
 	 * > datasize	size of data
 	 */
-	void sendRawData(byte* pData, size_t datasize);
+	void sendRawData(const byte* pData, size_t datasize);
 
 
 	/**

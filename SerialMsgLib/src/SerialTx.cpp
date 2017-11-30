@@ -21,7 +21,7 @@
 
 
 SerialTx::SerialTx(){
-
+	pSerialPort=NULL;
 }
 
 SerialTx::SerialTx(SerialPort* pSerialPort){
@@ -48,14 +48,14 @@ SerialPort* SerialTx::getSerialPort(){
 }
 
 
-void SerialTx::sendData(byte* data, size_t datasize) {
+void SerialTx::sendData(const byte* data, size_t datasize) {
 
 	sendPreamble();
 	sendRawData(data,datasize);
 	sendPostamble();
 }
 
-void SerialTx::sendRawData(byte* data, size_t datasize) {
+void SerialTx::sendRawData(const byte* data, size_t datasize) {
 	pSerialPort->write(data,datasize);
 	DPRINTSVAL("SerialTx::sendRawData - size:",datasize);
 }

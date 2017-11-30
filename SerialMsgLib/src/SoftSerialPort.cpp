@@ -12,17 +12,19 @@
 
 
 
-SoftSerialPort::SoftSerialPort(byte pinRx ,byte pinRy,byte id) {
+SoftSerialPort::SoftSerialPort(byte pinRx ,byte pinRy,byte remoteSysId) {
+	this->remoteSysId=remoteSysId;
 	pSoftwareSerial =new SoftwareSerial(pinRx,pinRy);
 	deleteSoftwareSerial=true;
-	this->id=id;
+
 }
 
 
-SoftSerialPort::SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte id) {
+SoftSerialPort::SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte remoteSysId) {
+	this->remoteSysId=remoteSysId;
 	this->pSoftwareSerial= pSoftwareSerial;
 	deleteSoftwareSerial=false;
-	this->id=id;
+
 }
 
 SoftSerialPort::~SoftSerialPort(){

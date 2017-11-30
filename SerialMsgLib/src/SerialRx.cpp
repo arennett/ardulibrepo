@@ -19,62 +19,57 @@
 
 SerialRx::SerialRx() {
 	updateCallback= NULL;
-	this->bufferSize  = 0;
-	pRecBuffer = NULL;
-	lastByte=0;
 }
 
-SerialRx::SerialRx(size_t maxDataSize) {
-	updateCallback= NULL;
-	lastByte=0;
-	createBuffer(maxDataSize);
-}
 
 
 SerialRx::~SerialRx() {
-	delete pRecBuffer;
+
 
 }
 
-void SerialRx::createBuffer(size_t maxDataSize){
-	if(pRecBuffer){
-		delete pRecBuffer;
-	}
-	this->bufferSize  = maxDataSize + sizeof serPostamble;
-	pRecBuffer = new byte[bufferSize];
-}
 
 bool SerialRx::setPort(SerialPort* pSerialPort) {
-	this->pSerialPort =pSerialPort;
+	this->pPort =pSerialPort;
+	this->pState = &pSerialPort->serialRxState;
 	return listen();
 }
 
-void SerialRx::setUpdateCallback(void (*ptr)(const byte* data, size_t data_size,SerialPort* pSerialPort)){
+void SerialRx::setUpdateCallback(void (*ptr)(const byte* data, size_t data_size,SerialPort* pPort)){
 	updateCallback=ptr;
 }
 
-void SerialRx::setSerialHeaderRx(SerialHeaderRx* pSerialHeaderRx){
-	this->pSerialHeaderRx=pSerialHeaderRx;
-}
+
 
 
 bool SerialRx::listen () {
-	return  pSerialPort->listen();
+	return  pPort->listen();
 }
 
-SerialPort* SerialRx::getSerialPort(){
-	return pSerialPort;
+SerialPort* SerialRx::getPort(){
+	return pPort;
 }
 
 bool SerialRx::readNext(){
-	return readNext(&lastByte);
+	return readNext(&pState->lastByte);
 }
+
+void SerialRx::readNextOnAllPorts(){
+	SerialPort* pport=SerialPort::pSerialPortList;
+	while(pport) {
+		setPort(pport);
+		readNext();
+		pport->pNext;
+	}
+}
+
+
 
 bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long timeOut ,unsigned long checkPeriod){
 	DPRINTLN("waitOnMessage");
 
 	data_size=0;
-	pData = pRecBuffer;
+	pData = pState->pBuffer;
 	if (checkPeriod==0){
 		checkPeriod = WAITED_READ_CHECKPERIOD_MSEC;
 	}
@@ -87,7 +82,7 @@ bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long tim
 		if (readNext()) {
 	 		DPRINTLN("waitOnMessage : message received");
 			DPRINTSVAL("restOfTime: " ,restOfTime);
-			data_size = prevDataCount;
+			data_size = pState->prevDataCount;
 			return true;
 		}
 		delay(checkPeriod);
@@ -108,68 +103,67 @@ bool SerialRx::waitOnMessage(byte*&  pData, size_t& data_size, unsigned long tim
 bool SerialRx::readNext(byte* pByte){
 	bool messReceived = false;
 
-	if (!pSerialPort->isListening()){
+	if (!pPort->isListening()){
 		DPRINTLN("NOT LISTEN");
 		return messReceived;
 	}
-	if (pSerialPort->available()> 0) {
-			lastByte= pSerialPort->read();
-			 pByte[0] =lastByte;
-			DPRINTSVAL("byte: " ,lastByte);
-			if (dataCollect) {
-				if (dataCount < bufferSize) {
-					pRecBuffer[dataCount]=lastByte;
-					dataCount++;
+	if (pPort->available()> 0) {
+		pState->lastByte= pPort->read();
+			 pByte[0] =pState->lastByte;
+			DPRINTSVAL("byte: " ,pPort->lastByte);
+			if (pState->dataCollect) {
+				if (pState->dataCount < pState->bufferSize) {
+					pState->pBuffer[pState->dataCount]=pState->lastByte;
+					 pState->dataCount++;
 				}else {
-					MPRINTSVAL("BUFFER OVERFLOW: DATA SIZE >=" ,bufferSize - sizeof serPostamble );
-					dataCollect=false;
+					MPRINTSVAL("BUFFER OVERFLOW: DATA SIZE >=" , pState->bufferSize - sizeof serPostamble );
+					pState->dataCollect=false;
 				}
-
 			}
 
-			if ( lastByte == serPreamble[preAmCount] ) {
+			if ( pState->lastByte == serPreamble[pState->preAmCount] ) {
 				//DPRINTSVAL("serPreamble COUNT:",preAmCount);
-				if (preAmCount == (sizeof serPreamble) -1 ) {
+				if (pState->preAmCount == (sizeof serPreamble) -1 ) {
 					DPRINTLN("serPreamble COMPLETE");
-					preAmCount=0;
-					dataCollect=true;
-					dataCount=0;
+					pState->preAmCount=0;
+					pState->dataCollect=true;
+					pState->dataCount=0;
 				}else {
-					preAmCount++;
+					pState->preAmCount++;
 				}
 			}else{
-				preAmCount=0;
-				if (lastByte == serPreamble[preAmCount]) {
+				pState->preAmCount=0;
+				if (pState->lastByte == serPreamble[pState->preAmCount]) {
 					//DPRINTSVAL("serPreamble COUNT:",preAmCount);
-					preAmCount++;
+					pState->preAmCount++;
 				}
 			}
 
-			if ( lastByte == serPostamble[postAmCount] ) {
+			if ( pState->lastByte == serPostamble[pState->postAmCount] ) {
 						//DPRINTSVAL("serPostamble COUNT:",postAmCount);
-						if (postAmCount == (sizeof serPostamble) -1 ) {
+						if (pState->postAmCount == (sizeof serPostamble) -1 ) {
 							DPRINTLN("serPostamble COMPLETE");
-							prevDataCount = dataCount-sizeof serPostamble;
-							DPRINTSVAL("MESSAGE SIZE: "  ,prevDataCount);
+							pState->prevDataCount = pState->dataCount-sizeof serPostamble;
+							DPRINTSVAL("MESSAGE SIZE: "  ,pState->prevDataCount);
 
-							if (updateCallback && dataCollect) {
-								updateCallback(pRecBuffer,prevDataCount );
+							if (updateCallback && pState->dataCollect) {
+								updateCallback( pState->pBuffer,pState->prevDataCount );
 
 							}
 
 							messReceived = true;
 							DPRINTLN("messReceived = true;");
-							postAmCount=0;
-							dataCollect=false;
-							dataCount=0;
+							pState->postAmCount=0;
+							pState->dataCollect=false;
+							pState->dataCount=0;
 						}else {
-							postAmCount++;
+							pState->postAmCount++;
 						}
 			}else{
-				postAmCount=0;
-				if (lastByte == serPostamble[postAmCount]) {
+				pState->postAmCount=0;
+				if (pState->lastByte == serPostamble[pState->postAmCount]) {
 					//DPRINTSVAL("serPostamble COUNT:",preAmCount);
-					postAmCount++;
+					pState->postAmCount++;
 				}
 
 

@@ -10,24 +10,43 @@
 
 #include "Arduino.h"
 
+
+
+typedef struct {
+	//used from SerialRx
+	byte* pBuffer;
+	size_t bufferSize=0;
+	byte preAmCount=0;
+	byte postAmCount=0;
+	byte dataCount=0;
+	byte prevDataCount=0;
+	bool dataCollect=false;
+	byte lastByte=0;
+} tSerialRxState;
+
+
 class SerialPort {
 public:
 	static SerialPort* pSerialPortList;
 
 	SerialPort();
 	virtual ~SerialPort();
+	void    createBuffer(size_t size);
+
 
 	virtual byte read()=0;
 	virtual bool write(byte b)=0;
-	virtual size_t write(byte* bb, size_t len)=0;
+	virtual size_t write(const byte* bb, size_t len)=0;
 	virtual void begin(long speed)=0;
 	virtual bool listen()=0;
 	virtual int  available()=0;
 	virtual bool isListening()=0;
 	void* pNext = NULL;
-	byte id;
-private:
+	byte remoteSysId=0;
 
+	tSerialRxState serialRxState;
+
+private:
 
 
 };

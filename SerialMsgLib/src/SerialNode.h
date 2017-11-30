@@ -15,23 +15,17 @@
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
 
-
-typedef struct { //Connection Control Block
-	byte localAddr;
-	byte remoteAddr;    //remote address
+//Connection Control Block
+typedef struct {
+	tAddr localAddr;
+	tAddr remoteAddr;    //remote address
 	#define  CONNECTION_STATUS_NOT_READY  	1
 	#define  CONNECTION_STATUS_READY 		2
 	#define  CONNECTION_STATUS_DISCONNECTED 3
 	#define  CONNECTION_STATUS_CONNECTED 	4
 	byte status=0;
-	bool master=false;
+	bool active=false;
 } tCcb;
-
-
-
-
-
-
 
 
 
@@ -42,6 +36,7 @@ public:
 
 	static SerialTx  serialTx ;
 	static SerialRx  serialRx ;
+	static byte		 systemId ;
 
 
 	/**
@@ -60,10 +55,20 @@ public:
 	/**
 	 * static void Init();
 	 * has to be called in the setup routine
-	 * > maxDataSize 	size of optional data (see pData)
-	 * 					dont care about the header
+	 * sytemId		id of the local system
+	 * 				the id must be unique for all sytem in the nodes network
 	 */
-	static void Init(size_t maxDataSize);
+
+	/**
+	 * SerialNode::forward(const byte* pMessage, size_t messageSize,SerialPort* pSourcePort)
+	 * A message received from pSourcePort but no node found in the system
+	 * 1. If  a link (port1 <> port2)  isn't found create a link.
+	 * 2. send the to the linked port
+	 */
+	static bool forward(const byte* pMessage, size_t messageSize,
+	SerialPort* pSourcePort);
+
+	static void Init(byte systemId);
 
 	/*
 	 * static unsigned int GetNextAktid();
@@ -87,10 +92,14 @@ public:
 	 * All local nodes are directly reachable. All remote nodes are reachable
 	 * over the ports. If you do not specify a specific serialport, the node tries to
 	 * send or receive on all ports until it is connected and the nodes port is set.
-	 * > address       	... address of this node . Must be unique in the node net.
+	 * > lAddr       	... local address of this node . Must be unique in the node net.
+	 * > rAddr		 	... remote address of this node.
+	 * 						If set, the node sends connection requests to the remote node.
+	 * 						If not set or 0, the node is passive and waits to be connected
+	 * 						by a connection request of an active node
 	 * > pSerialPort	... if set the node can only communicate over this port.
 	 */
-	SerialNode(byte address,SerialPort* pSerialPort=NULL);
+	SerialNode(byte localNodeId, byte remoteSysId=0,byte remoteNodeId=0,SerialPort* pSerialPort=NULL);
 
 	virtual ~SerialNode();
 
@@ -100,26 +109,46 @@ public:
 	 * If the node is active, it send connection requests to the other node (remoteAddress)
 	 * If the other node also tries to connect (passive) it replies an ACK on this node request.
 	 * > remoteAddress 		address of node to be connected	to
-	 * > active				true, 	the node send CR messages.
-	 * 						false	the node is listening, and wants to be connected
+	 * >					if		0 the given rAddr is used
+	 * > timeout			timeout in msec , 0 wait until connect
+	 * > checkPeriod        check period for connection, default 10 msec
 	 * < returns 			true	if the nodes are connected before timeout expires
 	 */
-	bool connect(byte remoteAddress,bool active=true,unsigned long timeOut=0,unsigned long reqPeriod=0);
+	 bool connectNode(tAddr remoteAddress,unsigned long timeOut=0,unsigned long checkPeriod=0);
+
+	 static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
 
 
 	/*
-	 * void setPort(SerialPort* pPort);
-	 * set the port for this node
+	 * bool setReady(bool bReady);
+	 * > bReady  true the node is ready to be connected
+	 *
 	 */
-	void setPort(SerialPort* pPort);
+	void setReady(bool bReady);
+
+	/*
+	 * bool SerialNode::setActive(bool bActive)
+	 *  set this node active for connect
+	 *  requests to remote
+	 *  after setActive the node is not ready
+	 *  you have call setReady(true)
+	 *  > bActive 	true, set node active
+	 *  < true      node was set to active
+	 *    false		node was set to passive
+	 *    			or remote address unknown
+	 */
+	bool setActive(bool bActive);
+
+	bool isActive();
 
 
 	/*
 	 * void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize);
 	 * is called by the static Update Routine if a message for
 	 * this node comes in
+	 * > pPort 		...port on which the message came in
 	 */
-	void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize);
+	void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize,SerialPort* pPort);
 
 
 
@@ -140,7 +169,7 @@ public:
 	 * 				0x**  		... send to unconnected node
 	 * < return 	aktid		... > 0 if message was sent
 	 */
-	tAktId send(tSerialCmd cmd,tAktId replyOn=0,byte par=0,byte* pData=NULL,byte datasize=0, byte replyTo=0);
+	tAktId send(tSerialCmd cmd,tAktId replyOn=0,byte par=0,byte* pData=NULL,byte datasize=0, byte replyToSys=0,byte replyToNode=0);
 
 
 	/**
@@ -161,7 +190,18 @@ public:
 	void setReceiveCallBack(void (*ptr)(tSerialHeader* pHeader,byte* pData,size_t datasize));
 
 
+	/*
+	 * 	bool isReadyToConnect() ;
+	 * < returns true if node is ready to be connected
+	 *
+	 */
 	bool isReadyToConnect() ;
+
+	/*
+	 * 	bool isReadyToConnect() ;
+	 * < returns true if node is connected
+	 *
+	 */
 
 	bool isConnected() ;
 
@@ -183,8 +223,6 @@ private:
 	/*
 	 * called by static Update
 	 */
-
-
 
 	SerialPort* pSerialPort =NULL; // if set, tx and rx only use this port
 								   // otherwise they send and listen on all ports
