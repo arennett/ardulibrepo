@@ -17,6 +17,7 @@ SerialRx SerialNode::serialRx;
 SerialNode* SerialNode::pSerialNodeList = NULL;
 unsigned int SerialNode::serialNodeAktId = 0;
 AcbList SerialNode::acbList;
+LcbList SerialNode::lcbList;
 
 void SerialNode::Update(const byte* pMessage, size_t messageSize,
 		SerialPort* pPort) {
@@ -28,23 +29,26 @@ void SerialNode::Update(const byte* pMessage, size_t messageSize,
 	}
 
 	SerialNode* pNode = GetNodeList();
-	//search node
-	while (pNode != NULL && pNode->pCcb->localAddr != pHeader->toAddr) {
-		pNode = (SerialNode*) pNode->pNext;
 
-	}
+	if (pHeader->toAddr.sysId==SerialNode::systemId) {
+		//local system
+		while (pNode != NULL && pNode->pCcb->localAddr != pHeader->toAddr) {
+			pNode = (SerialNode*) pNode->pNext;
 
-	if (pNode) {
-		pNode->onMessage(pHeader, (dsize > 0) ? (byte*) pHeader + hsize : NULL,
-				dsize, pPort);
+		}
+		if (pNode) {
+			pNode->onMessage(pHeader, (dsize > 0) ? (byte*) pHeader + hsize : NULL,
+		          			dsize, pPort);
+		}
 	} else {
-		// node not found must be in a remote system
+		//remote system
+		// find port
 		forward(pMessage, messageSize, pPort);
 	}
 }
 
 bool SerialNode::forward(const byte* pMessage, size_t messageSize,
-		SerialPort* pPort) {
+		SerialPort* pSourcePort) {
 	tSerialHeader* pHeader = (tSerialHeader*) pMessage;
 	//check links to find port
 
@@ -54,21 +58,51 @@ bool SerialNode::forward(const byte* pMessage, size_t messageSize,
 	//from S4aktid/ aktId to S4   open
 
 	// forward message to other systems
+
+	SerialPort* pTargetPort =SerialPort::getPort(pHeader->toAddr.sysId);
+
+
+	if (!pTargetPort) {
+		// find link
+		pTargetPort=lcbList.getTargetPort(pHeader);
+	}
+
+	// port or linked port found
+	if (pTargetPort) {
+		serialTx.setPort(pTargetPort);
+		serialTx.sendData(pMessage, messageSize);
+		return true;
+	}
+
+
+	// if CR create a link an send to all ports without ports to the source system
+
+	if (pHeader->cmd != CMD_CR) { //create a link only by connection request
+			MPRINTSVAL("SerialNode::Update> no link found to system: " ,pHeader->toAddr.sysId);
+			return false;
+	}
+
+	if(lcbList.createLcb(pHeader, pSourcePort)){
+		MPRINT("SerialNode::Update> LINK created: ");
+		PRINTLNADDR(pHeader->fromAddr);
+	}
+
 	SerialPort* pport = SerialPort::pSerialPortList;
-	while (pport && pport->remoteSysId != pPort->remoteSysId) {
-		serialTx.setPort(pport);
+
+	byte cnt=0;
+	while (pport && pport->remoteSysId != pSourcePort->remoteSysId) {
+		serialTx.setPort(pTargetPort);
 		serialTx.sendData(pMessage, messageSize);
 		pport = (SerialPort*) pport->pNext;
+		++cnt;
 	}
-	if (pport) {
-
-		// add open link
-		//from S1/ aktId to S4   open
-
-	} else {
-		MPRINT("SerialNode::Update> forward failed for node: ");
-		PRINTLNADDR(pHeader->toAddr);
+	if (cnt) {
+		return true;
 	}
+	MPRINT("SerialNode::Update> forward for CR failed: ");
+	PRINTLNADDR(pHeader->fromAddr);
+	PRINTLNADDR(pHeader->toAddr);
+
 
 }
 
@@ -143,8 +177,9 @@ bool SerialNode::isReadyToConnect() {
 }
 
 bool SerialNode::isConnected() {
-
-	return pCcb && (pCcb->status == CONNECTION_STATUS_CONNECTED);
+    // if port was set, the node can only connect over that port
+	// but the node is not connected before the the status is set to connected
+	return pCcb && (pSerialPort && pCcb->status == CONNECTION_STATUS_CONNECTED );
 }
 void SerialNode::onMessage(tSerialHeader* pSerialHeader, byte* pData,
 		size_t datasize, SerialPort* pPort) {

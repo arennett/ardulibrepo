@@ -12,6 +12,16 @@
 
 SerialPort* SerialPort::pSerialPortList=NULL;
 
+SerialPort* SerialPort::getPort(byte remoteSysId){
+	SerialPort* pPort = pSerialPortList;
+	while (pPort) {
+		if (pPort->remoteSysId==remoteSysId){
+			return pPort;
+		}
+	}
+	return NULL;
+}
+
 SerialPort::SerialPort(){};
 SerialPort::~SerialPort() {};
 

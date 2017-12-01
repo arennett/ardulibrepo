@@ -28,6 +28,7 @@ typedef struct {
 class SerialPort {
 public:
 	static SerialPort* pSerialPortList;
+	static SerialPort* getPort(byte remoteSysId);
 
 	SerialPort();
 	virtual ~SerialPort();
@@ -43,6 +44,8 @@ public:
 	virtual bool isListening()=0;
 	void* pNext = NULL;
 	byte remoteSysId=0;
+
+
 
 	tSerialRxState serialRxState;
 

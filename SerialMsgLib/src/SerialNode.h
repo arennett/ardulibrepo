@@ -10,6 +10,8 @@
 #include "SerialRx.h"
 #include "SerialHeader.h"
 #include "AcbList.h"
+#include "LcbList.h"
+
 
 
 #ifndef SERIALNODE_H_
@@ -203,6 +205,11 @@ public:
 	 *
 	 */
 
+	/*  bool isConnected() ;
+	 *  if port was set, the node can only connect over that port
+	 *  but the node is not connected before the the status is set to connected
+	 *  <true if node can communicate to remote node
+	 */
 	bool isConnected() ;
 
 
@@ -217,6 +224,7 @@ public:
 private:
 
 	static AcbList acbList;
+	static LcbList lcbList;
 	static SerialNode* pSerialNodeList;
 	static unsigned int serialNodeAktId;
 

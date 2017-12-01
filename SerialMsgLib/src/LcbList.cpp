@@ -6,6 +6,7 @@
  */
 
 #include "LcbList.h"
+#include <tools.h>
 
 LcbList::LcbList() {
 	// TODO Auto-generated constructor stub
@@ -64,6 +65,21 @@ tLcb* LcbList::getLinkedLcb(tSerialHeader* pHeader) {
 			return pLcb;
 		}
 		pLcb = pLcb->pNext;
+	}
+	return NULL;
+}
+
+SerialPort* LcbList::getTargetPort(tSerialHeader* pHeader) {
+	tLcb* pLcb = getLinkedLcb(pHeader);
+	if (pLcb) {
+		if (pLcb->addrA==pHeader->fromAddr && pLcb->addrB == pHeader->toAddr ) {
+			return pLcb->pPortB;
+		}else if (pLcb->addrB==pHeader->fromAddr && pLcb->addrA == pHeader->toAddr ) {
+			return pLcb->pPortA;
+		}else{
+			MPRINT("LcbList::getTargetPort ERROR");
+		}
+		return NULL;
 	}
 	return NULL;
 }

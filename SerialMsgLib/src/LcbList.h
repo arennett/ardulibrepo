@@ -25,15 +25,15 @@ struct tLcb {
 class LcbList {
 public:
 	LcbList();
-	virtual ~LcbList();
-	tLcb* 	getRoot();
-	tLcb* 	createLcb(tSerialHeader* pHeader,SerialPort* fromPort) ;
-	tLcb*   getLinkedLcb(tSerialHeader* pHeader);
-	tLcb* 	getOpenLcb(tSerialHeader* pHeader);
-
+	virtual 	~LcbList();
+	tLcb* 		getRoot();
+	tLcb* 		createLcb(tSerialHeader* pHeader,SerialPort* fromPort) ;
+	tLcb*   	getLinkedLcb(tSerialHeader* pHeader);
+	SerialPort* getTargetPort(tSerialHeader* pHeader);
+	tLcb* 		getOpenLcb(tSerialHeader* pHeader);
 		//void 	mprintAcb(tAcb* pAcb);
 	tLcb* 	getLastLcbEntry();
-	unsigned LcbList::count();
+	unsigned int count();
 	void 	deleteLcbList();
 	tLcb* pRoot = NULL;
 };
