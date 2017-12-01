@@ -77,7 +77,7 @@ SerialPort* LcbList::getTargetPort(tSerialHeader* pHeader) {
 		}else if (pLcb->addrB==pHeader->fromAddr && pLcb->addrA == pHeader->toAddr ) {
 			return pLcb->pPortA;
 		}else{
-			MPRINT("LcbList::getTargetPort ERROR");
+			MPRINTLNS("LcbList::getTargetPort ERROR");
 		}
 		return NULL;
 	}

@@ -94,11 +94,13 @@ public:
 	 * All local nodes are directly reachable. All remote nodes are reachable
 	 * over the ports. If you do not specify a specific serialport, the node tries to
 	 * send or receive on all ports until it is connected and the nodes port is set.
-	 * > lAddr       	... local address of this node . Must be unique in the node net.
-	 * > rAddr		 	... remote address of this node.
+	 * > localNodeId    ... local address of this node . Must be unique for one system
+	 * > remoteSystemId	... the id of the remote system. All connected systems have a unique id
 	 * 						If set, the node sends connection requests to the remote node.
 	 * 						If not set or 0, the node is passive and waits to be connected
 	 * 						by a connection request of an active node
+	 * > remoteNodeId	... id of the remote node
+  	 *
 	 * > pSerialPort	... if set the node can only communicate over this port.
 	 */
 	SerialNode(byte localNodeId, byte remoteSysId=0,byte remoteNodeId=0,SerialPort* pSerialPort=NULL);
@@ -110,13 +112,14 @@ public:
 	 * If the node is connected to another node, the nodes will be first diconnected.
 	 * If the node is active, it send connection requests to the other node (remoteAddress)
 	 * If the other node also tries to connect (passive) it replies an ACK on this node request.
-	 * > remoteAddress 		address of node to be connected	to
-	 * >					if		0 the given rAddr is used
-	 * > timeout			timeout in msec , 0 wait until connect
-	 * > checkPeriod        check period for connection, default 10 msec
+	 * > remoteSysId 		remote systemId  default/0 the constructor remoteSysId is used
+	 * > remoteNodeId		remote nodeId	 default/0 the constructor remoteNodeId is used
+	 * >
+	 * > timeout			timeout in msec , default/0 = wait until connect
+	 * > checkPeriod        check period for connection, default/0  10 msec
 	 * < returns 			true	if the nodes are connected before timeout expires
 	 */
-	 bool connectNode(tAddr remoteAddress,unsigned long timeOut=0,unsigned long checkPeriod=0);
+	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=10);
 
 	 static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
 

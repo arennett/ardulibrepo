@@ -22,10 +22,23 @@ SerialPort* SerialPort::getPort(byte remoteSysId){
 	return NULL;
 }
 
-SerialPort::SerialPort(){};
+SerialPort::SerialPort(){
+	SerialPort* pLast = pSerialPortList;
+
+	if (!pLast) {
+		pSerialPortList =this;
+		return;
+	}
+	while(!pLast->pNext) {
+		pLast=(SerialPort*)pLast->pNext;
+	}
+	pLast->pNext=this;
+};
 SerialPort::~SerialPort() {};
 
-
+size_t SerialPort::write(const byte*, size_t ){
+	//DUMMY
+}
 void SerialPort::createBuffer(size_t maxDataSize) {
 	if(serialRxState.pBuffer){
 			delete serialRxState.pBuffer;
