@@ -78,6 +78,12 @@ public:
 	 */
 	static unsigned int GetNextAktId();
 
+	/*
+	 * void writeToPort(tSerialHeader* pHeader,byte* data, size_t datasize ,SerialPort* pPort);
+	 * help routine, only for internal use
+	 */
+	static tAktId writeToPort(tSerialHeader* pHeader,byte* data, size_t datasize ,SerialPort* pPort);
+
 
 	/*
 	 * < return the node list
@@ -110,8 +116,9 @@ public:
 	/*
 	 * bool connect(byte remoteAddress,bool active=false,unsigned long timeOut=0,unsigned long reqPeriod=0);
 	 * If the node is connected to another node, the nodes will be first diconnected.
-	 * If the node is active, it send connection requests to the other node (remoteAddress)
+	 * If the node is active (remoteNodeId was passed), it send connection requests (CR) to the other node (remoteAddress)
 	 * If the other node also tries to connect (passive) it replies an ACK on this node request.
+	 * If the node is passive (no remoteId was passed) it wait for a CR of the active node
 	 * > remoteSysId 		remote systemId  default/0 the constructor remoteSysId is used
 	 * > remoteNodeId		remote nodeId	 default/0 the constructor remoteNodeId is used
 	 * >
@@ -119,7 +126,7 @@ public:
 	 * > checkPeriod        check period for connection, default/0  10 msec
 	 * < returns 			true	if the nodes are connected before timeout expires
 	 */
-	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=10);
+	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=1000);
 
 	 static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
 
@@ -175,6 +182,7 @@ public:
 	 * < return 	aktid		... > 0 if message was sent
 	 */
 	tAktId send(tSerialCmd cmd,tAktId replyOn=0,byte par=0,byte* pData=NULL,byte datasize=0, byte replyToSys=0,byte replyToNode=0);
+
 
 
 	/**

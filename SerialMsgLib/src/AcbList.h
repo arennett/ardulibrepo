@@ -32,7 +32,7 @@ public:
 	virtual ~AcbList();
 	tAcb* 	getRoot();
 	tAcb* 	createAcb(tAktId aktId) ;
-	tAcb* 	createOrUseAcb(byte cmd, tAddr fromAddr, tAddr toAddr, tAktId aktidTx);
+	tAcb* 	createOrUseAcb(tSerialHeader* pHeader);
 	//void 	mprintAcb(tAcb* pAcb);
 	tAcb*   getAcbEntry(tAktId aktId);
 	tAcb* 	getLastAcbEntry();

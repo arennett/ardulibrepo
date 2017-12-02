@@ -59,7 +59,8 @@ void SerialRx::readNextOnAllPorts(){
 	while(pport) {
 		setPort(pport);
 		readNext();
-		pport->pNext;
+		MPRINTLNS("SerialRx::readNextOnAllPorts()");
+		pport=(SerialPort*)pport->pNext;
 	}
 }
 

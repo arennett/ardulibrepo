@@ -18,6 +18,7 @@
 	#define MPRINTLNS(x)    MPRINTLN(F(x))
 
 	#define MPRINTSVAL(s,x)  	MPRINTS(s);MPRINTLN(x)
+    #define MPRINTLNSVAL(s,x)  	MPRINTS(s);MPRINTLN(x)
 	#define MPRINTSVALS(s,x,z)  MPRINTS(s);MPRINT(x);MPRINTLNS(z)
 
 	#define MPRINTFREE  MPRINTSVAL("free sram : " ,(freeRam()))
@@ -29,7 +30,7 @@
 	#define MPRINTLN(x)
 	#define MPRINTS(x)
 	#define MPRINTLNS(x)
-
+    #define MPRINTLNSVAL(s,x)
 	#define MPRINTSVAL(s,x)
 	#define MPRINTSVALS(s,x,z)
 

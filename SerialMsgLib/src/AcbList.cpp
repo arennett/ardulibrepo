@@ -5,6 +5,7 @@
  *      Author: User
  */
 
+#include <tools.h>
 #include "AcbList.h"
 
 AcbList::AcbList() {
@@ -25,17 +26,17 @@ tAcb* AcbList::createAcb(tAktId aktId) {
 		pLast->pNext = pNext;
 	}
 	pNext->aktid = aktId;
+	MPRINTLNSVAL("AcbList::createAcb> ",aktId);
 	return pNext;
 
 }
 
-tAcb* AcbList::createOrUseAcb(byte cmd, tAddr fromAddr, tAddr toAddr,
-		tAktId aktId) {
+tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 	tAcb* pAcb = pRoot;
 	while (pAcb) {
-		if (pAcb->cmd == cmd && pAcb->fromAddr == fromAddr
-				&& pAcb->toAddr == toAddr) {
-			pAcb->aktid = aktId;
+		if (pAcb->cmd == pHeader->cmd && pAcb->fromAddr == pHeader->fromAddr
+				&& pAcb->toAddr == pHeader->toAddr) {
+			pAcb->aktid = pHeader->aktid;
 			pAcb->cntRetries++;
 			break;
 		}
@@ -43,7 +44,7 @@ tAcb* AcbList::createOrUseAcb(byte cmd, tAddr fromAddr, tAddr toAddr,
 
 	}
 	if (!pAcb) {
-		pAcb = createAcb(aktId);
+		pAcb = createAcb(pHeader->aktid);
 	}
 	//pAcb->timeStamp = millis();
 	return pAcb;
