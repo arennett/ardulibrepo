@@ -399,7 +399,7 @@ bool SerialNode::connect(byte remoteSysId,byte remoteNodeId, unsigned long timeO
 				}
 			}
 		} else {
-			MPRINTLN("SerialNode::connect>  connected: ");
+			MPRINTLNS("SerialNode::connect>  connected: ");
 			PRINTLNADDR(pCcb->localAddr);
 			MPRINTS(" to ");
 			PRINTLNADDR(pCcb->remoteAddr);
@@ -408,7 +408,7 @@ bool SerialNode::connect(byte remoteSysId,byte remoteNodeId, unsigned long timeO
 
 	}
 	if (timeOut > 0) {
-		MPRINTLN("SerialNode::connect> TIMEOUT");
+		MPRINTLNS("SerialNode::connect> TIMEOUT");
 		acbList.deleteAcbEntry(pCcb,CMD_CR);
 	}
 

@@ -5,14 +5,12 @@
  *      Author: rea
  */
 #include <stddef.h>
+#include "SerialHeader.h"
 #include "SerialPort.h"
 #include "SerialTx.h"
 #include "SerialRx.h"
-#include "SerialHeader.h"
 #include "AcbList.h"
 #include "LcbList.h"
-
-
 
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
