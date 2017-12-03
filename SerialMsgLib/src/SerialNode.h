@@ -17,17 +17,8 @@
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
 
-//Connection Control Block
-typedef struct {
-	tAddr localAddr;
-	tAddr remoteAddr;    //remote address
-	#define  CONNECTION_STATUS_NOT_READY  	1
-	#define  CONNECTION_STATUS_READY 		2
-	#define  CONNECTION_STATUS_DISCONNECTED 3
-	#define  CONNECTION_STATUS_CONNECTED 	4
-	byte status=0;
-	bool active=false;
-} tCcb;
+
+
 
 
 
@@ -72,11 +63,7 @@ public:
 
 	static void Init(byte systemId);
 
-	/*
-	 * static unsigned int GetNextAktid();
-	 * < the next aktid for send
-	 */
-	static unsigned int GetNextAktId();
+
 
 	/*
 	 * void writeToPort(tSerialHeader* pHeader,byte* data, size_t datasize ,SerialPort* pPort);
@@ -237,7 +224,7 @@ private:
 	static AcbList acbList;
 	static LcbList lcbList;
 	static SerialNode* pSerialNodeList;
-	static unsigned int serialNodeAktId;
+
 
 	/*
 	 * called by static Update

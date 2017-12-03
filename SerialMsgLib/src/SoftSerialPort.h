@@ -18,7 +18,7 @@
 class SoftSerialPort: public SerialPort {
 public:
 	SoftSerialPort();
-	SoftSerialPort(byte pinRx, byte pinTx,byte remoteSysId);
+	SoftSerialPort(byte pinRx, byte pinTx,byte remoteSysId) ;
 	SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte remoteSysId);
 	virtual ~SoftSerialPort();
 
@@ -32,7 +32,6 @@ public:
 	virtual bool isListening();
 
 private:
-	byte remoteSysId = 0;
 	SoftwareSerial* pSoftwareSerial;
 	bool deleteSoftwareSerial = false;
 

@@ -139,7 +139,7 @@ public:
 	 */
 	virtual ~SerialRx();
 private:
-	void (*updateCallback)(const byte* data, size_t data_size);
+	void (*updateCallback)(const byte* data, size_t data_size,SerialPort* pPort);
 
 	SerialPort* pPort= NULL; 		// current port
 	tSerialRxState* pState = NULL;	// all variables to be saved when switching to another port

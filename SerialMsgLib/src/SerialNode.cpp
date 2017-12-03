@@ -10,12 +10,6 @@
 #include "SerialNode.h"
 #include "AcbList.h"
 
-#define PRINTADDR(x) MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId);
-#define PRINTLNADDR(x) PRINTADDR(x);MPRINTLNS("");
-
-#define PRINTHEADER(pH) PRINTLNADDR(pH->fromAddr);MPRINTS(" to ");PRINTLNADDR(pH->toAddr);\
-						MPRINTSVAL("aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTSVAL(" par: ",pH->cmd);
-#define PRINTLNHEADER(pH);MPRINTLNS("");
 
 tAddr fromAddr;
 	tAddr toAddr;
@@ -28,7 +22,6 @@ byte SerialNode::systemId=0;
 SerialTx SerialNode::serialTx;
 SerialRx SerialNode::serialRx;
 SerialNode* SerialNode::pSerialNodeList = NULL;
-unsigned int SerialNode::serialNodeAktId = 0;
 AcbList SerialNode::acbList;
 LcbList SerialNode::lcbList;
 
@@ -120,12 +113,7 @@ void SerialNode::Init(byte systemId) {
 	MPRINTSVAL("SerialNode::Init> systemId: ",systemId);
 }
 
-unsigned int SerialNode::GetNextAktId() {
-	if (serialNodeAktId >= 65535) {
-		serialNodeAktId = 0;
-	}
-	return ++serialNodeAktId;
-}
+
 
 SerialNode* SerialNode::GetNodeList() {
 	//return pSerialNodeList;
@@ -420,7 +408,8 @@ bool SerialNode::connect(byte remoteSysId,byte remoteNodeId, unsigned long timeO
 
 	}
 	if (timeOut > 0) {
-		MPRINTLN("SerialNode::connect: TIMEOUT");
+		MPRINTLN("SerialNode::connect> TIMEOUT");
+		acbList.deleteAcbEntry(pCcb,CMD_CR);
 	}
 
 	return false; // no connections or timeout
@@ -481,7 +470,6 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, byte* pData,
 
 tAktId SerialNode::writeToPort(tSerialHeader* pHeader,byte* pData, size_t datasize ,SerialPort* pPort){
 	if (pHeader->aktid==0) {// we need an aktId
-		pHeader->aktid = GetNextAktId();
 		acbList.createOrUseAcb(pHeader);
 	}
 	serialTx.setPort(pPort);
@@ -492,10 +480,11 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader,byte* pData, size_t datasi
 	}
 	serialTx.sendPostamble();
 	MPRINTLNSVAL("send to port: ",pPort->remoteSysId);
-	PRINTLNHEADER(header);
+	PRINTLNHEADER(pHeader);
 	if(pData){
 		MPRINTLNSVAL("datasize: ",datasize);
 	}
+	return pHeader->aktid;
 }
 
 void SerialNode::setReceiveCallBack(

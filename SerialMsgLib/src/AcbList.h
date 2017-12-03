@@ -20,7 +20,6 @@ typedef struct {
 #define ACB_STATUS_CLOSED		1
 #define ACB_STATUS_OPEN			2
 	byte 	status = ACB_STATUS_CREATED;
-	unsigned int cntRetries = 0;
 	void* 	pNext = NULL;
 } tAcb;
 
@@ -29,20 +28,35 @@ typedef struct {
 class AcbList {
 public:
 	AcbList();
+
 	virtual ~AcbList();
 	tAcb* 	getRoot();
-	tAcb* 	createAcb(tAktId aktId) ;
+	unsigned int getNextAktId();
+	tAcb* 	createAcb(tSerialHeader* pHeader) ;
 	tAcb* 	createOrUseAcb(tSerialHeader* pHeader);
 	//void 	mprintAcb(tAcb* pAcb);
 	tAcb*   getAcbEntry(tAktId aktId);
+
+	/*
+	 * tAcb*   getAcbEntry(tCcb* pCcb,byte cmd);
+	 * get the acb with a specific cmd for a given connection
+	 * i.e. an acb by connection request is reused until connection
+	 * or timeout.
+	 * > pCcb 	connection of a node
+	 * > cmd	message cmd
+	 */
+	tAcb*   getAcbEntry(tCcb* pCcb,byte cmd);
 	tAcb* 	getLastAcbEntry();
 	unsigned int count();
 	void 	deleteAcbList();
-
 	bool  	deleteAcbEntry(tAktId aktId);
+	bool  	deleteAcbEntry(tCcb* pCcb,byte cmd);
 
+
+
+private:
+	unsigned int aktId;
 	tAcb* pRoot = NULL;
-
 };
 
 #endif /* ACBLIST_H_ */

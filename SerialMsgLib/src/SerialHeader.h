@@ -7,8 +7,16 @@
 
 #ifndef SERIALHEADER_H_
 #define SERIALHEADER_H_
-
 #include "Arduino.h"
+#include <tools.h>
+
+#define PRINTADDR(x) MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
+#define PRINTLNADDR(x) PRINTADDR(x);MPRINTLNS("");
+
+#define PRINTHEADER(pH) PRINTADDR(pH->fromAddr);MPRINTS(" to ");PRINTLNADDR(pH->toAddr);\
+						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTSVAL(" par: ",pH->par);
+#define PRINTLNHEADER(pH);PRINTHEADER(pH);MPRINTLNS("");
+
 
 
 typedef enum {
@@ -32,6 +40,7 @@ typedef unsigned int tAktId;
 #define MAX_AKTID  65535
 
 
+
 class tAddr {
 public:
 		tAddr(){};
@@ -53,6 +62,17 @@ public:
 		}
 } ;
 
+//Connection Control Block
+typedef struct {
+	tAddr localAddr;
+	tAddr remoteAddr;    //remote address
+	#define  CONNECTION_STATUS_NOT_READY  	1
+	#define  CONNECTION_STATUS_READY 		2
+	#define  CONNECTION_STATUS_DISCONNECTED 3
+	#define  CONNECTION_STATUS_CONNECTED 	4
+	byte status=0;
+	bool active=false;
+} tCcb;
 
 typedef struct{
 	tAddr fromAddr;

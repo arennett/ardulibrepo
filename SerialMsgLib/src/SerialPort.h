@@ -31,6 +31,14 @@ public:
 	static SerialPort* getPort(byte remoteSysId);
 
 	SerialPort();
+
+	/**
+	 * SerialPort(byte remoteSysId);
+	 * the SerialPort get the ID of the remote system
+	 * and is linked into a port list
+	 */
+	SerialPort(byte remoteSysId);
+
 	virtual ~SerialPort();
 	void    createBuffer(size_t size);
 
