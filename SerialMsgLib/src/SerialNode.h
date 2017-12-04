@@ -31,49 +31,68 @@ public:
 
 
 	/**
-	 * void Update(byte* pMessage,size_t messageSize,SerialPort *pPort);
+	 * void update(byte* pMessage,size_t messageSize,SerialPort *pPort);
 	 * callback routine.
-	 * is called if a message was received by serialRx.
+	 * Is called if a message was received by serialRx.
 	 * It checks the address, and searches for the node
-	 * if a local node found, it calls the nodes callback routine.
-	 * If node not found , it asks on all ports for
-	 * this address, if found it forwards the message.
-	 * >pPort  the port on which the message was received
+	 * If a local node is found, it calls the node callback routine.
+	 * If the node isn't found , it asks on all ports for
+	 * the remote systemId, if found it forwards the message exclusive to the port.
+	 * If not found, search for link (see forward) to a port
+	 * If no links found, the message is sent to all ports without the ports that have the same remote systemId
+	 * as the message fromAddress. This means, it is only forwarded to other systems.
+	 * >pMessage 	...complete message: header (+data)
+	 * >messageSize	...size of header+data
+	 * >pPort  		...the port on which the message was received
+	 *
 	 */
+	static void update(const byte* pMessage,size_t messageSize,SerialPort *pPort);
 
-	static void Update(const byte* pMessage,size_t messageSize,SerialPort *pPort);
 
 	/**
-	 * static void Init();
-	 * has to be called in the setup routine
-	 * sytemId		id of the local system
-	 * 				the id must be unique for all sytem in the nodes network
-	 */
-
-	/**
-	 * SerialNode::forward(const byte* pMessage, size_t messageSize,SerialPort* pSourcePort)
+	 * forward(const byte* pMessage, size_t messageSize,SerialPort* pSourcePort)
 	 * A message received from pSourcePort but no node found in the system
-	 * 1. If  a link (port1 <> port2)  isn't found create a link.
-	 * 2. send the to the linked port
+	 * If the node isn't found , it asks on all ports for
+	 * the remote systemId, if found it forwards the message exclusive to the port.
+	 * If not found, search for link (see forward) to a port
+	 * If no links found, the message is sent to all ports without the ports that have the same remote systemId
+	 * as the message fromAddress. This means, it is only forwarded to other systems.
+	 * In case of connection request:
+	 * 1. delete existing link to remote system
+	 * 2. create a open link.
+	 *    the link is closed by the ACK of the remote system
 	 */
 	static bool forward(const byte* pMessage, size_t messageSize,
 	SerialPort* pSourcePort);
 
-	static void Init(byte systemId);
 
-
+	/**
+	 * static void init(byte systemId);
+	 * has to be called in the setup routine
+	 * sytemId		id of the local system
+	 * 				the id must be unique for all systems in the node network
+	 */
+	static void init(byte systemId);
 
 	/*
 	 * void writeToPort(tSerialHeader* pHeader,byte* data, size_t datasize ,SerialPort* pPort);
-	 * help routine, only for internal use
+	 * help routine
+	 * creates an aktid if needed
+	 * writes the message to a port
+	 * > pHeader	...header
+	 * > pData		...optional data
+	 * > datasize	...size of optional data
+	 * > pPort		...port to write to
+	 * < returns	...the aktid of the sent header
 	 */
-	static tAktId writeToPort(tSerialHeader* pHeader,byte* data, size_t datasize ,SerialPort* pPort);
+	static tAktId writeToPort(tSerialHeader* pHeader,byte* pData, size_t datasize ,SerialPort* pPort);
 
 
-	/*
-	 * < return the node list
+	/* static SerialNode* GetNodeList();
+	 * all instantiated nodes are linked in a node list.
+	 * < returns 	...the root node of the node list
 	 */
-	static SerialNode* GetNodeList();
+	static SerialNode* getNodeList();
 
 
 
@@ -104,15 +123,24 @@ public:
 	 * If the node is active (remoteNodeId was passed), it send connection requests (CR) to the other node (remoteAddress)
 	 * If the other node also tries to connect (passive) it replies an ACK on this node request.
 	 * If the node is passive (no remoteId was passed) it wait for a CR of the active node
-	 * > remoteSysId 		remote systemId  default/0 the constructor remoteSysId is used
-	 * > remoteNodeId		remote nodeId	 default/0 the constructor remoteNodeId is used
+	 * > remoteSysId 		...remote systemId 	>0 	try to connect to system with remoteSysId
+	 * 											 0  only for passive nodes, connect with nodes from every system
+	 * > remoteNodeId		...remote nodeId	>0	connect to a remote node with id == remoteNodeId
+	 * 											 0	active node tries to connect to all passive nodes of the remote system
+	 * >                                      		which have no remote node id
+	 * >										 	passive node waits to be connected from any node of the remote system
 	 * >
-	 * > timeout			timeout in msec , default/0 = wait until connect
-	 * > checkPeriod        check period for connection, default/0  10 msec
-	 * < returns 			true	if the nodes are connected before timeout expires
+	 * > timeout			...timeout in msec , default/0 = wait until connect
+	 * > reqPeriod        	...check period for connection, default/0  10 msec
+	 * < returns 			...true	if the nodes are connected before timeout expires
 	 */
 	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=1000);
 
+
+	 /*
+	  *  static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
+	  *  connect all active and passive nodes in the system
+	  */
 	 static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
 
 
@@ -125,28 +153,36 @@ public:
 
 	/*
 	 * bool SerialNode::setActive(bool bActive)
-	 *  set this node active for connect
-	 *  requests to remote
-	 *  after setActive the node is not ready
-	 *  you have call setReady(true)
-	 *  > bActive 	true, set node active
-	 *  < true      node was set to active
-	 *    false		node was set to passive
-	 *    			or remote address unknown
+	 *  set this node as active or passive node
+	 *  active node send connection requests to remote passive nodes
+	 *  passive nodes waiting to be connected by remote active node
+	 *  than you have to call setReady(true) for passive nodes
+	 *  > bActive 	...true, set node active
+	 *  < true     	...node was set to active
+	 *    false		...node was set to passive
 	 */
 	bool setActive(bool bActive);
 
+
+	/*
+	 * 	bool isActive();
+	 *  < return 	...true... active node
+	 *    			...false...passive node
+	 */
 	bool isActive();
 
 
 	/*
 	 * void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize);
-	 * is called by the static Update Routine if a message for
-	 * this node comes in
+	 * is called by the static update routine if a message for
+	 * this node came in
+	 * it handles all types of incoming messages
+	 * > pHeader	...header
+	 * > pData		...optional data
+	 * > datasize	...size of optional data
 	 * > pPort 		...port on which the message came in
 	 */
 	void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize,SerialPort* pPort);
-
 
 
 	/*
@@ -162,9 +198,10 @@ public:
 	 *
 	 * > pData		optionally data
 	 * > datasize	size of data
-	 * > replyTo	0x00		... send to connected remote address
-	 * 				0x**  		... send to unconnected node
-	 * < return 	aktid		... > 0 if message was sent
+	 * > replyToSys     			... remote system id
+	 * > replyToNode	0x00		... send to connected remote address
+	 * 				    0x**  		... send to unconnected node
+	 * < return 		aktid		... > 0 if message was sent
 	 */
 	tAktId send(tSerialCmd cmd,tAktId replyOn=0,byte par=0,byte* pData=NULL,byte datasize=0, byte replyToSys=0,byte replyToNode=0);
 
