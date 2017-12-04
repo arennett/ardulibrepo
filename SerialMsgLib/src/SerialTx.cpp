@@ -61,6 +61,7 @@ void SerialTx::sendRawData(const byte* data, size_t datasize) {
 }
 
 void SerialTx::sendPreamble() {
+	MPRINTLN("sending preamble");
 	pSerialPort->write(serPreamble,sizeof serPreamble);
 	DPRINTLN("SerialTx::sendPreamble");
 }

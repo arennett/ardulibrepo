@@ -58,7 +58,12 @@ void SerialRx::readNextOnAllPorts(){
 	SerialPort* pport=SerialPort::pSerialPortList;
 	while(pport) {
 		setPort(pport);
-		readNext();
+		if (pport->available()) {
+			MPRINTLNS("data available");
+		}
+		if (readNext()){
+			MPRINTLNS("receiving a message... ");
+		}
 		pport=(SerialPort*)pport->pNext;
 	}
 }

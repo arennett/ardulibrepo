@@ -24,7 +24,7 @@ public:
 
 	virtual byte read();
 	virtual bool write(byte b);
-	virtual size_t write(byte* bb,size_t len);
+	virtual size_t write(const byte* bb,size_t len);
 
 	virtual void begin(long speed);
 	virtual bool listen();

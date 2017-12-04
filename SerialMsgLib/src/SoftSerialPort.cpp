@@ -40,7 +40,7 @@ bool SoftSerialPort::write(byte b){
 	 return (pSoftwareSerial->write(b)) > 0;
 }
 
-size_t SoftSerialPort::write(byte* bb,size_t len){
+size_t SoftSerialPort::write(const byte* bb,size_t len){
 	 return pSoftwareSerial->write(bb,len) ;
 }
 

@@ -18,6 +18,7 @@ SerialPort* SerialPort::getPort(byte remoteSysId){
 		if (pPort->remoteSysId==remoteSysId){
 			return pPort;
 		}
+		pPort=(SerialPort*) pPort->pNext;
 	}
 	return NULL;
 }
@@ -40,10 +41,7 @@ SerialPort::SerialPort(byte remoteSysId){
 };
 SerialPort::~SerialPort() {};
 
-size_t SerialPort::write(const byte*, size_t ){
-	//DUMMY
-	return 0;
-}
+
 void SerialPort::createBuffer(size_t maxDataSize) {
 	if(serialRxState.pBuffer){
 			delete serialRxState.pBuffer;
