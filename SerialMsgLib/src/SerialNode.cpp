@@ -26,6 +26,9 @@ LcbList SerialNode::lcbList;
 void SerialNode::update(const byte* pMessage, size_t messageSize,
 		SerialPort* pPort) {
 	tSerialHeader* pHeader = (tSerialHeader*) pMessage;
+	MPRINTLN("SerialNode::update>");
+	PRINTLNHEADER(pHeader);
+
 	size_t hsize = sizeof(tSerialHeader);
 	size_t dsize = 0;
 	if (messageSize >= hsize) {
@@ -76,6 +79,8 @@ void SerialNode::update(const byte* pMessage, size_t messageSize,
 bool SerialNode::forward(const byte* pMessage, size_t messageSize,
 		SerialPort* pSourcePort) {
 	tSerialHeader* pHeader = (tSerialHeader*) pMessage;
+	MPRINTLN("SerialNode::forward>");
+	PRINTLNHEADER(pHeader);
 
 	SerialPort* pTargetPort = SerialPort::getPort(pHeader->toAddr.sysId);
 
@@ -202,6 +207,9 @@ bool SerialNode::isConnected() {
 void SerialNode::onMessage(tSerialHeader* pSerialHeader, byte* pData,
 		size_t datasize, SerialPort* pPort) {
 
+	MPRINTLN("SerialNode::onMessage>");
+	PRINTLNHEADER(pSerialHeader);
+
 	byte cmd = pSerialHeader->cmd;
 	tAcb* pAcb = NULL;
 	/* for received replies*/
@@ -211,15 +219,10 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, byte* pData,
 	bool acbNotFound = false;
 
 	if (!connected) {
-		if (!(cmd == CMD_ACK || cmd == CMD_NAK || cmd == CMD_CR)
-				|| cmd == CMD_AFA) {
-
-			MPRINTSVAL(
-					"SerialHeaderRx::internalReceive> unallowed message in unconnected status :",
-					pSerialHeader->aktid);
+		if (!(cmd == CMD_ACK || cmd == CMD_NAK || cmd == CMD_CR) || cmd == CMD_AFA) {
+			MPRINTSVAL("SerialNode::onMessage> unallowed message in unconnected status :", pSerialHeader->aktid);
+			return;
 		}
-		userCall = false;
-		return;
 	}
 
 	// protocol requests from remote
@@ -227,11 +230,14 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, byte* pData,
 	switch (cmd) {
 
 	case CMD_CR:
+		MPRINTLNS ("SerialNode::onMessage> CMD_CR");
 		if (!isActive() && isReadyToConnect()) { //if passiv and ready to be connected
 
 			if (pCcb->remoteAddr.sysId == 0) {
 				// connect, no matter who it is
 				pCcb->remoteAddr = pSerialHeader->fromAddr;
+				MPRINTLNS("pcb remote address:");
+				PRINTLNADDR(pCcb->remoteAddr);
 			} else if (pCcb->remoteAddr != pSerialHeader->fromAddr) {
 				// unknown node wants to connect, send NAK
 				MPRINTSVAL(
@@ -245,6 +251,9 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, byte* pData,
 			}
 			this->pSerialPort = pPort;
 			pCcb->status = CONNECTION_STATUS_CONNECTED;
+			pCcb->remoteAddr = pSerialHeader->fromAddr;
+			MPRINTLNS("CMD_ACK -> remote address:");
+			PRINTLNADDR(pCcb->remoteAddr);
 			send(CMD_ACK, pSerialHeader->aktid);
 			MPRINTLNSVAL("SerialNode::onMessage> node connected : ",
 					pCcb->localAddr.nodeId);
@@ -484,7 +493,7 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, byte* pData,
 		byte datasize, byte replyToSys, byte replyToNode) {
 	tSerialHeader header;
 
-	tAddr replyTo(replyToSys, replyToNode);
+
 
 // not connected
 	if (pCcb->status != CONNECTION_STATUS_CONNECTED
@@ -496,7 +505,14 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, byte* pData,
 	header.fromAddr.sysId = SerialNode::systemId;
 	if (replyOn > 0) {
 		header.aktid = replyOn;
-		header.toAddr = replyTo;
+		if (replyToSys > 0){
+			header.toAddr.sysId=replyToSys;
+			header.toAddr.nodeId=replyToNode;
+		}else{
+			header.toAddr = pCcb->remoteAddr;
+		}
+		MPRINTLNS("SerialNode::send> reply to:");
+		PRINTLNADDR(header.toAddr);
 	} else {
 		header.aktid = 0;
 		header.toAddr = pCcb->remoteAddr;
@@ -507,13 +523,17 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, byte* pData,
 	header.cmd = cmd;
 	header.par = par;
 
+	return 0;///<-----------------------------------------------------------------TESTESTEST
+
 	if (pSerialPort) { //connected or port was preset
 		SerialNode::writeToPort(&header, pData, datasize, pSerialPort);
+		MPRINTLN("SerialNode::send> success1");
 		return header.aktid;
 	} else { // not connected
 		SerialPort* pPort = SerialPort::getPort(header.toAddr.sysId);
 		if (pPort) {
 			SerialNode::writeToPort(&header, pData, datasize, pPort);
+			MPRINTLN("SerialNode::send> success2");
 		} else {
 			pPort = SerialPort::pSerialPortList;
 			MPRINTLNS("SerialNode::send> no port found!");
@@ -522,10 +542,12 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, byte* pData,
 				while (pPort) {
 					SerialNode::writeToPort(&header, pData, datasize, pPort);
 					pPort = (SerialPort*) pPort->pNext;
+					MPRINTLN("SerialNode::send> successe3");
 				}
 			}
 		}
 
+		MPRINTLN("SerialNode::send> success");
 		return header.aktid;
 	}
 
@@ -539,16 +561,17 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, byte* pData,
 	}
 	serialTx.setPort(pPort);
 	serialTx.sendPreamble();
-	serialTx.sendRawData((byte*) &pHeader, sizeof(tSerialHeader));
+	serialTx.sendRawData((byte*) pHeader, sizeof(tSerialHeader));
 	if (pData && datasize > 0) {
 		serialTx.sendRawData((byte*) pData, datasize);
 	}
 	serialTx.sendPostamble();
-	MPRINTLNSVAL("send to port: ", pPort->remoteSysId);
+	MPRINTLNSVAL("SerialNode::writeToPort> send to port: ", pPort->remoteSysId);
 	PRINTLNHEADER(pHeader);
 	if (pData) {
 		MPRINTLNSVAL("datasize: ", datasize);
 	}
+	MPRINTLN("SerialNode::writeToPort success");
 	return pHeader->aktid;
 }
 

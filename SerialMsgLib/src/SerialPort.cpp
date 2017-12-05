@@ -39,14 +39,16 @@ SerialPort::SerialPort(byte remoteSysId){
 	}
 	pLast->pNext=this;
 };
-SerialPort::~SerialPort() {};
+SerialPort::~SerialPort() {
+
+};
 
 
 void SerialPort::createBuffer(size_t maxDataSize) {
 	if(serialRxState.pBuffer){
 			delete serialRxState.pBuffer;
 	};
-	serialRxState.bufferSize = maxDataSize + sizeof(serPostamble) +sizeof (tSerialHeader);
+	serialRxState.bufferSize = maxDataSize + sizeof(serPreamble) +sizeof (tSerialHeader) + sizeof(serPostamble);
 	serialRxState.pBuffer = new byte[serialRxState.bufferSize];
 }
 
