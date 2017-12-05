@@ -27,7 +27,7 @@ SoftSerialPort::SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte remoteSysId)
 
 SoftSerialPort::~SoftSerialPort(){
 	if (deleteSoftwareSerial) {
-		delete pSoftwareSerial;
+		//delete pSoftwareSerial;
 	}
 }
 

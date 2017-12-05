@@ -105,15 +105,23 @@ public:
 	 * over the ports. If you do not specify a specific serialport, the node tries to
 	 * send or receive on all ports until it is connected and the nodes port is set.
 	 * > localNodeId    ... local address of this node . Must be unique for one system
+	 * > active			...	true, node sends connection requests to remote node
+	 * 					... false nodes waits for connection request from remote
 	 * > remoteSystemId	... the id of the remote system. All connected systems have a unique id
-	 * 						If set, the node sends connection requests to the remote node.
-	 * 						If not set or 0, the node is passive and waits to be connected
-	 * 						by a connection request of an active node
-	 * > remoteNodeId	... id of the remote node
-  	 *
+	 * 						If set and node is active,  it sends connection requests to the remote node(s).
+	 * 						If set and node is passive, it waits for CR from the remote node(s).
+	 * 						If not set and node is passive and waits to be connected from any active node
+	 * 						If not set and active, send CR to all remote passive system nodes, that wants
+	 * 						to connect. (first wins)
+	 *
+	 * > remoteNodeId	... id of the remote node, see remoteSystemId
+	 * 						If set and node is active, only try to connect to one remote node
+	 * 						If set and node is passive, only wait for connect to one remote node
+	 * 						If not set (or 0) and active try to connect to all remote nodes of a system (remoteSystemId)
+	 * 						If not set (or 0) and passive wait for connect to  remote nodes a system (remoteSystemId)
 	 * > pSerialPort	... if set the node can only communicate over this port.
 	 */
-	SerialNode(byte localNodeId, byte remoteSysId=0,byte remoteNodeId=0,SerialPort* pSerialPort=NULL);
+	SerialNode(byte localNodeId, bool active=false, byte remoteSysId=0,byte remoteNodeId=0,SerialPort* pSerialPort=NULL);
 
 	virtual ~SerialNode();
 
@@ -131,23 +139,32 @@ public:
 	 * >										 	passive node waits to be connected from any node of the remote system
 	 * >
 	 * > timeout			...timeout in msec , default/0 = wait until connect
-	 * > reqPeriod        	...check period for connection, default/0  10 msec
-	 * < returns 			...true	if the nodes are connected before timeout expires
+	 * > reqPeriod        	...period for active connection requests, default 200 msec
+	 * < returns 			...true	if the node is connected before timeout expires
 	 */
-	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=1000);
+	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=200);
 
 
 	 /*
 	  *  static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
 	  *  connect all active and passive nodes in the system
+	  *  all nodes have to be ready to connect -> setReady(true)
+	  *  > timeout		...timeout in msec , default/0 = wait until all nodes connected
+	  *  > reqPeriod	...period for active connection requests, default 200 msec
+	  *  < returns 		...true	if the nodes are connected before timeout expires
 	  */
-	 static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
+	 static bool connectNodes(unsigned long timeOut=0, unsigned long reqPeriod=200);
 
+
+	 /**
+	  * static bool areAllNodesConnected();
+	  * <  returns 		...true	if all nodes connected , or no node found
+	  */
+	 static bool areAllNodesConnected();
 
 	/*
 	 * bool setReady(bool bReady);
-	 * > bReady  true the node is ready to be connected
-	 *
+	 * > bReady  	...true the node is ready to be connected
 	 */
 	void setReady(bool bReady);
 
@@ -246,12 +263,12 @@ public:
 	bool isConnected() ;
 
 
-	void* pNext=NULL; 	// next SerialNode , alle nodes are in a linked list
+	/**
+	 * public pointer variables
+	 */
+	void* pNext=NULL; 	// next SerialNode , all nodes are in a linked list
 	tCcb* pCcb = NULL;	// connection data
 	void (*pCallBack)(tSerialHeader* pHeader,byte* pData,size_t datasize)=NULL; // user callback
-
-
-
 
 
 private:
@@ -260,13 +277,11 @@ private:
 	static LcbList lcbList;
 	static SerialNode* pSerialNodeList;
 
-
 	/*
 	 * called by static Update
 	 */
 
-	SerialPort* pSerialPort =NULL; // if set, tx and rx only use this port
-								   // otherwise they send and listen on all ports
+	SerialPort* pSerialPort =NULL; // if set the node is attached to a port
 
 };
 

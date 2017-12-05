@@ -133,8 +133,8 @@ SerialNode* SerialNode::getNodeList() {
 	return pSerialNodeList;
 }
 
-SerialNode::SerialNode(byte localNodeId, byte remoteSysId, byte remoteNodeId,
-		SerialPort* pSerialPort) {
+SerialNode::SerialNode(byte localNodeId, bool active, byte remoteSysId,
+		byte remoteNodeId, SerialPort* pSerialPort) {
 	this->pSerialPort = pSerialPort;
 	this->pCcb = new tCcb();
 	tAddr lAddr(systemId, localNodeId);
@@ -142,7 +142,7 @@ SerialNode::SerialNode(byte localNodeId, byte remoteSysId, byte remoteNodeId,
 
 	pCcb->localAddr = lAddr;
 	pCcb->remoteAddr = rAddr;
-	pCcb->active = (rAddr.sysId > 0) ? true : false;
+	setActive(active);
 
 	SerialNode* pNode = getNodeList();
 
@@ -183,12 +183,11 @@ void SerialNode::setReady(bool bReady) {
 
 bool SerialNode::setActive(bool bActive) {
 	this->pCcb->active = bActive;
-	setReady(bActive);
 	return this->pCcb->active;
 }
 
 bool SerialNode::isActive() {
-	return this->pCcb->active && pCcb->remoteAddr.sysId > 0;
+	return this->pCcb->active;
 }
 
 bool SerialNode::isReadyToConnect() {
@@ -385,22 +384,32 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, byte* pData,
 
 // user request /reply
 
+bool SerialNode::areAllNodesConnected() {
+	SerialNode* pNode = SerialNode::pSerialNodeList;
+	bool connected = true;
+
+	while (pNode) {
+		connected = connected && pNode->isConnected();
+		pNode = (SerialNode*) pNode->pNext;
+	}
+	return connected;
+}
+
 bool SerialNode::connectNodes(unsigned long timeOut, unsigned long reqPeriod) {
 
 	SerialNode* pNode = SerialNode::pSerialNodeList;
 	unsigned long endMillis = millis() + timeOut;
 	unsigned long reqMillis = 0;
-	bool connected = false;
+	bool connected = areAllNodesConnected();
 
-	if (pNode) {
-		while (millis() <= endMillis && !connected) {
+	if (pNode && !connected) {
+		while ((millis() <= endMillis || timeOut==0) && !connected) {
 			serialRx.readNextOnAllPorts();
 			connected = true;
 			while (pNode) {
 				connected = connected && pNode->isConnected();
 				if (!pNode->isConnected()) {
 					if (pNode->isReadyToConnect()) {
-
 						if (pNode->isActive()) {
 							if (millis() > reqMillis) {
 								pNode->send(CMD_CR);
@@ -414,7 +423,12 @@ bool SerialNode::connectNodes(unsigned long timeOut, unsigned long reqPeriod) {
 			}
 		}
 	} else {
-		connected = false;
+		if (pNode) {
+			MPRINTLNS("SerialNode::connectNodes> all nodes connected");
+		} else {
+			MPRINTLNS("SerialNode::connectNodes> no nodes to connect");
+		}
+		connected = true;
 	}
 
 	return connected;
@@ -428,14 +442,13 @@ bool SerialNode::connect(byte remoteSysId, byte remoteNodeId,
 	pCcb->remoteAddr.nodeId =
 			(remoteNodeId > 0) ? remoteNodeId : pCcb->remoteAddr.nodeId;
 
-	pCcb->status = CONNECTION_STATUS_READY;
-
+	setReady(true);
 	unsigned long endMillis = millis() + timeOut;
 	unsigned long reqMillis = 0;
 	MPRINTLNSVAL("SerialNode::connect> node: ", pCcb->localAddr.nodeId);
 	if (isActive()) {
 		MPRINTLNS("SerialNode::connect> node is active");
-	}else{
+	} else {
 		MPRINTLNS("SerialNode::connect> wait for connection request");
 	}
 
