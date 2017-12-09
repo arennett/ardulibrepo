@@ -28,8 +28,9 @@ unsigned int AcbList::getNextAktId() {
 tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 	tAcb* pLast = getLastAcbEntry();
 	tAcb* pNew = new tAcb();
+
 	;
-	if (pLast == NULL) {
+	if (!pLast) {
 		pRoot = pNew;
 	} else {
 		pLast->pNext = pNew;
@@ -39,8 +40,9 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 	pNew->toAddr   	= pHeader->toAddr;
 	pNew->status 	= ACB_STATUS_CREATED;
 	pHeader->aktid	= pNew->aktid = getNextAktId();
-
+	MPRINTLNSVAL ("size acb :" ,sizeof (tAcb));
 	MPRINTLNSVAL("AcbList::createAcb> ",pNew->aktid);
+
 	return pNew;
 
 }
@@ -51,6 +53,7 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 		if (pAcb->cmd == pHeader->cmd && pAcb->fromAddr == pHeader->fromAddr
 			&& pAcb->toAddr == pHeader->toAddr) {
 				//reuse open (unacknowledged) acb
+			    MPRINTSVAL("AcbList::createOrUseAcb> reuse acb: ",pAcb->aktid);
 				pHeader->aktid = pAcb->aktid = getNextAktId();
 				pAcb->status = ACB_STATUS_OPEN;
 
@@ -61,6 +64,8 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 	}
 	if (!pAcb) {
 		pAcb = createAcb(pHeader);
+	}else{
+		MPRINTLNSVAL(" , new aktid: ",pAcb->aktid);
 	}
 
 

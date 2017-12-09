@@ -9,21 +9,7 @@
 #define SERIALPORT_H_
 
 #include "Arduino.h"
-
-
-
-typedef struct {
-	//used from SerialRx
-	byte* pBuffer;
-	size_t bufferSize=0;
-	byte preAmCount=0;
-	byte postAmCount=0;
-	byte dataCount=0;
-	byte prevDataCount=0;
-	bool dataCollect=false;
-	byte lastByte=0;
-} tSerialRxState;
-
+class SerialRx;
 
 class SerialPort {
 public:
@@ -52,10 +38,9 @@ public:
 	virtual bool isListening()=0;
 	void* pNext = NULL;
 	byte remoteSysId=0;
-
-
-
-	tSerialRxState serialRxState;
+	byte* pBuffer=NULL;
+	size_t bufferSize=0;
+	SerialRx* pSerialRx=NULL;
 
 private:
 

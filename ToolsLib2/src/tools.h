@@ -1,12 +1,14 @@
 #ifndef tools_h
 #define tools_h
 
+#define __ASSERT_USE_STDERR
+#include <assert.h>
 
 // uncomment to switch off all messages
 // #define MPRINT_OFF
 // comment ti switch on debug messages
 // #define DPRINT_ON
-
+#define DPRINT_ON
 
 #ifndef MPRINT_OFF
 
@@ -17,11 +19,11 @@
 	#define MPRINTS(x)   	MPRINT(F(x))
 	#define MPRINTLNS(x)    MPRINTLN(F(x))
 
-	#define MPRINTSVAL(s,x)  	MPRINTS(s);MPRINTLN(x)
+	#define MPRINTSVAL(s,x)  	MPRINTS(s);MPRINT(x)
     #define MPRINTLNSVAL(s,x)  	MPRINTS(s);MPRINTLN(x)
 	#define MPRINTSVALS(s,x,z)  MPRINTS(s);MPRINT(x);MPRINTLNS(z)
 
-	#define MPRINTFREE  MPRINTSVAL("free sram : " ,(freeRam()))
+	#define MPRINTFREE  MPRINTLNSVAL("free sram : " ,(freeRam()))
 
 
 #else
@@ -30,8 +32,8 @@
 	#define MPRINTLN(x)
 	#define MPRINTS(x)
 	#define MPRINTLNS(x)
+    #define MPRINTSVAL(s,x)
     #define MPRINTLNSVAL(s,x)
-	#define MPRINTSVAL(s,x)
 	#define MPRINTSVALS(s,x,z)
 
 	#define MPRINTFREE
@@ -56,6 +58,7 @@
 	#define DPRINTS(x) 			MPRINTS(x)
 	#define DPRINTLNS(x) 		MPRINTLNS(x)
 	#define DPRINTSVAL(s,x) 	MPRINTSVAL(s,x)
+    #define DPRINTLNSVAL(s,x) 	MPRINTLNSVAL(s,x)
 	#define DPRINTSVALS(s,x,z) 	MPRINTSVALS(s,x,z)
 	#define DPRINTFREE 			MPRINTFREE
 

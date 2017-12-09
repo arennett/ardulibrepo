@@ -26,7 +26,7 @@ class SerialNode {
 public:
 
 	static SerialTx  serialTx ;
-	static SerialRx  serialRx ;
+
 	static byte		 systemId ;
 
 
@@ -142,7 +142,7 @@ public:
 	 * > reqPeriod        	...period for active connection requests, default 200 msec
 	 * < returns 			...true	if the node is connected before timeout expires
 	 */
-	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=200);
+	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=500);
 
 
 	 /*

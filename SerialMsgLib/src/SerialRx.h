@@ -13,8 +13,6 @@
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
 #include "SerialPort.h"
-#include "SoftSerialPort.h"
-
 
 
 
@@ -35,6 +33,16 @@ public:
 	 * > maxDataSize 	...data size, to create an internal buffer (dataSize + postamble size)
 	 */
 	SerialRx(size_t maxDataSize);
+
+	SerialRx(SerialPort* pSerialPort,size_t maxDataSize,void (*ptr)(const byte* data, size_t data_size,SerialPort* pPort)) ;
+
+
+	/*
+	 * void readNextOnAllPorts() ;
+	 * for all instantiated SerialPorts
+	 * read next byte into the port buffer
+	 */
+	static void readNextOnAllPorts() ;
 
 
 	/**
@@ -76,12 +84,6 @@ public:
 	bool readNext();
 
 
-	/*
-	 * void readNextOnAllPorts() ;
-	 * for all instantiated SerialPorts
-	 * read next byte into the port buffer
-	 */
-	void readNextOnAllPorts() ;
 
 
 	/**
@@ -140,9 +142,15 @@ public:
 	virtual ~SerialRx();
 private:
 	void (*updateCallback)(const byte* data, size_t data_size,SerialPort* pPort);
-
-	SerialPort* pPort= NULL; 		// current port
-	tSerialRxState* pState = NULL;	// all variables to be saved when switching to another port
+	byte* pRecBuffer=NULL;
+	SerialPort* pSerialPort= NULL;;
+	byte preAmCount=0;
+	byte postAmCount=0;
+	byte dataCount=0;
+	byte prevDataCount=0;
+	bool dataCollect=false;
+	size_t bufferSize=0;
+	byte lastByte=0;
 
 };
 

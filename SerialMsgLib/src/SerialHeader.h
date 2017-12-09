@@ -13,9 +13,8 @@
 #define PRINTADDR(x) MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
 #define PRINTLNADDR(x) PRINTADDR(x);MPRINTLNS("");
 
-#define PRINTHEADER(pH) PRINTADDR(pH->fromAddr);MPRINTS(" to ");PRINTLNADDR(pH->toAddr);\
-						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTSVAL(" par: ",pH->par);
-#define PRINTLNHEADER(pH);PRINTHEADER(pH);MPRINTLNS("");
+#define PRINTLNHEADER(pH) PRINTADDR(pH->fromAddr);MPRINTS(" to ");PRINTLNADDR(pH->toAddr);\
+						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTLNSVAL(" par: ",pH->par);
 
 
 

@@ -12,20 +12,6 @@
 
 SerialPort* SerialPort::pSerialPortList=NULL;
 
-SerialPort* SerialPort::getPort(byte remoteSysId){
-	SerialPort* pPort = pSerialPortList;
-	while (pPort) {
-		if (pPort->remoteSysId==remoteSysId){
-			return pPort;
-		}
-		pPort=(SerialPort*) pPort->pNext;
-	}
-	return NULL;
-}
-
-SerialPort::SerialPort(){
-};
-
 SerialPort::SerialPort(byte remoteSysId){
 	this->remoteSysId=remoteSysId;
 	SerialPort* pLast = pSerialPortList;
@@ -38,18 +24,42 @@ SerialPort::SerialPort(byte remoteSysId){
 		pLast=(SerialPort*)pLast->pNext;
 	}
 	pLast->pNext=this;
+
+	//pSerialRx= new SerialRx(this,20,SerialNode::update);
 };
+
 SerialPort::~SerialPort() {
 
 };
 
 
+SerialPort* SerialPort::getPort(byte remoteSysId){
+	SerialPort* pPort = pSerialPortList;
+	while (pPort) {
+		if (pPort->remoteSysId==remoteSysId){
+			return pPort;
+		}
+		pPort=(SerialPort*) pPort->pNext;
+	}
+	return NULL;
+}
+
+
+
+
+SerialPort::SerialPort(){
+
+};
+
+
+
+
 void SerialPort::createBuffer(size_t maxDataSize) {
-	if(serialRxState.pBuffer){
-			delete serialRxState.pBuffer;
+	if(pBuffer){
+			delete pBuffer;
 	};
-	serialRxState.bufferSize = maxDataSize + sizeof(serPreamble) +sizeof (tSerialHeader) + sizeof(serPostamble);
-	serialRxState.pBuffer = new byte[serialRxState.bufferSize];
+	bufferSize = maxDataSize + sizeof(serPreamble) +sizeof (tSerialHeader) + sizeof(serPostamble);
+	pBuffer = new byte[bufferSize];
 }
 
 
