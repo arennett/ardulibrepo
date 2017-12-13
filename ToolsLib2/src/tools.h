@@ -3,13 +3,18 @@
 
 #define __ASSERT_USE_STDERR
 #include <assert.h>
+#define ASSERTNODE(pNode)  assert(pNode->pCcb->localAddr.sysId==10);assert(pNode->pCcb->localAddr.nodeId==1);
+#define ADDRESSOFNODE(pNode) MPRINTLNSVAL("address of node: ",long ((void*) pNode));
+#define DUMPNODE(pNode) for (size_t i=0;i < sizeof(SerialNode);i++) {MPRINTSVAL(" node byte i :",i);MPRINTS(" ");MPRINTHEX(((byte*) pNode)[i]);MPRINTLN("");}
+
+
 
 // uncomment to switch off all messages
 // #define MPRINT_OFF
 // comment ti switch on debug messages
 // #define DPRINT_ON
 #define DPRINT_ON
-
+//#define MPRINT_OFF
 #ifndef MPRINT_OFF
 
 	#define MPRINT(x)   	Serial.print((x))
