@@ -34,6 +34,7 @@ SerialTx::~SerialTx() {
 }
 
 bool SerialTx::setPort(SerialPort* pSerialPort) {
+	assert(pSerialPort);
 	this->pSerialPort =pSerialPort;
 	return listen();
 }
@@ -56,19 +57,20 @@ void SerialTx::sendData(const byte* data, size_t datasize) {
 }
 
 void SerialTx::sendRawData(const byte* data, size_t datasize) {
+	DPRINTLNSVAL("SerialTx::sendRawData - size:",datasize);
 	pSerialPort->write(data,datasize);
-	DPRINTSVAL("SerialTx::sendRawData - size:",datasize);
 }
 
 void SerialTx::sendPreamble() {
-	MPRINTLNS("sending preamble");
-	pSerialPort->write(serPreamble,sizeof serPreamble);
 	DPRINTLNS("SerialTx::sendPreamble");
+	pSerialPort->write(serPreamble,sizeof serPreamble);
+
 }
 
 void SerialTx::sendPostamble() {
-	pSerialPort->write(serPostamble,sizeof serPostamble);
 	DPRINTLNS("SerialTx::sendPostamble");
+	pSerialPort->write(serPostamble,sizeof serPostamble);
+
 }
 
 

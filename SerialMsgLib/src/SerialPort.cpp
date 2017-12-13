@@ -25,6 +25,12 @@ SerialPort::SerialPort(byte remoteSysId){
 	}
 	pLast->pNext=this;
 
+	pPortRxTxMapper =new SerialPortRxTxMapper(this);
+	pSerialRx = pPortRxTxMapper->pSerialRx;
+	pSerialTx = pPortRxTxMapper->pSerialTx;
+
+
+
 	//pSerialRx= new SerialRx(this,20,SerialNode::update);
 };
 
@@ -55,11 +61,8 @@ SerialPort::SerialPort(){
 
 
 void SerialPort::createBuffer(size_t maxDataSize) {
-	if(pBuffer){
-			delete pBuffer;
-	};
-	bufferSize = maxDataSize + sizeof(serPreamble) +sizeof (tSerialHeader) + sizeof(serPostamble);
-	pBuffer = new byte[bufferSize];
+	pPortRxTxMapper->createRxBuffer(maxDataSize);
+
 }
 
 

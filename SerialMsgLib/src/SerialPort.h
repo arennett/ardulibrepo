@@ -9,7 +9,10 @@
 #define SERIALPORT_H_
 
 #include "Arduino.h"
+#include "SerialPortRxTxMapper.h"
+
 class SerialRx;
+class SerialTx;
 
 class SerialPort {
 public:
@@ -41,6 +44,9 @@ public:
 	byte* pBuffer=NULL;
 	size_t bufferSize=0;
 	SerialRx* pSerialRx=NULL;
+	SerialTx* pSerialTx=NULL;
+	SerialPortRxTxMapper* pPortRxTxMapper =NULL;
+
 
 private:
 

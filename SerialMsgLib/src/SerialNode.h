@@ -27,6 +27,7 @@ public:
 
 	static SerialTx  serialTx ;
 
+
 	static byte		 systemId ;
 
 
@@ -73,6 +74,14 @@ public:
 	 * 				the id must be unique for all systems in the node network
 	 */
 	static void init(byte systemId);
+
+
+	/**
+	 * SerialNode* createNode(byte localNodeId, bool active=false, byte remoteSysId=0,byte remoteNodeId=0,SerialPort* pSerialPort=NULL);
+	 * factory method for SerialNodes
+	 * see SerialNode(...)
+	 */
+	static SerialNode* createNode(byte localNodeId, bool active=false, byte remoteSysId=0,byte remoteNodeId=0,SerialPort* pSerialPort=NULL);
 
 	/*
 	 * void writeToPort(tSerialHeader* pHeader,byte* data, size_t datasize ,SerialPort* pPort);
@@ -199,7 +208,7 @@ public:
 	 * > datasize	...size of optional data
 	 * > pPort 		...port on which the message came in
 	 */
-	void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize,SerialPort* pPort);
+	static void onMessage(tSerialHeader* pHeader,const byte* pData,size_t datasize,SerialPort* pPort,SerialNode* pNode);
 
 
 	/*
@@ -239,7 +248,7 @@ public:
 	 * (>) pData		Application Data
 	 * (>) datasize		datasize of application data
 	 */
-	void setReceiveCallBack(void (*ptr)(tSerialHeader* pHeader,byte* pData,size_t datasize));
+	void setReceiveCallBack(void (*ptr)(const tSerialHeader* pHeader,const byte* pData,size_t datasize));
 
 
 	/*
@@ -268,20 +277,21 @@ public:
 	 */
 	void* pNext=NULL; 	// next SerialNode , all nodes are in a linked list
 	tCcb* pCcb = NULL;	// connection data
-	void (*pCallBack)(tSerialHeader* pHeader,byte* pData,size_t datasize)=NULL; // user callback
-
-
-private:
+	void (*pCallBack)(const tSerialHeader* pHeader,const byte* pData,size_t datasize)=NULL; // user callback
+	SerialPort* pSerialPort =NULL; // if set the node is attached to a port
 
 	static AcbList acbList;
 	static LcbList lcbList;
 	static SerialNode* pSerialNodeList;
 
+private:
+
+
+
 	/*
 	 * called by static Update
 	 */
 
-	SerialPort* pSerialPort =NULL; // if set the node is attached to a port
 
 };
 

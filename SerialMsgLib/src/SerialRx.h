@@ -12,9 +12,8 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
-#include "SerialPort.h"
 
-
+class SerialPort;
 
 class SerialRx {
 public:
@@ -86,14 +85,7 @@ public:
 
 
 
-	/**
-	 * bool readNext(byte* b);
-	 * > reads next byte into the buffer
-	 * < return : true when data complete and callBack was called
-	 * b	...current byte (can be data or pre-/postamble bytes
-	 */
 
-	bool readNext(byte* b);
 
 	/**
 	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
