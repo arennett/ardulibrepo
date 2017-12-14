@@ -19,7 +19,7 @@ public:
 	static SerialPort* pSerialPortList;
 	static SerialPort* getPort(byte remoteSysId);
 
-	SerialPort();
+
 
 	/**
 	 * SerialPort(byte remoteSysId);
@@ -29,7 +29,27 @@ public:
 	SerialPort(byte remoteSysId);
 
 	virtual ~SerialPort();
-	void    createBuffer(size_t size);
+
+	/*
+	 *  createDataBuffer(size_t dataSize);
+	 *  creates (recreates) the data buffer for receiving messages
+	 *  > datasize	...	size for optional data (discount the header)
+	 */
+	void    createDataBuffer(size_t dataSize);
+
+	/*
+	 * SerialRx* getRx();
+	 * < returns	...the receiver for this port
+	 */
+	SerialRx* getRx();
+
+	/*
+	 * SerialRx* getTx();
+	 * < returns	...the transmitter for this port
+	 */
+
+	SerialTx* getTx();
+
 
 
 	virtual byte read()=0;
@@ -43,16 +63,14 @@ public:
 	byte remoteSysId=0;
 	byte* pBuffer=NULL;
 	size_t bufferSize=0;
-	SerialRx* pSerialRx=NULL;
-	SerialTx* pSerialTx=NULL;
+
 	SerialPortRxTxMapper* pPortRxTxMapper =NULL;
 
 
 private:
-
+	SerialPort();
 
 };
-
 
 //SerialPort* pSerialPortList = NULL;
 

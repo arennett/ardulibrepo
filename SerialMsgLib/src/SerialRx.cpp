@@ -32,7 +32,7 @@ SerialRx::SerialRx(SerialPort* pSerialPort, size_t maxDataSize,
 
 bool SerialRx::setPort(SerialPort* pSerialPort) {
 	this->pSerialPort = pSerialPort;
-	return listen();
+	return true;
 }
 
 void SerialRx::createBuffer(size_t maxDataSize) {
@@ -66,9 +66,9 @@ void SerialRx::readNextOnAllPorts() {
 
 		//MPRINTLNSVAL("SerialRx::readNextOnAllPorts> nrofports: ", nrofports);
 
-		if (pport->pSerialRx) {
+		if (pport->getRx()) {
 				//DPRINTLNS("SerialRx::readNextOnAllPorts> data available");
-			if (pport->pSerialRx->readNext()) {
+			if (pport->getRx()->readNext()) {
 				//MPRINTLNS(
 				//		"SerialRx::readNextOnAllPorts> receiving a message... ");
 			}

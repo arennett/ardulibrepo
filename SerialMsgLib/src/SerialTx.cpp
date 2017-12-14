@@ -36,7 +36,7 @@ SerialTx::~SerialTx() {
 bool SerialTx::setPort(SerialPort* pSerialPort) {
 	assert(pSerialPort);
 	this->pSerialPort =pSerialPort;
-	return listen();
+	return true;
 }
 
 

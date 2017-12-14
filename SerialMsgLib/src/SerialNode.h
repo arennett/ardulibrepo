@@ -6,7 +6,6 @@
  */
 #include <stddef.h>
 #include "SerialHeader.h"
-#include "SerialPort.h"
 #include "SerialTx.h"
 #include "SerialRx.h"
 #include "AcbList.h"
@@ -18,15 +17,10 @@
 
 
 
-
-
 class SerialNode {
 
 
 public:
-
-	static SerialTx  serialTx ;
-
 
 	static byte		 systemId ;
 

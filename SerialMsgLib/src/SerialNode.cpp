@@ -8,7 +8,7 @@
 #include "SerialRx.h"
 #include "SerialPort.h"
 #include "SerialNode.h"
-#include "AcbList.h"
+
 
 tAddr fromAddr;
 tAddr toAddr;
@@ -33,7 +33,7 @@ void SerialNode::update(const byte* pMessage, size_t messageSize,
 		dsize = messageSize - hsize;
 	}
 	assert(messageSize >= hsize);
-    assert(dsize >=0);
+
 
 	if (pHeader->toAddr.sysId == SerialNode::systemId) {
 		//local system
@@ -47,30 +47,24 @@ void SerialNode::update(const byte* pMessage, size_t messageSize,
 			// find node in our system
 			while (pNode) {
 				if (pNode->pCcb->localAddr == pHeader->toAddr) {
-					// found
-					break;
+					// node found
+					MPRINTLNS("SerialNode::update> node found");
+					ASSERTNODE(pNode);
+					pNode->onMessage(pHeader,
+							(dsize > 0) ? (byte*) pHeader + hsize : NULL, dsize,
+							pPort,pNode);
+					return;
 				}
 				pNode = (SerialNode*) pNode->pNext;
 			}
-			if (!pNode) {
-				MPRINTLNS("SerialNode::update> node not found : ");
-				PRINTLNHEADER(pHeader);
-				return;
-			} else {
-				MPRINTLNS("SerialNode::update> node found");
-				ASSERTNODE(pNode);
-				//pNode->onMessage(pHeader,
-				//		(dsize > 0) ? (byte*) pHeader + hsize : NULL, dsize,
-				//		pPort);
-				//pNode->send(CMD_NAK,223,0,0,0,11,4);
-				SerialNode::onMessage(pHeader, NULL, 0, SerialPort::pSerialPortList,pNode);
-				return;
-			}
+			MPRINTLNS("SerialNode::update> node not found : ");
+			PRINTLNHEADER(pHeader);
+			return;
 		}
 
 		assert(pHeader->toAddr.nodeId == 0);
 		// send CR to first found passive but ready(to connect) node without remote node id
-		// whithout remote system id or equal system id to headers from system id
+		// and whithout remote system id or equal system id to headers from system id
 
 		if (pHeader->cmd == CMD_CR) {
 			SerialNode* pNode = getNodeList();
@@ -78,13 +72,12 @@ void SerialNode::update(const byte* pMessage, size_t messageSize,
 				if (!pNode->isActive() && pNode->isReadyToConnect()
 						&& (pNode->pCcb->remoteAddr.sysId == 0
 							|| pNode->pCcb->remoteAddr.sysId == pHeader->fromAddr.sysId)
-						&& pNode->pCcb->remoteAddr.nodeId == 0) {
+						&& pNode->pCcb->remoteAddr.nodeId == 0) {// only as comment
 					      onMessage(pHeader,(dsize > 0) ? (byte*) pHeader + hsize : NULL, dsize, pPort,pNode);
 					return;
 				}
 				pNode = (SerialNode*) pNode->pNext;
 			}
-			assert(!pNode);
 			MPRINTLNS("SerialNode::update> no ready node for CR found");
 			return;
 		} else {
@@ -114,8 +107,7 @@ bool SerialNode::forward(const byte* pMessage, size_t messageSize,
 
 // port or linked port found
 	if (pTargetPort) {
-		serialTx.setPort(pTargetPort);
-		serialTx.sendData(pMessage, messageSize);
+		pTargetPort->getTx()->sendData(pMessage, messageSize);
 		return true;
 	}
 
@@ -136,8 +128,7 @@ bool SerialNode::forward(const byte* pMessage, size_t messageSize,
 
 	byte cnt = 0;
 	while (pport && pport->remoteSysId != pSourcePort->remoteSysId) {
-		serialTx.setPort(pTargetPort);
-		serialTx.sendData(pMessage, messageSize);
+		pport->getTx()->sendData(pMessage, messageSize);
 		pport = (SerialPort*) pport->pNext;
 		++cnt;
 	}
@@ -642,13 +633,12 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, byte* pData,
 		acbList.createOrUseAcb(pHeader);
 	}
 
-	serialTx.setPort(pPort);
-	serialTx.sendPreamble();
-	serialTx.sendRawData((byte*) pHeader, sizeof(tSerialHeader));
+	pPort->getTx()->sendPreamble();
+	pPort->getTx()->sendRawData((byte*) pHeader, sizeof(tSerialHeader));
 	if (pData && datasize > 0) {
-		serialTx.sendRawData((byte*) pData, datasize);
+		pPort->getTx()->sendRawData((byte*) pData, datasize);
 	}
-	serialTx.sendPostamble();
+	pPort->getTx()->sendPostamble();
 	MPRINTLNSVAL("SerialNode::writeToPort> send to port: ", pPort->remoteSysId);
 	PRINTLNHEADER(pHeader);
 	if (pData) {

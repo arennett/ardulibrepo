@@ -13,23 +13,24 @@
 SerialPort* SerialPort::pSerialPortList=NULL;
 
 SerialPort::SerialPort(byte remoteSysId){
+	MPRINTLNS("SerialPort::SerialPort1(byte remoteSysId)");
 	this->remoteSysId=remoteSysId;
 	SerialPort* pLast = pSerialPortList;
 
+
 	if (!pLast) {
 		pSerialPortList =this;
-		return;
+	}else {
+		while(!pLast->pNext) {
+			pLast=(SerialPort*)pLast->pNext;
+		}
+		pLast->pNext=this;
 	}
-	while(!pLast->pNext) {
-		pLast=(SerialPort*)pLast->pNext;
-	}
-	pLast->pNext=this;
 
-	pPortRxTxMapper =new SerialPortRxTxMapper(this);
-	pSerialRx = pPortRxTxMapper->pSerialRx;
-	pSerialTx = pPortRxTxMapper->pSerialTx;
-
-
+    pPortRxTxMapper =new SerialPortRxTxMapper(this);
+	MPRINTFREE;
+	createDataBuffer(0);
+	MPRINTLNS("SerialPort::SerialPort> inited");
 
 	//pSerialRx= new SerialRx(this,20,SerialNode::update);
 };
@@ -50,6 +51,15 @@ SerialPort* SerialPort::getPort(byte remoteSysId){
 	return NULL;
 }
 
+SerialRx* SerialPort::getRx(){
+	assert(pPortRxTxMapper->getRx());
+	return pPortRxTxMapper->getRx();
+}
+SerialTx* SerialPort::getTx(){
+	assert(pPortRxTxMapper->getTx());
+	return pPortRxTxMapper->getTx();
+}
+
 
 
 
@@ -60,7 +70,7 @@ SerialPort::SerialPort(){
 
 
 
-void SerialPort::createBuffer(size_t maxDataSize) {
+void SerialPort::createDataBuffer(size_t maxDataSize) {
 	pPortRxTxMapper->createRxBuffer(maxDataSize);
 
 }

@@ -12,8 +12,7 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
-
-class SerialPort;
+#include "SerialPort.h"
 
 class SerialRx {
 public:

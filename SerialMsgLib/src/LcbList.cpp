@@ -5,8 +5,9 @@
  *      Author: rea
  */
 
-#include "LcbList.h"
 #include <tools.h>
+#include "LcbList.h"
+
 
 LcbList::LcbList() {
 	// TODO Auto-generated constructor stub

@@ -1,6 +1,6 @@
 #ifndef tools_h
 #define tools_h
-
+#define NDEBUG
 #define __ASSERT_USE_STDERR
 #include <assert.h>
 #define ASSERTNODE(pNode)  assert(pNode->pCcb->localAddr.sysId==10);assert(pNode->pCcb->localAddr.nodeId==1);
@@ -13,7 +13,7 @@
 // #define MPRINT_OFF
 // comment ti switch on debug messages
 // #define DPRINT_ON
-#define DPRINT_ON
+//#define DPRINT_ON
 //#define MPRINT_OFF
 #ifndef MPRINT_OFF
 
@@ -54,18 +54,21 @@
 	#define DPRINTS(x)
 	#define DPRINTLNS(x)
 	#define DPRINTSVAL(s,x)
+    #define DPRINTLNSVAL(s,x)
 	#define DPRINTSVALS(s,x,z)
 	#define DPRINTFREE
 #else
-    #define DPRINT(x) 			MPRINT(x)
-	#define DPRINTHEX(x) 		MPRINTHEX(x)
-	#define DPRINTLN(x) 		MPRINTLN(x)
-	#define DPRINTS(x) 			MPRINTS(x)
-	#define DPRINTLNS(x) 		MPRINTLNS(x)
-	#define DPRINTSVAL(s,x) 	MPRINTSVAL(s,x)
-    #define DPRINTLNSVAL(s,x) 	MPRINTLNSVAL(s,x)
-	#define DPRINTSVALS(s,x,z) 	MPRINTSVALS(s,x,z)
-	#define DPRINTFREE 			MPRINTFREE
+
+
+#define DPRINT(x)			MPRINT(x)
+	#define DPRINTHEX(x)	MPRINTHEX(x)
+	#define DPRINTLN(x)		MPRINTLN(x)
+	#define DPRINTS(x)		MPRINTS(x)
+	#define DPRINTLNS(x)	MPRINTLNS(x)
+	#define DPRINTSVAL(s,x) MPRINTSVAL(s,x)
+    #define DPRINTLNSVAL(s,x) MPRINTLNSVAL(s,x)
+	#define DPRINTSVALS(s,x,z) MPRINTSVALS(s,x,z)
+	#define DPRINTFREE 		MPRINTFREE
 
 #endif
 

@@ -8,7 +8,8 @@
 #ifndef LCBLIST_H_
 #define LCBLIST_H_
 #include "SerialHeader.h"
-#include "SerialPort.h"
+
+class SerialPort;
 
 /* a link between two ports*/
 struct tLcb {
