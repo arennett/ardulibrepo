@@ -9,7 +9,7 @@ byte data[] = {55,99,88,44}; // some data
 void setup()
 {
 	 Serial.begin(9600);
-	 MPRINTLN("setup SerialTestMaster");
+	 MPRINTLNS("setup SerialTestMaster");
 	 stxSerial.begin(9600);
 }
 

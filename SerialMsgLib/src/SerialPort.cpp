@@ -13,7 +13,8 @@
 SerialPort* SerialPort::pSerialPortList=NULL;
 
 SerialPort::SerialPort(byte remoteSysId){
-	MPRINTLNS("SerialPort::SerialPort1(byte remoteSysId)");
+	MPRINTLNSVAL("SerialPort::SerialPort> sysId: ", remoteSysId);
+	ASSERTP( remoteSysId > 0 ,"remoteSysId must be > 0 !");
 	this->remoteSysId=remoteSysId;
 	SerialPort* pLast = pSerialPortList;
 

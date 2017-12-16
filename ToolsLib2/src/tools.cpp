@@ -20,11 +20,14 @@ int freeRam ()
 // handle diagnostic informations given by assertion and abort program execution:
 void __assert(const char *__func, const char *__file, int __lineno, const char *__sexp) {
     // transmit diagnostic informations through serial link.
-	 MPRINTS("ASSERT func : ");Serial.println(__func);
-	 MPRINTS("       file : ");Serial.println(__file);
-     MPRINTS("       line : ");Serial.println(__lineno, DEC);
-     MPRINTS("       val  : ");Serial.println(__sexp);
+
+	 MPRINTS("ASSERT func : ");MPRINTLN(__func);
+	 MPRINTS("       file : ");MPRINTLN(__file);
+     MPRINTS("       line : ");MPRINTLN(__lineno);
+     MPRINTS("       val  : ");MPRINTLN(__sexp);
     Serial.flush();
+
     // abort program execution.
     abort();
+
 }

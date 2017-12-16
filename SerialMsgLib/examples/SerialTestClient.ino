@@ -34,16 +34,16 @@ void loop() {
 
 	// waited receiving
 	// if time expired before message received, waitOnMessage returns false
-	MPRINTLN("waiting ...");
+	MPRINTLNS("waiting ...");
 	if (serialRx.waitOnMessage(rpDat, dataSize, 5000)) {
 		MPRINTSVAL("receive message on wait ...size: ", dataSize);
 		for (size_t i = 0; i < dataSize; i++) {
 			MPRINT(i);
-			MPRINTS(" : ");MPRINTLN(rpDat[i]);
+			MPRINTS(" : ");MPRINTLNS(rpDat[i]);
 		}
 
 	} else {
-		MPRINTLN("timeout ...");
+		MPRINTLNS("timeout ...");
 	}
 	MPRINTFREE
 	;
