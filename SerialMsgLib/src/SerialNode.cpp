@@ -27,12 +27,20 @@ void SerialNode::update(const byte* pMessage, size_t messageSize,
 	assert(pHeader);
 	PRINTLNHEADER(pHeader);
 
+
+
+
 	size_t hsize = sizeof(tSerialHeader);
 	size_t dsize = 0;
 	if (messageSize >= hsize) {
 		dsize = messageSize - hsize;
 	}
 	assert(messageSize >= hsize);
+
+	if(pHeader->toAddr.sysId == 0) {
+		MPRINTLNS("SerialNode::update> systemId must be > 0 ");
+		return;
+	}
 
 	if (pHeader->toAddr.sysId == SerialNode::systemId) {
 		//local system
@@ -87,7 +95,7 @@ void SerialNode::update(const byte* pMessage, size_t messageSize,
 			return;
 		}
 		// end of local system
-	} else {
+	} {
 		//remote system
 		forward(pMessage, messageSize, pPort);
 	}
@@ -225,11 +233,18 @@ bool SerialNode::isReadyToConnect() {
 	return pCcb && (pCcb->status == CONNECTION_STATUS_READY);
 }
 
-bool SerialNode::isConnected() {
+bool SerialNode::isConnected(bool checkRemote) {
 // if port was set, the node can only connect over that port
 // but the node is not connected before the the status is set to connected
-	return pCcb && (pSerialPort && pCcb->status == CONNECTION_STATUS_CONNECTED);
+	bool isConnected = pCcb && (pSerialPort && pCcb->status == CONNECTION_STATUS_CONNECTED);
+	if (isConnected && checkRemote) {
+		tAktId aktId =send(CMD_LIVE);
+		return !waitOnReply(aktId);
+	}
+	return isConnected;
 }
+
+
 
 void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData,
 		size_t datasize, SerialPort* pPort, SerialNode* pNode) {
@@ -506,6 +521,8 @@ bool SerialNode::connect(byte remoteSysId, byte remoteNodeId,
 	pCcb->remoteAddr.nodeId =
 			(remoteNodeId > 0) ? remoteNodeId : pCcb->remoteAddr.nodeId;
 
+	ASSERTP(isActive() ? pCcb->remoteAddr.sysId > 0 :true,"unknown remote system id, must be > 0 for active nodes");
+
 	setReady(true);
 	unsigned long endMillis = millis() + timeOut;
 	unsigned long reqMillis = 0;
@@ -644,6 +661,12 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, byte* pData,
 	;
 	MPRINTLNS("SerialNode::writeToPort success");
 	return pHeader->aktid;
+}
+
+bool  waitOnReply(tAktId aktId,unsigned long timeout=500){
+
+	MPRINTLNS("SerialNode::waitOnReply");
+
 }
 
 void SerialNode::setReceiveCallBack(

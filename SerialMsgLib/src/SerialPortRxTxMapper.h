@@ -16,7 +16,7 @@ class SerialPort;
 
 class SerialPortRxTxMapper {
 public:
-	SerialPortRxTxMapper::SerialPortRxTxMapper();
+	SerialPortRxTxMapper();
 	SerialPortRxTxMapper(SerialPort* pSerialPort);
 	SerialPortRxTxMapper(SerialPort* pSerialPort,SerialRx* pSerialRx,SerialTx* pSerialTx);
 	virtual ~SerialPortRxTxMapper();

@@ -232,7 +232,7 @@ public:
 	 * > aktid		...aktid of the sent message
 	 * > timeout 	...in msec
 	 */
-	bool  waitOnReply(tAktId aktId,unsigned long timeout);
+	bool  waitOnReply(tAktId aktId,unsigned long timeout=500);
 
 
 	/*
@@ -261,9 +261,10 @@ public:
 	/*  bool isConnected() ;
 	 *  if port was set, the node can only connect over that port
 	 *  but the node is not connected before the the status is set to connected
+	 *  > checkRemote 	...true checks also the remote node
 	 *  <true if node can communicate to remote node
 	 */
-	bool isConnected() ;
+	bool isConnected(bool checkRemote =false) ;
 
 
 	/**
@@ -273,6 +274,11 @@ public:
 	tCcb* pCcb = NULL;	// connection data
 	void (*pCallBack)(const tSerialHeader* pHeader,const byte* pData,size_t datasize)=NULL; // user callback
 	SerialPort* pSerialPort =NULL; // if set the node is attached to a port
+
+	unsigned long lastReceiveTime; // if older as 1 sec  -> send live (and expect ack or nak)
+								   //                        ( if nak onMessage() will disconnect)
+								   // if older as 2 sec  -> set connection status disconnected
+
 
 	static AcbList acbList;
 	static LcbList lcbList;
