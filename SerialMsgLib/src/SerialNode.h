@@ -14,7 +14,9 @@
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
 
-
+#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 	200   // check all 200msec if life must be sent
+#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	1000  // if we didn't hear anything for 1 sec send life
+#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	2000  // if we didn't hear anything for 2 sec, node is diconnected
 
 
 class SerialNode {
@@ -23,6 +25,7 @@ class SerialNode {
 public:
 
 	static byte		 systemId ;
+	static unsigned long lastLiveCheckTimeStamp;
 
 
 	/**
@@ -126,7 +129,11 @@ public:
 	 */
 	SerialNode(byte localNodeId, bool active=false, byte remoteSysId=0,byte remoteNodeId=0,SerialPort* pSerialPort=NULL);
 
+
 	virtual ~SerialNode();
+
+
+	inline byte getId() {return pCcb->localAddr.nodeId;};
 
 	/*
 	 * bool connect(byte remoteAddress,bool active=false,unsigned long timeOut=0,unsigned long reqPeriod=0);
@@ -148,6 +155,14 @@ public:
 	 bool connect(byte remoteSysId=0,byte remoteNodeId=0,unsigned long timeOut=0,unsigned long checkPeriod=500);
 
 
+	 /**
+	  *  bool reconnect();
+	  *  sets status to readyToConnect
+	  *  and send CR if node is active
+	  */
+	 void reconnect();
+
+
 	 /*
 	  *  static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
 	  *  connect all active and passive nodes in the system
@@ -157,6 +172,26 @@ public:
 	  *  < returns 		...true	if the nodes are connected before timeout expires
 	  */
 	 static bool connectNodes(unsigned long timeOut=0, unsigned long reqPeriod=200);
+
+
+
+	 /*
+	  *  static bool SerialNode::checkLifeNodes(unsigned long period);
+	  *  check for all period msec for each node, if there was a message received
+	  *  in the last second (see SERIALONODE_TIMELIFECHECK_LATE), if not it send a life message
+	  *  if node is disconnected it sends a CR message
+	  */
+	 static bool SerialNode::checkLifeNodes(unsigned long period);
+
+
+	 /**
+	  * static void SerialNode::processNodes(bool bLifeCheck);
+	  * this routine has to be put into the main loop
+	  * it reads on all ports for all nodes
+	  * >  lifeCheckPeriodMsec > 	...check periodically all node connections
+	  */
+	 static void SerialNode::processNodes(bool lifeCheck, unsigned long lifeCheckPeriodMsec);
+
 
 
 	 /**
@@ -261,11 +296,23 @@ public:
 	/*  bool isConnected() ;
 	 *  if port was set, the node can only connect over that port
 	 *  but the node is not connected before the the status is set to connected
-	 *  > checkRemote 	...true checks also the remote node
 	 *  <true if node can communicate to remote node
 	 */
-	bool isConnected(bool checkRemote =false) ;
+	bool isConnected() ;
 
+
+	/*
+	 * bool SerialNode::isLifeCheckLate();
+	 * < true 	...lifecheck is late, lifeCheck will send live now
+	 */
+	bool SerialNode::isLifeCheckLate();
+
+	/*
+	* bool SerialNode::isLifeCheckExpired();
+	* < true 	...lifecheck is expired, lifeCheck will change connection status now
+	*
+	*/
+	bool SerialNode::isLifeCheckExpired();
 
 	/**
 	 * public pointer variables
@@ -275,7 +322,7 @@ public:
 	void (*pCallBack)(const tSerialHeader* pHeader,const byte* pData,size_t datasize)=NULL; // user callback
 	SerialPort* pSerialPort =NULL; // if set the node is attached to a port
 
-	unsigned long lastReceiveTime; // if older as 1 sec  -> send live (and expect ack or nak)
+	unsigned long lastReceiveTimeStamp=0; // if older as 1 sec  -> send live (and expect ack or nak)
 								   //                        ( if nak onMessage() will disconnect)
 								   // if older as 2 sec  -> set connection status disconnected
 

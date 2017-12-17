@@ -68,9 +68,10 @@ void SerialRx::readNextOnAllPorts() {
 
 		if (pport->getRx()) {
 				//DPRINTLNS("SerialRx::readNextOnAllPorts> data available");
-			if (pport->getRx()->readNext()) {
+			while (pport->getRx()->readNext()) {
 				//MPRINTLNS(
 				//		"SerialRx::readNextOnAllPorts> receiving a message... ");
+
 			}
 
 		} else {
@@ -87,7 +88,7 @@ bool SerialRx::waitOnMessage(byte*& pData, size_t& data_size,
 	DPRINTLNS("waitOnMessage");
 
 	data_size = 0;
-	pData = pSerialPort->pBuffer;
+	pData = pRecBuffer;
 	if (checkPeriod == 0) {
 		checkPeriod = WAITED_READ_CHECKPERIOD_MSEC;
 	}
@@ -126,7 +127,7 @@ bool SerialRx::readNext() {
 	bool messReceived = false;
 
 	if (!pSerialPort->isListening()) {
-		DPRINTLNS("NOT LISTEN");
+		MPRINTLNS("NOT LISTEN");
 		return messReceived;
 	}
 	if (pSerialPort->available() > 0) {

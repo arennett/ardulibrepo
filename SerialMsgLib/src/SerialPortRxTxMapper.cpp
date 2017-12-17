@@ -12,7 +12,9 @@ SerialPortRxTxMapper::SerialPortRxTxMapper(){
 }
 
 SerialPortRxTxMapper::~SerialPortRxTxMapper() {
-	// TODO Auto-generated destructor stub
+	delete pSerialRx;
+	delete pSerialTx;
+
 }
 
 SerialPortRxTxMapper::SerialPortRxTxMapper(SerialPort* pSerialPort) {

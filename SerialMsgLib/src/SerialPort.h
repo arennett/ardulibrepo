@@ -61,8 +61,7 @@ public:
 	virtual bool isListening()=0;
 	void* pNext = NULL;
 	byte remoteSysId=0;
-	byte* pBuffer=NULL;
-	size_t bufferSize=0;
+
 
 	SerialPortRxTxMapper* pPortRxTxMapper =NULL;
 

@@ -40,9 +40,8 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 	pNew->toAddr   	= pHeader->toAddr;
 	pNew->status 	= ACB_STATUS_CREATED;
 	pHeader->aktid	= pNew->aktid = getNextAktId();
-	MPRINTLNSVAL ("size acb :" ,sizeof (tAcb));
-	MPRINTLNSVAL("AcbList::createAcb> ",pNew->aktid);
-
+	MPRINTLNSVAL("AcbList::createAcb> aktId: ",pNew->aktid);
+	MPRINTLNSVAL("AcbList::createAcb> count: ",count());
 	return pNew;
 
 }
@@ -102,11 +101,14 @@ tAcb* AcbList::getLastAcbEntry() {
 }
 
 unsigned int AcbList::count(){
+	MPRINTLNSVAL("address of proot : ", ((int)(void*) pRoot));
 	tAcb* p = pRoot;
 	unsigned int cnt= 0;
-	while (p ) {
+		while (p ) {
+		assert(p!=p->pNext);
 		++cnt;
 		p= (tAcb*) p->pNext;
+		MPRINTLNSVAL("cnt: " ,cnt);
 	}
 	return cnt;;
 }
@@ -121,6 +123,7 @@ void AcbList::deleteAcbList() {
 }
 
 bool AcbList::deleteAcbEntry(tAktId aktId) {
+	MPRINTLNSVAL("AcbList::deleteAcbEntry>2> ",aktId);
 	tAcb* pAcb = getAcbEntry(aktId);
 	if (pAcb) {
 		if (pAcb->pNext) {
@@ -137,7 +140,8 @@ bool AcbList::deleteAcbEntry(tAktId aktId) {
 		}
 		delete pAcb;
 
-		MPRINTLNSVAL("AcbList::deleteAcbEntry> ",aktId);
+
+		MPRINTLNSVAL("AcbList::deleteAcbEntry> count: ",count());
 		return true;
 	} else {
 		MPRINTLNSVAL("AcbList::deleteAcbEntry> NOT FOUND: ",aktId);

@@ -37,6 +37,7 @@ SerialPort::SerialPort(byte remoteSysId){
 };
 
 SerialPort::~SerialPort() {
+	delete pPortRxTxMapper;
 
 };
 
