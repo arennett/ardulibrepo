@@ -13,6 +13,8 @@
 //#define MPRINT_OFF
 
 #define PRINTFREE  Serial.print(F("free sram : "));Serial.println(freeRam())
+#define FS(x) (__FlashStringHelper*)(x)
+
 
 #ifndef MPRINT_OFF
 
@@ -21,7 +23,10 @@
 	#define MPRINTLN(x) 	Serial.println((x))
 
 	#define MPRINTS(s)   	MPRINT(F(s))
+	#define MPRINTSS(s)   	MPRINT(FS(s))
+
 	#define MPRINTLNS(s)    MPRINTLN(F(s))
+	#define MPRINTLNSS(s)   MPRINTLN(FS(s))
 
 	#define MPRINTSVAL(s,x)  	MPRINTS(s);MPRINT(x)
     #define MPRINTLNSVAL(s,x)  	MPRINTS(s);MPRINTLN(x)
@@ -35,7 +40,9 @@
 	#define MPRINTHEX(x)
 	#define MPRINTLN(x)
 	#define MPRINTS(s)
+	#define MPRINTSS(s)
 	#define MPRINTLNS(s)
+	#define MPRINTLNSS(s)
     #define MPRINTSVAL(s,x)
     #define MPRINTLNSVAL(s,x)
 	#define MPRINTSVALS(s,x,z)

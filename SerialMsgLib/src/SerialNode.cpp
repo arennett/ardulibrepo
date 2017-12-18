@@ -263,13 +263,15 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData,
 	assert(pNode->pCcb->remoteAddr.sysId!=systemId);
 	pNode->lastReceiveTimeStamp = millis();
 
-	byte cmd = pSerialHeader->cmd;
+	tSerialCmd cmd = pSerialHeader->cmd;
 	tAcb* pAcb = NULL;
 	/* for received replies*/
 
 	bool connected = pNode->isConnected();
 	bool userCall = true;
 	bool acbNotFound = false;
+
+	MPRINTS("SerialNode::onMessage>  <<< ");MPRINTSS(tSerialHeader::cmd2Str(cmd));MPRINTLNS(" <<<");
 
 	if (!connected) {
 		if (!(cmd == CMD_ACK || cmd == CMD_NAK || cmd == CMD_CR)
@@ -286,7 +288,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData,
 	switch (cmd) {
 
 	case CMD_CR:
-		MPRINTLNS("SerialNode::onMessage> CMD_CR");
+
 		if (!pNode->isActive() && pNode->isReadyToConnect()) { //if passiv and ready to be connected
 
 			if (pNode->pCcb->remoteAddr.sysId == 0) {
@@ -551,9 +553,10 @@ bool SerialNode::checkLifeNodes(unsigned long period) {
 				MPRINTLNSVAL("SerialNode::checkLifeNodes> isLifeCheckExpired for node : ", pNode->getId());
 				pNode->reconnect();
 			} else if (pNode->isLifeCheckLate()) {
-				MPRINTLNSVAL("SerialNode::checkLifeNodes> isLate for node : ", pNode->getId());
+
 				if (pNode->isConnected()) {
 					if (pNode->isActive()) {
+						MPRINTLNSVAL("SerialNode::checkLifeNodes> node is late : ", pNode->getId());
 						pNode->send(CMD_LIVE);
 					}
 				} else {
@@ -628,7 +631,7 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, byte* pData,
 
 	tSerialHeader header, *pHeader;
 	pHeader = &header;
-	MPRINTLNSVAL("SerialNode::send> cmd: ", cmd);
+	MPRINTS("SerialNode::send>  >>> ");MPRINTSS(tSerialHeader::cmd2Str(cmd));MPRINTLNS(" >>>");
 	assert(pCcb->remoteAddr.sysId!=systemId);
 
 // not connected
@@ -665,7 +668,7 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, byte* pData,
 
 	header.cmd = cmd;
 	header.par = par;
-	MPRINTLNS("SerialNode::send> header ...");
+
 
 	if (pSerialPort) { //connected or port was preset
 		SerialNode::writeToPort(pHeader, pData, datasize, pSerialPort);

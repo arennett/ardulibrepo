@@ -9,14 +9,13 @@
 #include "AcbList.h"
 
 AcbList::AcbList() {
-	aktId=0;
+	aktId = 0;
 
 }
 
 tAcb* AcbList::getRoot() {
 	return pRoot;
 }
-
 
 unsigned int AcbList::getNextAktId() {
 	if (aktId >= 65535) {
@@ -35,13 +34,13 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 	} else {
 		pLast->pNext = pNew;
 	}
-	pNew->cmd   	= pHeader->cmd;
-	pNew->fromAddr 	= pHeader->fromAddr;
-	pNew->toAddr   	= pHeader->toAddr;
-	pNew->status 	= ACB_STATUS_CREATED;
-	pHeader->aktid	= pNew->aktid = getNextAktId();
-	MPRINTLNSVAL("AcbList::createAcb> aktId: ",pNew->aktid);
-	MPRINTLNSVAL("AcbList::createAcb> count: ",count());
+	pNew->cmd = pHeader->cmd;
+	pNew->fromAddr = pHeader->fromAddr;
+	pNew->toAddr = pHeader->toAddr;
+	pNew->status = ACB_STATUS_CREATED;
+	pHeader->aktid = pNew->aktid = getNextAktId();
+	MPRINTLNSVAL("AcbList::createAcb> aktId: ", pNew->aktid);
+	MPRINTLNSVAL("AcbList::createAcb> count: ", count());
 	return pNew;
 
 }
@@ -50,11 +49,11 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 	tAcb* pAcb = pRoot;
 	while (pAcb) {
 		if (pAcb->cmd == pHeader->cmd && pAcb->fromAddr == pHeader->fromAddr
-			&& pAcb->toAddr == pHeader->toAddr) {
-				//reuse open (unacknowledged) acb
-			    MPRINTSVAL("AcbList::createOrUseAcb> reuse acb: ",pAcb->aktid);
-				pHeader->aktid = pAcb->aktid = getNextAktId();
-				pAcb->status = ACB_STATUS_OPEN;
+				&& pAcb->toAddr == pHeader->toAddr) {
+			//reuse open (unacknowledged) acb
+			MPRINTSVAL("AcbList::createOrUseAcb> reuse acb: ", pAcb->aktid);
+			pHeader->aktid = pAcb->aktid = getNextAktId();
+			pAcb->status = ACB_STATUS_OPEN;
 
 			break;
 		}
@@ -63,10 +62,9 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 	}
 	if (!pAcb) {
 		pAcb = createAcb(pHeader);
-	}else{
-		MPRINTLNSVAL(" , new aktid: ",pAcb->aktid);
+	} else {
+		MPRINTLNSVAL(" , new aktid: ", pAcb->aktid);
 	}
-
 
 	//pAcb->timeStamp = millis();
 	return pAcb;
@@ -80,16 +78,17 @@ tAcb* AcbList::getAcbEntry(tAktId aktId) {
 	return pAcb;
 }
 
-tAcb* AcbList::getAcbEntry(tCcb* pCcb,byte cmd){
+tAcb* AcbList::getAcbEntry(tCcb* pCcb, byte cmd) {
 	tAcb* pAcb = pRoot;
 
-	while (pAcb && !(pAcb->cmd == cmd && pAcb->fromAddr == pCcb->localAddr && pAcb->toAddr == pCcb->remoteAddr)) {
+	while (pAcb
+			&& !(pAcb->cmd == cmd && pAcb->fromAddr == pCcb->localAddr
+					&& pAcb->toAddr == pCcb->remoteAddr)) {
 		pAcb = (tAcb*) pAcb->pNext;
 	}
 
 	return pAcb;
 }
-
 
 //void 	mprintAcb(tAcb* pAcb);
 tAcb* AcbList::getLastAcbEntry() {
@@ -100,15 +99,12 @@ tAcb* AcbList::getLastAcbEntry() {
 	return pLast;
 }
 
-unsigned int AcbList::count(){
-	MPRINTLNSVAL("address of proot : ", ((int)(void*) pRoot));
+unsigned int AcbList::count() {
 	tAcb* p = pRoot;
-	unsigned int cnt= 0;
-		while (p ) {
-		assert(p!=p->pNext);
+	unsigned int cnt = 0;
+	while (p) {
 		++cnt;
-		p= (tAcb*) p->pNext;
-		MPRINTLNSVAL("cnt: " ,cnt);
+		p = (tAcb*) p->pNext;
 	}
 	return cnt;;
 }
@@ -123,34 +119,52 @@ void AcbList::deleteAcbList() {
 }
 
 bool AcbList::deleteAcbEntry(tAktId aktId) {
-	MPRINTLNSVAL("AcbList::deleteAcbEntry>2> ",aktId);
+	MPRINTLNSVAL("AcbList::deleteAcbEntry> ", aktId);
 	tAcb* pAcb = getAcbEntry(aktId);
+	bool prevFound = false;
 	if (pAcb) {
 		if (pAcb->pNext) {
-			tAcb* pPrev = pRoot;
-			while (pPrev && pPrev->pNext) {
-				if (pPrev->pNext == pAcb) {
-					break;
+			if (pAcb == pRoot) {
+				pRoot = pRoot->pNext;
+			} else {
+				tAcb* pPrev = pRoot;
+				while (pPrev && pPrev->pNext) {
+					if (pPrev->pNext == pAcb) {
+						pPrev->pNext = pAcb->pNext;
+						break;
+					}
+					pPrev = (tAcb*) pPrev->pNext;
 				}
-				pPrev = (tAcb*) pPrev->pNext;
 			}
-			if (pPrev) { // set next of previos to next of acb to be deleted
-				pPrev->pNext = pAcb->pNext;
+		} else {
+			if (pAcb == pRoot) {
+				pRoot = NULL;
+			} else {
+				tAcb* pPrev = pRoot;
+				while (pPrev && pPrev->pNext) {
+					if (pPrev->pNext == pAcb) {
+						pPrev->pNext = NULL;
+						break;
+					}
+					pPrev = (tAcb*) pPrev->pNext;
+				}
 			}
+
+			//set prev->pNext=null
+
 		}
 		delete pAcb;
 
-
-		MPRINTLNSVAL("AcbList::deleteAcbEntry> count: ",count());
+		MPRINTLNSVAL("AcbList::deleteAcbEntry> count: ", count());
 		return true;
 	} else {
-		MPRINTLNSVAL("AcbList::deleteAcbEntry> NOT FOUND: ",aktId);
+		MPRINTLNSVAL("AcbList::deleteAcbEntry> NOT FOUND: ", aktId);
 		return false;
 	}
 }
 
-bool  	AcbList::deleteAcbEntry(tCcb* pCcb,byte cmd) {
-	tAcb* pAcb = getAcbEntry(pCcb,cmd);
+bool AcbList::deleteAcbEntry(tCcb* pCcb, byte cmd) {
+	tAcb* pAcb = getAcbEntry(pCcb, cmd);
 	if (pAcb) {
 		return deleteAcbEntry(pAcb->aktid);
 	}

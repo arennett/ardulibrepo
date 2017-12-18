@@ -16,73 +16,104 @@
 #define PRINTLNHEADER(pH) PRINTADDR(pH->fromAddr);MPRINTS(" to ");PRINTLNADDR(pH->toAddr);\
 						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTLNSVAL(" par: ",pH->par);
 
-
-
 typedef enum {
-				// application and internal use
-				CMD_NAK	=240,	//  < NOT ACKNOWLEDGED
-				CMD_ACK,		// 	< ACKNOWLEDGED
+	// application and internal use
+	CMD_NAK = 240,	//  < NOT ACKNOWLEDGED
+	CMD_ACK,		// 	< ACKNOWLEDGED
 
-				// internal use
-				CMD_LIVE,		//	> LIVE
-				CMD_CR,			// 	> CONNECTION REQUEST
-				CMD_CD, 		//	> CONNECTION DOWN
-				CMD_AFA,			//	> ASK FOR ADDRESS
+	// internal use
+	CMD_LIVE,		//	> LIVE
+	CMD_CR,			// 	> CONNECTION REQUEST
+	CMD_CD, 		//	> CONNECTION DOWN
+	CMD_AFA,			//	> ASK FOR ADDRESS
 
-
-				// application use
-				CMD_ACD,		//	> Application Command	(opt. data)
-				CMD_ARQ,		//	> Application Request  	(opt. data)
-				CMD_ARP		 	//	> Application Reply   	(opt. data)
+	// application use
+	CMD_ACD,		//	> Application Command	(opt. data)
+	CMD_ARQ,		//	> Application Request  	(opt. data)
+	CMD_ARP		 	//	> Application Reply   	(opt. data)
 } tSerialCmd;
 typedef unsigned int tAktId;
 #define MAX_AKTID  65535
+
+const char STR_NAK[] PROGMEM = { "NAK" };
+const char STR_ACK[] PROGMEM = { "ACK" };
+const char STR_LIVE[] PROGMEM = { "LIVE" };
+const char STR_CR[] PROGMEM = { "CR" };
+const char STR_CD[] PROGMEM = { "CD" };
+const char STR_AFA[] PROGMEM = { "AFA" };
+const char STR_ACD[] PROGMEM = { "ACD" };
+const char STR_ARQ[] PROGMEM = { "ARQ" };
+const char STR_ARP[] PROGMEM = { "ARP" };
+const char STR_UNKOWN_CMD[] PROGMEM = { "UNKOWN_CMD" };
 
 
 
 class tAddr {
 public:
-		tAddr(){};
-		~tAddr(){};
+	tAddr() {
+	}
+	;
+	~tAddr() {
+	}
+	;
 
-		tAddr (byte sysid,byte nodeid) {
-			sysId =sysid;
-			nodeId=nodeid;
-		}
-		byte  sysId=0;
-		byte  nodeId=0;
+	tAddr(byte sysid, byte nodeid) {
+		sysId = sysid;
+		nodeId = nodeid;
+	}
+	byte sysId = 0;
+	byte nodeId = 0;
 
-		bool operator==(const tAddr& right) const{
-			return (sysId == right.sysId) && (nodeId == right.nodeId);
-		}
+	bool operator==(const tAddr& right) const {
+		return (sysId == right.sysId) && (nodeId == right.nodeId);
+	}
 
-		bool operator!=(const tAddr& right)const{
-			return !operator==(right);
-		}
-} ;
+	bool operator!=(const tAddr& right) const {
+		return !operator==(right);
+	}
+};
 
 //Connection Control Block
 typedef struct {
 	tAddr localAddr;
 	tAddr remoteAddr;    //remote address
-	#define  CONNECTION_STATUS_NOT_READY  	1
-	#define  CONNECTION_STATUS_READY 		2
-	#define  CONNECTION_STATUS_DISCONNECTED 3
-	#define  CONNECTION_STATUS_CONNECTED 	4
-	byte status=0;
-	bool active=false;
+#define  CONNECTION_STATUS_NOT_READY  	1
+#define  CONNECTION_STATUS_READY 		2
+#define  CONNECTION_STATUS_DISCONNECTED 3
+#define  CONNECTION_STATUS_CONNECTED 	4
+	byte status = 0;bool active = false;
 } tCcb;
 
-typedef struct{
+class tSerialHeader {
+public:
+	tSerialHeader() {
+	}
+	;
+	~tSerialHeader() {
+	}
+	;
+
 	tAddr fromAddr;
 	tAddr toAddr;
-	tAktId aktid=0;
-	byte cmd=0;
-	byte par=0;
-} tSerialHeader;
+	tAktId aktid = 0;
+	tSerialCmd cmd = 0;
+	byte par = 0;
+	static const char* cmd2Str(tSerialCmd cmd) {
+		switch (cmd) {
+		case CMD_NAK:  return STR_NAK;
+		case CMD_ACK:  return STR_ACK;
+		case CMD_LIVE: return STR_LIVE;
+		case CMD_CR:   return STR_CR;
+		case CMD_AFA:  return STR_AFA;
+		case CMD_ACD:  return STR_ACD;
+		case CMD_ARQ:  return STR_ARQ;
+		case CMD_ARP:  return STR_ARP;
+		default:  return STR_UNKOWN_CMD;
+		}
+	}
+
+};
 
 #define SERIALHEADER_SIZE  sizeof(tSerialHeader);
-
-
 
 #endif /* SERIALHEADER_H_ */
