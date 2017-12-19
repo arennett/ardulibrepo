@@ -5,6 +5,7 @@
  *      Author: User
  */
 
+
 #include "SerialMsg.h"
 #include "SoftSerialPort.h"
 #include <SoftwareSerial.h>
@@ -13,6 +14,7 @@
 
 
 SoftSerialPort::SoftSerialPort(byte pinRx ,byte pinRy,byte remoteSysId) : SerialPort(remoteSysId) {
+
 	pSoftwareSerial =new SoftwareSerial(pinRx,pinRy);
 	deleteSoftwareSerial=true;
 

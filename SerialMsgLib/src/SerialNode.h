@@ -180,17 +180,19 @@ public:
 	  *  check for all period msec for each node, if there was a message received
 	  *  in the last second (see SERIALONODE_TIMELIFECHECK_LATE), if not it send a life message
 	  *  if node is disconnected it sends a CR message
+	  *  > period	...time period between the lifeChecks, default 500 msec
 	  */
-	 static bool SerialNode::checkLifeNodes(unsigned long period);
+	 static void checkLifeNodes(unsigned long periodMsec = 500);
 
 
 	 /**
 	  * static void SerialNode::processNodes(bool bLifeCheck);
 	  * this routine has to be put into the main loop
 	  * it reads on all ports for all nodes
-	  * >  lifeCheckPeriodMsec > 	...check periodically all node connections
+	  * > lifeCheck					...checks periodically all node connections
+	  * > lifeCheckPeriodMsec > 	...time period between the lifeChecks, default 500 msec
 	  */
-	 static void SerialNode::processNodes(bool lifeCheck, unsigned long lifeCheckPeriodMsec);
+	 static void processNodes(bool lifeCheck, unsigned long lifeCheckPeriodMsec= 500);
 
 
 
@@ -237,7 +239,7 @@ public:
 	 * > datasize	...size of optional data
 	 * > pPort 		...port on which the message came in
 	 */
-	static void onMessage(tSerialHeader* pHeader,const byte* pData,size_t datasize,SerialPort* pPort,SerialNode* pNode);
+	 void onMessage(tSerialHeader* pHeader,const byte* pData,size_t datasize,SerialPort* pPort);
 
 
 	/*
@@ -305,14 +307,14 @@ public:
 	 * bool SerialNode::isLifeCheckLate();
 	 * < true 	...lifecheck is late, lifeCheck will send live now
 	 */
-	bool SerialNode::isLifeCheckLate();
+	bool isLifeCheckLate();
 
 	/*
 	* bool SerialNode::isLifeCheckExpired();
 	* < true 	...lifecheck is expired, lifeCheck will change connection status now
 	*
 	*/
-	bool SerialNode::isLifeCheckExpired();
+	bool isLifeCheckExpired();
 
 	/**
 	 * public pointer variables
