@@ -21,6 +21,7 @@ typedef struct {
 #define ACB_STATUS_OPEN			2
 	byte 	status = ACB_STATUS_CREATED;
 	void* 	pNext = NULL;
+	unsigned long timeStamp= 0;
 } tAcb;
 
 

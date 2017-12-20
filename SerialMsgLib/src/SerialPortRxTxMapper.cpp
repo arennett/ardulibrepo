@@ -8,6 +8,9 @@
 #include "SerialNode.h"
 
 SerialPortRxTxMapper::SerialPortRxTxMapper(){
+	pSerialRx=NULL;
+	pSerialTx=NULL;
+	pSerialPort=NULL;
 
 }
 

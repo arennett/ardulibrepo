@@ -18,6 +18,7 @@
 
 typedef enum {
 	// application and internal use
+	CMD_NULL=  0,
 	CMD_NAK = 240,	//  < NOT ACKNOWLEDGED
 	CMD_ACK,		// 	< ACKNOWLEDGED
 
@@ -96,7 +97,7 @@ public:
 	tAddr fromAddr;
 	tAddr toAddr;
 	tAktId aktid = 0;
-	tSerialCmd cmd = 0;
+	tSerialCmd cmd = CMD_NULL;
 	byte par = 0;
 	static const char* cmd2Str(tSerialCmd cmd) {
 		switch (cmd) {

@@ -68,12 +68,7 @@ void SerialRx::readNextOnAllPorts() {
 
 		if (pport->getRx()) {
 				//DPRINTLNS("SerialRx::readNextOnAllPorts> data available");
-			while (pport->getRx()->readNext()) {
-				//MPRINTLNS(
-				//		"SerialRx::readNextOnAllPorts> receiving a message... ");
-
-			}
-
+			    pport->getRx()->readNext();
 		} else {
 			MPRINTLNSVAL("SerialRx::port has no receiver: ", pport->remoteSysId);
 		}
@@ -117,9 +112,12 @@ bool SerialRx::waitOnMessage(byte*& pData, size_t& data_size,
 	return waitOnMessage(pData, data_size, timeOut, 0);
 }
 
+
+
 /**
  * returns true if incoming message was completed
  */
+
 bool SerialRx::readNext() {
 
 	assert(pSerialPort);

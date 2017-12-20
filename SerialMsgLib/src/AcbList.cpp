@@ -51,7 +51,10 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 		if (pAcb->cmd == pHeader->cmd && pAcb->fromAddr == pHeader->fromAddr
 				&& pAcb->toAddr == pHeader->toAddr) {
 			//reuse open (unacknowledged) acb
-			MPRINTSVAL("AcbList::createOrUseAcb> reuse acb: ", pAcb->aktid);
+			MPRINTLNSVAL("AcbList::createOrUseAcb> total count : ", count());
+			MPRINTSVAL("AcbList::createOrUseAcb> reuse acb   : ", pAcb->aktid);
+
+
 			pHeader->aktid = pAcb->aktid = getNextAktId();
 			pAcb->status = ACB_STATUS_OPEN;
 
@@ -66,6 +69,7 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 		MPRINTLNSVAL(" , new aktid: ", pAcb->aktid);
 	}
 
+	pAcb->timeStamp=millis();
 	//pAcb->timeStamp = millis();
 	return pAcb;
 }
@@ -121,11 +125,11 @@ void AcbList::deleteAcbList() {
 bool AcbList::deleteAcbEntry(tAktId aktId) {
 	MPRINTLNSVAL("AcbList::deleteAcbEntry> ", aktId);
 	tAcb* pAcb = getAcbEntry(aktId);
-	bool prevFound = false;
+
 	if (pAcb) {
 		if (pAcb->pNext) {
 			if (pAcb == pRoot) {
-				pRoot = pRoot->pNext;
+				pRoot = (tAcb*)pRoot->pNext;
 			} else {
 				tAcb* pPrev = pRoot;
 				while (pPrev && pPrev->pNext) {
