@@ -2,6 +2,7 @@
 #define tools_h
 #define __ASSERT_USE_STDERR
 #include <assert.h>
+#include "Arduino.h"
 
 
 
@@ -14,8 +15,26 @@
 
 #define PRINTFREE  Serial.print(F("free sram : "));Serial.println(freeRam())
 #define FS(x) (__FlashStringHelper*)(x)
+#define MTIMESTAMP MPRINT(F(" >>> "));MPRINT(millis());MPRINT(F(" >>> "))
 
 
+    #define XPRINT(x)   	Serial.print((x))
+	#define XPRINTHEX(x)   	Serial.print((x),HEX)
+	#define XPRINTLN(x) 	Serial.println((x))
+
+	#define XPRINTS(s)   	XPRINT(F(s))
+	#define XPRINTSS(s)   	XPRINT(FS(s))
+
+	#define XPRINTLNS(s)    XPRINTLN(F(s))
+	#define XPRINTLNSS(s)   XPRINTLN(FS(s))
+
+	#define XPRINTSVAL(s,x)  	XPRINTS(s);XPRINT(x)
+    #define XPRINTLNSVAL(s,x)  	XPRINTS(s);XPRINTLN(x)
+	#define XPRINTSVALS(s,x,z)  XPRINTS(s);XPRINT(x);XPRINTLNS(z)
+
+	#define XPRINTFREE  XPRINTLNSVAL("free sram : " ,(freeRam()))
+
+//#define MPRINT_OFF
 #ifndef MPRINT_OFF
 
 	#define MPRINT(x)   	Serial.print((x))
