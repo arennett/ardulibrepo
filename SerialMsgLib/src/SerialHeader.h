@@ -12,9 +12,19 @@
 
 #define PRINTADDR(x) MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
 #define PRINTLNADDR(x) PRINTADDR(x);MPRINTLNS("");
+#define XPRINTADDR(x) MPRINT(x.sysId);XPRINTS(".");MPRINT(x.nodeId)
+#define XPRINTLNADDR(x) XPRINTADDR(x);XPRINTLNS("");
+
+
 
 #define PRINTLNHEADER(pH) PRINTADDR(pH->fromAddr);MPRINTS(" to ");PRINTLNADDR(pH->toAddr);\
 						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTLNSVAL(" par: ",pH->par);
+
+#define XPRINTLNHEADER(pH) XPRINTADDR(pH->fromAddr);XPRINTS(" to ");
+
+//XPRINTLNADDR(pH->toAddr);\
+//						XPRINTSVAL(" aktId: ",pH->aktid);XPRINTSVAL(" cmd: ",pH->cmd);XPRINTLNSVAL(" par: ",pH->par);
+
 
 typedef enum {
 	// application and internal use

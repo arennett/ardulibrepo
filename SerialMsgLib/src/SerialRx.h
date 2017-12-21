@@ -138,7 +138,7 @@ private:
 	byte preAmCount=0;
 	byte postAmCount=0;
 	byte dataCount=0;
-	byte prevDataCount=0;
+	byte dataSize=0;
 	bool dataCollect=false;
 	size_t bufferSize=0;
 	byte lastByte=0;

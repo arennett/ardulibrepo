@@ -96,7 +96,7 @@ bool SerialRx::waitOnMessage(byte*& pData, size_t& data_size,
 		if (readNext()) {
 			DPRINTLNS("waitOnMessage : message received");
 			DPRINTSVAL("restOfTime: ", restOfTime);
-			data_size = prevDataCount;
+			data_size = dataSize;
 			return true;
 		}
 		delay(checkPeriod);
@@ -131,17 +131,19 @@ bool SerialRx::readNext() {
 	if (pSerialPort->available() > 0) {
 		assert(postAmCount < sizeof(serPostamble));
 		assert(preAmCount < sizeof(serPreamble));
-		assert(dataCount < bufferSize);
+		//assert(dataCount < bufferSize);
 
 		lastByte = pSerialPort->read();
 		// pByte[0] =lastByte;
+
 		DPRINTLNSVAL("byte: ", lastByte);
 		if (dataCollect) {
+			DPRINTLNSVAL("dc: ", dataCount);
 			if (dataCount < bufferSize) {
 				pRecBuffer[dataCount] = lastByte;
-				dataCount++;
+				++dataCount;
 			} else {
-				MPRINTSVAL("BUFFER OVERFLOW: DATA SIZE >=",
+				XPRINTLNSVAL("BUFFER OVERFLOW: DATA SIZE >= ",
 						bufferSize - sizeof serPostamble);
 				dataCollect = false;
 			}
@@ -171,19 +173,14 @@ bool SerialRx::readNext() {
 			//DPRINTSVAL("serPostamble COUNT:",postAmCount);
 			if (postAmCount == (sizeof serPostamble) - 1) {
 				DPRINTLNS("serPostamble COMPLETE");
-				prevDataCount = dataCount - sizeof serPostamble;
+				dataSize = dataCount - sizeof serPostamble;
 				DPRINTLNSVAL("SerialRx::readNext> message size: ",
-						prevDataCount);
+						dataSize);
 
 				if (updateCallback && dataCollect) {
 
 					MPRINTLNS(" SerialRx::readNext> call updateCallback");
-					assert(pRecBuffer);
-					assert(
-							prevDataCount >= sizeof(tSerialHeader)
-									&& prevDataCount < bufferSize);
-					assert(pSerialPort);
-					updateCallback(pRecBuffer, prevDataCount, pSerialPort);
+					updateCallback(pRecBuffer, dataSize, pSerialPort);
 				}
 
 				messReceived = true;

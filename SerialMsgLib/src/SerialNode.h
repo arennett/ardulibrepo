@@ -14,9 +14,9 @@
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
 
-#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 	200   // check all 200msec if life must be sent
-#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	5000  // if we didn't hear anything for 1 sec send life
-#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	10000  // if we didn't hear anything for 2 sec, node is diconnected
+#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 	200   // check nodes all 200 msec
+#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	2000  // if we didn't hear anything for 2 sec send life
+#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	5000  // if we didn't hear anything for 5 sec, node is diconnected
 
 class SerialNode {
 

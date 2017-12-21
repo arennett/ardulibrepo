@@ -9,6 +9,11 @@
 #include "Arduino.h"
 #include "tools.h"
 
+unsigned long timeStampLastPick = 0;
+unsigned long timeDuration = 0;
+unsigned int timeStampId= 0;
+
+
 
 int freeRam ()
 {
@@ -21,10 +26,10 @@ int freeRam ()
 void __assert(const char *__func, const char *__file, int __lineno, const char *__sexp) {
     // transmit diagnostic informations through serial link.
 
-	 MPRINTS("ASSERT func : ");MPRINTLN(__func);
-	 MPRINTS("       file : ");MPRINTLN(__file);
-     MPRINTS("       line : ");MPRINTLN(__lineno);
-     MPRINTS("       val  : ");MPRINTLN(__sexp);
+	 XPRINTS("ASSERT func : ");XPRINTLN(__func);
+	 XPRINTS("       file : ");XPRINTLN(__file);
+     XPRINTS("       line : ");XPRINTLN(__lineno);
+     XPRINTS("       val  : ");XPRINTLN(__sexp);
     Serial.flush();
 
     // abort program execution.
