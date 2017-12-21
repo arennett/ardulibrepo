@@ -134,7 +134,7 @@ public:
 private:
 	void (*updateCallback)(const byte* data, size_t data_size,SerialPort* pPort);
 	byte* pRecBuffer=NULL;
-	SerialPort* pSerialPort= NULL;;
+	SerialPort* pSerialPort= NULL;
 	byte preAmCount=0;
 	byte postAmCount=0;
 	byte dataCount=0;

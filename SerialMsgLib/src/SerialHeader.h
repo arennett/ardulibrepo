@@ -10,20 +10,36 @@
 #include "Arduino.h"
 #include <tools.h>
 
-#define PRINTADDR(x) MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
-#define PRINTLNADDR(x) PRINTADDR(x);MPRINTLNS("");
-#define XPRINTADDR(x) MPRINT(x.sysId);XPRINTS(".");MPRINT(x.nodeId)
+#define XPRINTADDR(x)   XPRINT(x.sysId);XPRINTS(".");XPRINT(x.nodeId)
+#define XPRINTLNADDR(x) XPRINTADDR(x);XPRINTLNS("");
+#define XPRINTADDR(x)   XPRINT(x.sysId);XPRINTS(".");XPRINT(x.nodeId)
 #define XPRINTLNADDR(x) XPRINTADDR(x);XPRINTLNS("");
 
+#define XPRINTLNHEADER(pH) XPRINTADDR(pH->fromAddr);XPRINTS(" to ");XPRINTLNADDR(pH->toAddr);\
+						XPRINTSVAL(" aktId: ",pH->aktid);XPRINTSVAL(" cmd: ",pH->cmd);XPRINTLNSVAL(" par: ",pH->par);
 
-
-#define PRINTLNHEADER(pH) PRINTADDR(pH->fromAddr);MPRINTS(" to ");PRINTLNADDR(pH->toAddr);\
-						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTLNSVAL(" par: ",pH->par);
-
-#define XPRINTLNHEADER(pH) XPRINTADDR(pH->fromAddr);XPRINTS(" to ");
-
-//XPRINTLNADDR(pH->toAddr);\
-//						XPRINTSVAL(" aktId: ",pH->aktid);XPRINTSVAL(" cmd: ",pH->cmd);XPRINTLNSVAL(" par: ",pH->par);
+#ifdef MPRINT_ON
+#define MPRINTADDR(x) 	XPRINTADDR(x)
+#define MPRINTLNADDR(x) XPRINTLNADDR(x)
+#define MPRINTADDR(x)	XPRINTADDR(x)
+#define MPRINTLNHEADER(pH) XPRINTLNHEADER(pH)
+#else
+	#define MPRINTADDR(x)
+	#define MPRINTLNADDR(x)
+	#define MPRINTADDR(x)
+	#define MPRINTLNHEADER(pH)
+#endif
+#ifdef DPRINT_ON
+#define DPRINTADDR(x) 	   XPRINTADDR(x)
+#define DPRINTLNADDR(x)    XPRINTLNADDR(x)
+#define DPRINTADDR(x)	   XPRINTADDR(x)
+#define DPRINTLNHEADER(pH) XPRINTLNHEADER(pH)
+#else
+	#define DPRINTADDR(x)
+	#define DPRINTLNADDR(x)
+	#define DPRINTADDR(x)
+	#define DPRINTLNHEADER(pH)
+#endif
 
 
 typedef enum {

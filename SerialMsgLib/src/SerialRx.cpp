@@ -124,10 +124,6 @@ bool SerialRx::readNext() {
 
 	bool messReceived = false;
 
-	if (!pSerialPort->isListening()) {
-		MPRINTLNS("NOT LISTEN");
-		return messReceived;
-	}
 	if (pSerialPort->available() > 0) {
 		assert(postAmCount < sizeof(serPostamble));
 		assert(preAmCount < sizeof(serPreamble));

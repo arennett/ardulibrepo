@@ -27,10 +27,11 @@ void (*SerialNode::pCallBackOnMessage)(const tSerialHeader* pHeader, const byte*
 void (*SerialNode::pCallBackOnPreConnect)(SerialNode* pNode)=NULL; // user callback before node connects
 
 void SerialNode::update(const byte* pMessage, size_t messageSize, SerialPort* pPort) {
+	XTIME_PICK;
 	tSerialHeader* pHeader = (tSerialHeader*) pMessage;
 	MPRINTLNSVAL("SerialNode::update> size: ", messageSize);
 	assert(pHeader);
-	PRINTLNHEADER(pHeader);
+	MPRINTLNHEADER(pHeader);
 
 	size_t hsize = sizeof(tSerialHeader);
 	size_t dsize = 0;
@@ -69,7 +70,7 @@ void SerialNode::update(const byte* pMessage, size_t messageSize, SerialPort* pP
 				pNode = (SerialNode*) pNode->pNext;
 			}
 			MPRINTLNS("SerialNode::update> node not found : ");
-			PRINTLNHEADER(pHeader);
+			MPRINTLNHEADER(pHeader);
 			return;
 		}
 
@@ -110,7 +111,7 @@ void SerialNode::update(const byte* pMessage, size_t messageSize, SerialPort* pP
 bool SerialNode::forward(const byte* pMessage, size_t messageSize, SerialPort* pSourcePort) {
 	tSerialHeader* pHeader = (tSerialHeader*) pMessage;
 	MPRINTLNS("SerialNode::forward>");
-	PRINTLNHEADER(pHeader);
+	MPRINTLNHEADER(pHeader);
 
 	SerialPort* pTargetPort = SerialPort::getPort(pHeader->toAddr.sysId);
 
@@ -134,7 +135,7 @@ bool SerialNode::forward(const byte* pMessage, size_t messageSize, SerialPort* p
 
 	if (lcbList.createLcb(pHeader, pSourcePort)) {
 		MPRINTS("SerialNode::Update> LINK created: ");
-		PRINTLNADDR(pHeader->fromAddr);
+		MPRINTLNADDR(pHeader->fromAddr);
 	}
 
 	SerialPort* pport = SerialPort::pSerialPortList;
@@ -149,8 +150,8 @@ bool SerialNode::forward(const byte* pMessage, size_t messageSize, SerialPort* p
 		return true;
 	}
 	MPRINTS("SerialNode::Update> forward for CR failed: ");
-	PRINTLNADDR(pHeader->fromAddr);
-	PRINTLNADDR(pHeader->toAddr);
+	MPRINTLNADDR(pHeader->fromAddr);
+	MPRINTLNADDR(pHeader->toAddr);
 	return false;
 
 }
@@ -203,7 +204,7 @@ SerialNode::SerialNode(byte localNodeId, bool active, byte remoteSysId, byte rem
 		pNode->pNext = this;
 	}
 	MPRINTS("SerialNode:SerialNode> created : ");
-	PRINTLNADDR(pCcb->localAddr);
+	MPRINTLNADDR(pCcb->localAddr);
 
 }
 
@@ -245,23 +246,36 @@ bool SerialNode::isReadyToConnect() {
 }
 
 bool SerialNode::isLifeCheckLate() {
-	//MPRINTLNSVAL("isLifeCheckLate) node:" ,getId()); MPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
-	return (millis() - lastReceiveTimeStamp) > SERIALNODE_TIME_LIFECHECK_LATE_MSEC;
+	if (!isActive()) {
+		return false;
+	}
+	if ((millis() - lastReceiveTimeStamp) > SERIALNODE_TIME_LIFECHECK_LATE_MSEC){
+		MPRINTSVAL(" SerialNode::isLifeCheckLate> node late: " ,getId());
+		MPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
+		return true;
+	}
+
+	return false;
+
 }
 
 bool SerialNode::isLifeCheckExpired() {
 	if (!isActive()) {
 		return false;
 	}
-	//MPRINTLNSVAL("isLifeCheckExpired() node:" ,getId()); MPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
-	return (millis() - lastReceiveTimeStamp) > SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC;
+	if ((millis() - lastReceiveTimeStamp) > SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC){
+		MPRINTSVAL("SerialNode::isLifeCheckExpired> node expired: " ,getId());
+		MPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
+		return true;
+	}
+	return false;
 }
 
 void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size_t datasize, SerialPort* pPort) {
 
 	MPRINTLNS("SerialNode::onMessage>");
 	assert(pSerialHeader);
-	PRINTLNHEADER(pSerialHeader);
+	MPRINTLNHEADER(pSerialHeader);
 	assert(pData ? datasize > 0 : datasize == 0);
 	assert(pPort);
 	assert(pCcb->remoteAddr.sysId != systemId);
@@ -275,10 +289,10 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 	bool userCall = true;
 	bool acbNotFound = false;
 
-	XPRINTS("SerialNode::onMessage>    <<< ");
+	XPRINTSVALS("SerialNode::onMessage> node : ",getId(),"  <<< ");
 	XPRINTSS(tSerialHeader::cmd2Str(cmd));
 	XPRINTLNS(" <<< ");
-	XPRINTLNHEADER(pH);
+	XPRINTLNHEADER(pSerialHeader);
 
 	if (!connected) {
 		if (!(cmd == CMD_ACK || cmd == CMD_NAK || cmd == CMD_CR) || cmd == CMD_AFA) {
@@ -304,12 +318,12 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 				// connect, no matter who it is
 				pCcb->remoteAddr = pSerialHeader->fromAddr;
 				MPRINTLNS("pcb remote address:");
-				PRINTLNADDR(pCcb->remoteAddr);
+				MPRINTLNADDR(pCcb->remoteAddr);
 			} else if (pCcb->remoteAddr != pSerialHeader->fromAddr) {
 				// unknown node wants to connect, send NAK
 				MPRINTSVAL("SerialNode::onMessage> unknown remote node wants to connect: ", pCcb->localAddr.nodeId);
 				MPRINTLNS("SerialNode::onMessage> unknown remote node address:");
-				PRINTLNADDR(pCcb->remoteAddr);
+				MPRINTLNADDR(pCcb->remoteAddr);
 				send(CMD_NAK, pSerialHeader->aktid);
 
 			}
@@ -393,7 +407,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 					pCcb->status = CONNECTION_STATUS_CONNECTED;
 					pSerialPort = pPort;
 					MPRINTLNSVAL("SerialNode::onMessage> CONNECTION_STATUS_CONNECTED node (active) : ", getId());
-					PRINTLNADDR(pCcb->localAddr)
+					MPRINTLNADDR(pCcb->localAddr)
 				}
 				;
 				break;
@@ -402,7 +416,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 				pSerialPort = NULL;
 				pCcb->status = CONNECTION_STATUS_DISCONNECTED;
 				MPRINTS("SerialNode::onMessage> node disconnected : ");
-				PRINTLNADDR(pCcb->localAddr)
+				MPRINTLNADDR(pCcb->localAddr)
 				;
 				break;
 			case CMD_LIVE:
@@ -549,24 +563,21 @@ void SerialNode::checkLifeNodes(unsigned long period) {
 
 	while (pNode) {
 		if (!pNode->isConnected()) {
-			if (now - pNode->lastConnectionTrialTimeStamp > 5000) {
+			if ((now - pNode->lastConnectionTrialTimeStamp) > 2000) {
 				pNode->reconnect();
 				pNode->lastConnectionTrialTimeStamp = now;
 			}
 		} else if (pNode->isLifeCheckExpired()) {
-			MPRINTLNSVAL("SerialNode::checkLifeNodes> isLifeCheckExpired for node : ", pNode->getId());
-			if (now - pNode->lastConnectionTrialTimeStamp > 5000) {
+			if (now - pNode->lastConnectionTrialTimeStamp > 2000) {
 				pNode->reconnect();
 				pNode->lastConnectionTrialTimeStamp = now;
 			}
 		} else if (pNode->isLifeCheckLate()) {
-			if (pNode->isActive()) {
-				if (now - pNode->lastLiveTrialTimeStamp > 5000) {
-					MPRINTLNSVAL("SerialNode::checkLifeNodes> node is late : ", pNode->getId());
-					pNode->send(CMD_LIVE);
-					pNode->lastLiveTrialTimeStamp = now;
-				}
+			if (now - pNode->lastLiveTrialTimeStamp > 2000) {
+				pNode->send(CMD_LIVE);
+				pNode->lastLiveTrialTimeStamp = now;
 			}
+
 		}
 		pNode = (SerialNode*) pNode->pNext;
 	}
@@ -611,9 +622,9 @@ while ((timeOut == 0) || millis() <= endMillis) {
 		}
 	} else {
 		MPRINTLNS("SerialNode::connect>  connected: ");
-		PRINTLNADDR(pCcb->localAddr);
+		MPRINTLNADDR(pCcb->localAddr);
 		MPRINTS(" to ");
-		PRINTLNADDR(pCcb->remoteAddr);
+		MPRINTLNADDR(pCcb->remoteAddr);
 		return true;
 	}
 
@@ -703,30 +714,31 @@ return 0;
 }
 
 tAktId SerialNode::writeToPort(tSerialHeader* pHeader, byte* pData, size_t datasize, SerialPort* pPort) {
-TIME_RESET;
+XPRINTSVALS("SerialNode::writeToPort> node : ",pHeader->fromAddr.nodeId,"  >>> ");
+XPRINTSS(tSerialHeader::cmd2Str(pHeader->cmd));
+XPRINTLNS(" >>> ");
+XPRINTLNHEADER(pHeader);
 
 MPRINTLNSVAL("SerialNode::writeToPort> send to port: ", pPort->remoteSysId);
+
 assert(pHeader);
 assert(pHeader->toAddr.sysId != pHeader->fromAddr.sysId);
-TIME_PICK;
+
 if (pHeader->aktid == 0) { // we need an aktId
 	acbList.createOrUseAcb(pHeader);
 }
-TIME_PICK;
+
 pPort->getTx()->sendPreamble();
 pPort->getTx()->sendRawData((byte*) pHeader, sizeof(tSerialHeader));
 if (pData && datasize > 0) {
 	pPort->getTx()->sendRawData((byte*) pData, datasize);
 }
 pPort->getTx()->sendPostamble();
-TIME_PICK;
+XTIME_RESET;
 if (pData) {
 	MPRINTLNSVAL("datasize: ", datasize);
 }
-PRINTLNHEADER(pHeader);
 
-
-TIME_PICK;
 
 return pHeader->aktid;
 }
