@@ -51,6 +51,7 @@ void SerialPort::cycleListenerPort() {
 	while (pPort) {
 		if (pPort->isListening()
 				&& ((millis()- pPort->listenTimeStamp) > MAX_LISTENTIME)
+				&& (SerialNode::acbList.count() == 0)
 				&& !pPort->available()){
 
 			pPort->cycleNextPort()->listen();
@@ -80,12 +81,13 @@ void SerialPort::readNextOnAllPorts() {
 				  while (pport->available()){
 				  	  pport->getRx()->readNext();
 				  }
-				  pport->cycleNextPort()->listen();
+
 			  }
 
 		} else {
 			MPRINTLNSVAL("SerialRx::port has no receiver: ", pport->remoteSysId);
 		}
+
 
 		pport = (SerialPort*) pport->pNext;
 	}
@@ -126,6 +128,7 @@ SerialPort::SerialPort(){
 
 
 SerialPort* SerialPort::cycleNextPort(){
+   // XPRINTLNS("SerialPort::cycleNextPort") ;
 	if (this->pNext) {
 		return (SerialPort*)this->pNext;
 	}else {

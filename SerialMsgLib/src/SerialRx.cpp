@@ -117,7 +117,7 @@ bool SerialRx::readNext() {
 				pRecBuffer[dataCount] = lastByte;
 				++dataCount;
 			} else {
-				XPRINTLNSVAL("BUFFER OVERFLOW: DATA SIZE >= ",
+				XPRINTLNSVAL("BUFFER OVERFLOW: dataSize > ",
 						bufferSize - sizeof serPostamble);
 				dataCollect = false;
 			}

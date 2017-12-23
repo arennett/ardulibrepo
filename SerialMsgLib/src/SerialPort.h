@@ -8,7 +8,7 @@
 #ifndef SERIALPORT_H_
 #define SERIALPORT_H_
 
-#define MAX_LISTENTIME 400 // only by multiple SoftSerialPorts important
+#define MAX_LISTENTIME 40 // mecs if port is idle, only by multiple SoftSerialPorts
 
 #include "Arduino.h"
 #include "SerialPortRxTxMapper.h"

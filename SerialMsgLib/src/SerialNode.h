@@ -86,7 +86,7 @@ public:
 	 * > pPort		...port to write to
 	 * < returns	...the aktid of the sent header
 	 */
-	static tAktId writeToPort(tSerialHeader* pHeader, byte* pData, size_t datasize, SerialPort* pPort);
+	tAktId writeToPort(tSerialHeader* pHeader, byte* pData, size_t datasize, SerialPort* pPort);
 
 	/* static SerialNode* GetNodeList();
 	 * all instantiated nodes are linked in a node list.
@@ -323,6 +323,8 @@ public:
 
 	unsigned long lastConnectionTrialTimeStamp = 0;
 	unsigned long lastLiveTrialTimeStamp = 0;
+
+	bool waitForPort=false;
 
 
 

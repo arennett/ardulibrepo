@@ -1,6 +1,6 @@
 #ifndef tools_h
 #define tools_h
-#define __ASSERT_USE_STDERR
+//#define __ASSERT_USE_STDERR
 #include <assert.h>
 #include "Arduino.h"
 

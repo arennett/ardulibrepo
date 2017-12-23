@@ -476,12 +476,19 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 		XPRINTFREE;
 
 		MPRINTLNSVAL("SerialNode::onMessage> ACB COUNT : ", SerialNode::acbList.count());
+		int count =SerialNode::acbList.count();
 		SerialNode::acbList.deleteAcbEntry(pSerialHeader->aktid);
+		assert(acbList.count() < count);
+
+	}else{
+		// old reply, acb already reused
+		//assert(false);
 	}
 
-}
+
 
 // user request /reply
+}
 
 bool SerialNode::areAllNodesConnected() {
 	SerialNode* pNode = SerialNode::pSerialNodeList;
@@ -562,22 +569,24 @@ void SerialNode::checkLifeNodes(unsigned long period) {
 	}
 
 	while (pNode) {
-		if (!pNode->isConnected()) {
-			if ((now - pNode->lastConnectionTrialTimeStamp) > 2000) {
-				pNode->reconnect();
-				pNode->lastConnectionTrialTimeStamp = now;
-			}
-		} else if (pNode->isLifeCheckExpired()) {
-			if (now - pNode->lastConnectionTrialTimeStamp > 2000) {
-				pNode->reconnect();
-				pNode->lastConnectionTrialTimeStamp = now;
-			}
-		} else if (pNode->isLifeCheckLate()) {
-			if (now - pNode->lastLiveTrialTimeStamp > 2000) {
-				pNode->send(CMD_LIVE);
-				pNode->lastLiveTrialTimeStamp = now;
-			}
+		if (!pNode->waitForPort){
+			if (!pNode->isConnected()) {
+				if ((now - pNode->lastConnectionTrialTimeStamp) > 2000) {
+					pNode->reconnect();
+					pNode->lastConnectionTrialTimeStamp = now;
+				}
+			} else if (pNode->isLifeCheckExpired()) {
+				if (now - pNode->lastConnectionTrialTimeStamp > 2000) {
+					pNode->reconnect();
+					pNode->lastConnectionTrialTimeStamp = now;
+				}
+			} else if (pNode->isLifeCheckLate()) {
+				if (now - pNode->lastLiveTrialTimeStamp > 2000) {
+					pNode->send(CMD_LIVE);
+					pNode->lastLiveTrialTimeStamp = now;
+				}
 
+			}
 		}
 		pNode = (SerialNode*) pNode->pNext;
 	}
@@ -648,6 +657,9 @@ return false; // no connections or timeout
 
 tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, byte* pData, byte datasize, byte replyToSys,
 	byte replyToNode) {
+
+
+
 
 tSerialHeader header, *pHeader;
 pHeader = &header;
@@ -724,8 +736,27 @@ return 0;
 tAktId SerialNode::writeToPort(tSerialHeader* pHeader, byte* pData, size_t datasize, SerialPort* pPort) {
 XPRINTSVALS("SerialNode::writeToPort> node : ",pHeader->fromAddr.nodeId,"  >>> ");
 XPRINTSS(tSerialHeader::cmd2Str(pHeader->cmd));
-XPRINTLNS(" >>> ");
-XPRINTLNHEADER(pHeader);
+XPRINTLNSVAL(" >>> port: ",pPort->remoteSysId);
+
+if (SerialNode::acbList.count() > 0){
+	if (!pPort->isListening()) { //at least one open acb on other port, we wait
+		XPRINTLNS("SerialNode::writeToPort> not listen, acb count > 0, waiting for port");
+
+
+		waitForPort=true;
+
+		while(SerialNode::acbList.count() > 0){
+			processNodes();
+		}
+
+		waitForPort=false;
+	}
+}else{
+	XPRINTLNSVAL("SerialNode::writeToPort> acb count = 0, listen to port: ",pPort->remoteSysId);
+
+}
+
+pPort->listen();
 
 MPRINTLNSVAL("SerialNode::writeToPort> send to port: ", pPort->remoteSysId);
 
@@ -747,6 +778,9 @@ if (pData) {
 	MPRINTLNSVAL("datasize: ", datasize);
 }
 
+XPRINTLNHEADER(pHeader);
+SerialNode::acbList.printList();
+XPRINTLNSVAL("SerialNode::writeToPort> --------------------- end ----------------node: ",pHeader->fromAddr.nodeId);
 
 return pHeader->aktid;
 }

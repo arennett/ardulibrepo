@@ -52,6 +52,7 @@ public:
 	void 	deleteAcbList();
 	bool  	deleteAcbEntry(tAktId aktId);
 	bool  	deleteAcbEntry(tCcb* pCcb,byte cmd);
+	void	printList();
 
 
 

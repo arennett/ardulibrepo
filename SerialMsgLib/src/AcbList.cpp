@@ -13,6 +13,11 @@ AcbList::AcbList() {
 
 }
 
+AcbList::~AcbList() {
+	deleteAcbList();
+}
+
+
 tAcb* AcbList::getRoot() {
 	return pRoot;
 }
@@ -116,9 +121,8 @@ unsigned int AcbList::count() {
 //unsigned int AcbList::getCountAcbEntries();
 
 void AcbList::deleteAcbList() {
-	tAcb* pLastEntry;
-	while ((pLastEntry = getLastAcbEntry()) != NULL) {
-		delete pLastEntry;
+	while (pRoot) {
+		deleteAcbEntry(pRoot->aktid);
 	}
 }
 
@@ -176,7 +180,14 @@ bool AcbList::deleteAcbEntry(tCcb* pCcb, byte cmd) {
 	return false;
 }
 
-AcbList::~AcbList() {
-	deleteAcbList();
+void AcbList::printList(){
+	tAcb* pEntry=pRoot;
+	MPRINTLNSVAL("AcbList::printList>>>>>>>>begin>>>>>>>> count: " ,count());
+	while (pEntry) {
+		MPRINTLNSVAL("AcbList::printList> ACB: ", pEntry->aktid);
+		pEntry=(tAcb*)pEntry->pNext;
+	}
+	MPRINTLNS("AcbList::printList<<<<<<<<end<<<<<<<<<<<<<<<<");
 }
+
 
