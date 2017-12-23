@@ -40,9 +40,6 @@ bool SerialTx::setPort(SerialPort* pSerialPort) {
 }
 
 
-bool SerialTx::listen () {
-	return  pSerialPort->listen();
-}
 
 SerialPort* SerialTx::getSerialPort(){
 	return pSerialPort;

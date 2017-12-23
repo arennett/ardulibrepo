@@ -503,7 +503,7 @@ bool SerialNode::connectNodes(unsigned long timeOut, unsigned long reqPeriod) {
 
 	if (pNode && !connected) {
 		while ((millis() <= endMillis || timeOut == 0) && !connected) {
-			SerialRx::readNextOnAllPorts();
+			SerialPort::readNextOnAllPorts();
 			connected = true;
 			while (pNode) {
 				connected = connected && pNode->isConnected();
@@ -581,16 +581,24 @@ void SerialNode::checkLifeNodes(unsigned long period) {
 		}
 		pNode = (SerialNode*) pNode->pNext;
 	}
+
+
+
 	SerialNode::lastLiveCheckTimeStamp = now;
+
+
 }
 
 
 void SerialNode::processNodes(bool lifeCheck, unsigned long lifeCheckPeriodMsec) {
-if (lifeCheck) {
-	checkLifeNodes(lifeCheckPeriodMsec);
+	SerialPort::cycleListenerPort();
+
+	if (lifeCheck) {
+		checkLifeNodes(lifeCheckPeriodMsec);
+	}
+	SerialPort::readNextOnAllPorts();
 }
-SerialRx::readNextOnAllPorts();
-}
+
 
 bool SerialNode::connect(byte remoteSysId, byte remoteNodeId, unsigned long timeOut, unsigned long checkPeriod) {
 
@@ -611,7 +619,7 @@ if (isActive()) {
 }
 
 while ((timeOut == 0) || millis() <= endMillis) {
-	SerialRx::readNextOnAllPorts(); // receive next byte
+	SerialPort::readNextOnAllPorts(); // receive next byte
 	if (!isConnected()) {
 		if (isActive()) {
 			if (millis() > reqMillis) {

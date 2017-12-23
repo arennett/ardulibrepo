@@ -5,6 +5,7 @@
  *      Author: User
  */
 
+
 #include "SerialMsg.h"
 #include "SerialHeader.h"
 #include "SerialPort.h"
@@ -21,23 +22,76 @@ SerialPort::SerialPort(byte remoteSysId){
 	this->remoteSysId=remoteSysId;
 	SerialPort* pLast = pSerialPortList;
 
-
+	uint8_t cnt=0;
 	if (!pLast) {
 		pSerialPortList =this;
-	}else {
-		while(!pLast->pNext) {
+		++cnt;
+
+	}else{
+		++cnt;
+		while(pLast->pNext) {
 			pLast=(SerialPort*)pLast->pNext;
+			++cnt;
 		}
 		pLast->pNext=this;
+		++cnt;
 	}
 
     pPortRxTxMapper =new SerialPortRxTxMapper(this);
-	MPRINTFREE;
 	createDataBuffer(0);
-	MPRINTLNS("SerialPort::SerialPort> inited");
+	MPRINTLNSVALS("SerialPort::SerialPort> cnt: ",cnt, " inited");
+
 
 	//pSerialRx= new SerialRx(this,20,SerialNode::update);
 };
+
+
+void SerialPort::cycleListenerPort() {
+	SerialPort* pPort = pSerialPortList;
+	while (pPort) {
+		if (pPort->isListening()
+				&& ((millis()- pPort->listenTimeStamp) > MAX_LISTENTIME)
+				&& !pPort->available()){
+
+			pPort->cycleNextPort()->listen();
+
+			break;
+		}
+		pPort=(SerialPort*) pPort->pNext;
+	}
+}
+
+void SerialPort::readNextOnAllPorts() {
+
+	SerialPort* pport = SerialPort::pSerialPortList;
+
+
+	assert(pport);
+	byte nrofports = 0;
+	while (pport) {
+		++nrofports;
+		if (pport->getRx()) {
+				//DPRINTLNS("SerialRx::readNextOnAllPorts> data available");
+
+			  int size = pport->available();
+			  if (size > 0) {
+				  XPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
+				  XPRINTLNSVAL("SerialRx::data available size :",size );
+				  while (pport->available()){
+				  	  pport->getRx()->readNext();
+				  }
+				  pport->cycleNextPort()->listen();
+			  }
+
+		} else {
+			MPRINTLNSVAL("SerialRx::port has no receiver: ", pport->remoteSysId);
+		}
+
+		pport = (SerialPort*) pport->pNext;
+	}
+
+}
+
 
 SerialPort::~SerialPort() {
 	delete pPortRxTxMapper;
@@ -66,13 +120,18 @@ SerialTx* SerialPort::getTx(){
 }
 
 
-
-
 SerialPort::SerialPort(){
 
 };
 
 
+SerialPort* SerialPort::cycleNextPort(){
+	if (this->pNext) {
+		return (SerialPort*)this->pNext;
+	}else {
+		return pSerialPortList;
+	}
+}
 
 
 void SerialPort::createDataBuffer(size_t maxDataSize) {

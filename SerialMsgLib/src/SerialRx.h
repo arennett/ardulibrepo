@@ -35,12 +35,7 @@ public:
 	SerialRx(SerialPort* pSerialPort,size_t maxDataSize,void (*ptr)(const byte* data, size_t data_size,SerialPort* pPort)) ;
 
 
-	/*
-	 * void readNextOnAllPorts() ;
-	 * for all instantiated SerialPorts
-	 * read next byte into the port buffer
-	 */
-	static void readNextOnAllPorts() ;
+
 
 
 	/**

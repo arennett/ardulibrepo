@@ -44,16 +44,6 @@ public:
 	bool setPort(SerialPort* pSerialPort);
 
 
-
-	/**
-	 * bool listen ();
-	 * - if multiple software serials are used, listen
-	 * - activate this software serial connection
-	 * - since they are concurrent
-	 * < returns	...true, if other connection was deactivated
-	 */
-	bool listen ();
-
 	/**
 	 * void sendData(byte* pDdata, size_t datasize);
 	 * - sends a byte array to a the serialport

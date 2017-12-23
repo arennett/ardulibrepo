@@ -6,12 +6,11 @@
 
 
 // serial output
-//#define DPRINT_ON   ...debugging level
-#define MPRINT_ON   ...monitoring level
-//#deine  XPRINT_ON   ...application messages / errors
+//#define DPRINT_ON     //...debugging level
+//#define MPRINT_ON     //...monitoring level
+//#define  XPRINT_ON    //...application messages / errors
 
 
-#define PRINTFREE  Serial.print(F("free sram : "));Serial.println(freeRam())
 #define FS(x) (__FlashStringHelper*)(x)
 
 #define XPRINT(x)   		Serial.print((x))

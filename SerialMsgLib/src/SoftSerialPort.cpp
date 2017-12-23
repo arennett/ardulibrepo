@@ -5,7 +5,7 @@
  *      Author: User
  */
 
-
+#include <tools.h>
 #include "SerialMsg.h"
 #include "SoftSerialPort.h"
 #include <SoftwareSerial.h>
@@ -35,7 +35,8 @@ SoftSerialPort::~SoftSerialPort(){
 
 
 byte SoftSerialPort::read(){
-	return pSoftwareSerial->read();
+	byte b = pSoftwareSerial->read();
+	return b;
 }
 
 bool SoftSerialPort::write(byte b){
@@ -48,11 +49,13 @@ size_t SoftSerialPort::write(const byte* bb,size_t len){
 
 
 bool SoftSerialPort::listen(){
+	 listenTimeStamp =millis();
+	 XPRINTLNSVAL("SoftSerialPort::listen> on port :", remoteSysId);
 	 return pSoftwareSerial->listen();
 }
 
 void SoftSerialPort::begin(long speed){
-	 return pSoftwareSerial->begin(speed);
+	  pSoftwareSerial->begin(speed);
 }
 
 int  SoftSerialPort::available(){

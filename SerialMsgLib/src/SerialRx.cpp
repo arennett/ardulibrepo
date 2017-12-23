@@ -54,29 +54,7 @@ SerialPort* SerialRx::getPort() {
 	return pSerialPort;
 }
 
-void SerialRx::readNextOnAllPorts() {
 
-	SerialPort* pport = SerialPort::pSerialPortList;
-
-
-	assert(pport);
-	byte nrofports = 0;
-	while (pport) {
-		++nrofports;
-
-		//MPRINTLNSVAL("SerialRx::readNextOnAllPorts> nrofports: ", nrofports);
-
-		if (pport->getRx()) {
-				//DPRINTLNS("SerialRx::readNextOnAllPorts> data available");
-			    pport->getRx()->readNext();
-		} else {
-			MPRINTLNSVAL("SerialRx::port has no receiver: ", pport->remoteSysId);
-		}
-
-		pport = (SerialPort*) pport->pNext;
-	}
-	assert(nrofports == 1);
-}
 
 bool SerialRx::waitOnMessage(byte*& pData, size_t& data_size,
 		unsigned long timeOut, unsigned long checkPeriod) {
@@ -149,7 +127,7 @@ bool SerialRx::readNext() {
 		if (lastByte == serPreamble[preAmCount]) {
 			//DPRINTSVAL("serPreamble COUNT:",preAmCount);
 			if (preAmCount == (sizeof serPreamble) - 1) {
-				DPRINTLNS("serPreamble COMPLETE");
+				MPRINTLNSVAL("serPreamble COMPLETE port : ",pSerialPort->remoteSysId);
 				preAmCount = 0;
 				dataCollect = true;
 				dataCount = 0;
@@ -168,11 +146,12 @@ bool SerialRx::readNext() {
 
 			//DPRINTSVAL("serPostamble COUNT:",postAmCount);
 			if (postAmCount == (sizeof serPostamble) - 1) {
-				DPRINTLNS("serPostamble COMPLETE");
+				MPRINTLNSVAL("serPostamble COMPLETE port : ", pSerialPort->remoteSysId);
 				dataSize = dataCount - sizeof serPostamble;
-				DPRINTLNSVAL("SerialRx::readNext> message size: ",
+				MPRINTLNSVAL("SerialRx::readNext> message size: ",
 						dataSize);
 
+				assert(updateCallback);
 				if (updateCallback && dataCollect) {
 
 					MPRINTLNS(" SerialRx::readNext> call updateCallback");
@@ -180,7 +159,7 @@ bool SerialRx::readNext() {
 				}
 
 				messReceived = true;
-				DPRINTLNS("messReceived = true;");
+				MPRINTLNS("messReceived = true;");
 				postAmCount = 0;
 				dataCollect = false;
 				dataCount = 0;

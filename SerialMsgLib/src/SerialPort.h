@@ -8,8 +8,11 @@
 #ifndef SERIALPORT_H_
 #define SERIALPORT_H_
 
+#define MAX_LISTENTIME 400 // only by multiple SoftSerialPorts important
+
 #include "Arduino.h"
 #include "SerialPortRxTxMapper.h"
+
 
 class SerialRx;
 class SerialTx;
@@ -19,6 +22,20 @@ public:
 	static SerialPort* pSerialPortList;
 	static SerialPort* getPort(byte remoteSysId);
 
+	/*
+	 * void readNextOnAllPorts() ;
+	 * for all instantiated SerialPorts
+	 * read next byte into the port buffer
+	 */
+	static void readNextOnAllPorts() ;
+
+
+	/*
+	 * switch to next port if listen time expired
+	 * and no data available
+	 * only for software serial ports important
+	 */
+	static void cycleListenerPort();
 
 
 	/**
@@ -29,6 +46,9 @@ public:
 	SerialPort(byte remoteSysId);
 
 	virtual ~SerialPort();
+
+	SerialPort* cycleNextPort();
+
 
 	/*
 	 *  createDataBuffer(size_t dataSize);
@@ -64,6 +84,8 @@ public:
 
 
 	SerialPortRxTxMapper* pPortRxTxMapper =NULL;
+
+	unsigned long listenTimeStamp = 0;
 
 
 private:
