@@ -17,11 +17,27 @@
 
 class SoftSerialPort: public SerialPort {
 public:
+
+	static SoftSerialPort* pSoftSerialPortList;
+	static SoftSerialPort*  getListenerPort();
+	/*
+	 * switch to next port if listen time expired
+	 * and no data available
+	 * only for software serial ports important
+	 */
+	static void cycleListenerPort();
+
 	SoftSerialPort();
 	SoftSerialPort(byte pinRx, byte pinTx,byte remoteSysId) ;
 	SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte remoteSysId);
+
+
 	virtual ~SoftSerialPort();
 
+
+	SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort();
+
+	virtual tPortType getType();
 	virtual byte read();
 	virtual bool write(byte b);
 	virtual size_t write(const byte* bb,size_t len);

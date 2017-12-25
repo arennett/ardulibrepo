@@ -20,14 +20,19 @@ typedef struct {
 #define ACB_STATUS_CLOSED		1
 #define ACB_STATUS_OPEN			2
 	byte 	status = ACB_STATUS_CREATED;
-	void* 	pNext = NULL;
+	byte    portId = 0;
 	unsigned long timeStamp= 0;
+	void* 	pNext = NULL;
 } tAcb;
 
 
 
 class AcbList {
 public:
+
+	//static
+	static AcbList instance;
+
 	AcbList();
 
 	virtual ~AcbList();
@@ -48,7 +53,14 @@ public:
 	 */
 	tAcb*   getAcbEntry(tCcb* pCcb,byte cmd);
 	tAcb* 	getLastAcbEntry();
-	unsigned int count();
+
+	/**
+	 * unsigned int count(byte portId=0);
+	 * count open acbs
+	 * > portId 	== 0	...all acbs
+	 * 				> 0 	...acbs on a port
+	 */
+	unsigned int count(byte portId=0);
 	void 	deleteAcbList();
 	bool  	deleteAcbEntry(tAktId aktId);
 	bool  	deleteAcbEntry(tCcb* pCcb,byte cmd);

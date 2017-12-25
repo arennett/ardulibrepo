@@ -8,6 +8,9 @@
 #include <tools.h>
 #include "AcbList.h"
 
+
+AcbList AcbList::instance ;
+
 AcbList::AcbList() {
 	aktId = 0;
 
@@ -108,10 +111,10 @@ tAcb* AcbList::getLastAcbEntry() {
 	return pLast;
 }
 
-unsigned int AcbList::count() {
+unsigned int AcbList::count(byte portId) {
 	tAcb* p = pRoot;
 	unsigned int cnt = 0;
-	while (p) {
+	while (p && (portId ? p->portId==portId: true)) {
 		++cnt;
 		p = (tAcb*) p->pNext;
 	}

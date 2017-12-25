@@ -15,8 +15,8 @@
 #define SERIALNODE_H_
 
 #define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 	200   // check nodes all 200 msec
-#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	2000  // if we didn't hear anything for 2 sec send life
-#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	5000  // if we didn't hear anything for 5 sec, node is diconnected
+#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	5000  // if we didn't hear anything for 2 sec send life
+#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	8000  // if we didn't hear anything for 5 sec, node is diconnected
 
 class SerialNode {
 
@@ -25,6 +25,7 @@ public:
 	static byte systemId;
 	static unsigned long lastLiveCheckTimeStamp;
 	static unsigned long lastConnectTimeStamp;
+	static SerialNode* pProcessingNode;
 
 	/**
 	 * void update(byte* pMessage,size_t messageSize,SerialPort *pPort);
@@ -124,16 +125,16 @@ public:
 	 *  if node is disconnected it sends a CR message
 	 *  > period	...time period between the lifeChecks, default 500 msec
 	 */
-	static void checkLifeNodes(unsigned long periodMsec = 500);
+	static void checkConnection(SerialNode* pNode,unsigned long periodMsec = 200);
 
 	/**
 	 * static void SerialNode::processNodes(bool bLifeCheck);
 	 * this routine has to be put into the main loop
 	 * it reads on all ports for all nodes
 	 * > lifeCheck					...checks periodically all node connections
-	 * > lifeCheckPeriodMsec > 	...time period between the lifeChecks, default 500 msec
+
 	 */
-	static void processNodes(bool lifeCheck=true, unsigned long lifeCheckPeriodMsec = 500);
+	static void processNodes(bool lifeCheck=true);
 
 	/**
 	 * static bool areAllNodesConnected();
@@ -324,11 +325,6 @@ public:
 	unsigned long lastConnectionTrialTimeStamp = 0;
 	unsigned long lastLiveTrialTimeStamp = 0;
 
-	bool waitForPort=false;
-
-
-
-	static AcbList acbList;
 	static LcbList lcbList;
 	static SerialNode* pSerialNodeList;
 

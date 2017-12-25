@@ -8,11 +8,17 @@
 #ifndef SERIALPORT_H_
 #define SERIALPORT_H_
 
-#define MAX_LISTENTIME 40 // mecs if port is idle, only by multiple SoftSerialPorts
+
 
 #include "Arduino.h"
 #include "SerialPortRxTxMapper.h"
 
+enum tPortType{
+PORTTYPE_MOCK		=0,
+PORTTYPE_SOFTSERIAL	=1,
+PORTTYPE_HARDSERIAL	=2,
+
+};
 
 class SerialRx;
 class SerialTx;
@@ -30,12 +36,7 @@ public:
 	static void readNextOnAllPorts() ;
 
 
-	/*
-	 * switch to next port if listen time expired
-	 * and no data available
-	 * only for software serial ports important
-	 */
-	static void cycleListenerPort();
+
 
 
 	/**
@@ -47,7 +48,7 @@ public:
 
 	virtual ~SerialPort();
 
-	SerialPort* cycleNextPort();
+
 
 
 	/*
@@ -72,6 +73,8 @@ public:
 
 
 
+
+	virtual tPortType getType()=0;
 	virtual byte read()=0;
 	virtual bool write(byte b)=0;
 	virtual size_t write(const byte* bb, size_t len)=0;
@@ -80,6 +83,7 @@ public:
 	virtual int  available()=0;
 	virtual bool isListening()=0;
 	void* pNext = NULL;
+	byte portType = 0;
 	byte remoteSysId=0;
 
 

@@ -46,21 +46,7 @@ SerialPort::SerialPort(byte remoteSysId){
 };
 
 
-void SerialPort::cycleListenerPort() {
-	SerialPort* pPort = pSerialPortList;
-	while (pPort) {
-		if (pPort->isListening()
-				&& ((millis()- pPort->listenTimeStamp) > MAX_LISTENTIME)
-				&& (SerialNode::acbList.count() == 0)
-				&& !pPort->available()){
 
-			pPort->cycleNextPort()->listen();
-
-			break;
-		}
-		pPort=(SerialPort*) pPort->pNext;
-	}
-}
 
 void SerialPort::readNextOnAllPorts() {
 
@@ -76,8 +62,8 @@ void SerialPort::readNextOnAllPorts() {
 
 			  int size = pport->available();
 			  if (size > 0) {
-				  XPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
-				  XPRINTLNSVAL("SerialRx::data available size :",size );
+				  MPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
+				  MPRINTLNSVAL("SerialRx::data available size :",size );
 				  while (pport->available()){
 				  	  pport->getRx()->readNext();
 				  }
@@ -127,14 +113,7 @@ SerialPort::SerialPort(){
 };
 
 
-SerialPort* SerialPort::cycleNextPort(){
-   // XPRINTLNS("SerialPort::cycleNextPort") ;
-	if (this->pNext) {
-		return (SerialPort*)this->pNext;
-	}else {
-		return pSerialPortList;
-	}
-}
+
 
 
 void SerialPort::createDataBuffer(size_t maxDataSize) {

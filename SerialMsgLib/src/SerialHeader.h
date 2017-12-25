@@ -49,14 +49,13 @@ typedef enum {
 	CMD_ACK,		// 	< ACKNOWLEDGED
 
 	// internal use
-	CMD_LIVE,		//	> LIVE
+	CMD_LIVE,		//	> LIVE (reply exp.)
 	CMD_CR,			// 	> CONNECTION REQUEST
 	CMD_CD, 		//	> CONNECTION DOWN
-	CMD_AFA,			//	> ASK FOR ADDRESS
 
 	// application use
 	CMD_ACD,		//	> Application Command	(opt. data)
-	CMD_ARQ,		//	> Application Request  	(opt. data)
+	CMD_ARQ,		//	> Application Request  	(opt. data)	(reply exp.)
 	CMD_ARP		 	//	> Application Reply   	(opt. data)
 } tSerialCmd;
 typedef unsigned int tAktId;
@@ -67,7 +66,6 @@ const char STR_ACK[] PROGMEM = { "ACK" };
 const char STR_LIVE[] PROGMEM = { "LIVE" };
 const char STR_CR[] PROGMEM = { "CR" };
 const char STR_CD[] PROGMEM = { "CD" };
-const char STR_AFA[] PROGMEM = { "AFA" };
 const char STR_ACD[] PROGMEM = { "ACD" };
 const char STR_ARQ[] PROGMEM = { "ARQ" };
 const char STR_ARP[] PROGMEM = { "ARP" };
@@ -131,7 +129,6 @@ public:
 		case CMD_ACK:  return STR_ACK;
 		case CMD_LIVE: return STR_LIVE;
 		case CMD_CR:   return STR_CR;
-		case CMD_AFA:  return STR_AFA;
 		case CMD_ACD:  return STR_ACD;
 		case CMD_ARQ:  return STR_ARQ;
 		case CMD_ARP:  return STR_ARP;
