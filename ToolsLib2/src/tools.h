@@ -7,7 +7,7 @@
 
 // serial output
 //#define DPRINT_ON     //...debugging level
-//#define MPRINT_ON     //...monitoring level
+#define MPRINT_ON     //...monitoring level
 //#define  XPRINT_ON    //...application messages / errors
 
 
@@ -69,6 +69,7 @@
 	#define DPRINTHEX(x)	MPRINTHEX(x)
 	#define DPRINTLN(x)		MPRINTLN(x)
 	#define DPRINTS(s)		MPRINTS(s)
+	#define DPRINTSS(s)   	MPRINTSS(s)
 	#define DPRINTLNS(s)	MPRINTLNS(s)
 	#define DPRINTSVAL(s,x) MPRINTSVAL(s,x)
     #define DPRINTLNSVAL(s,x) MPRINTLNSVAL(s,x)
@@ -83,6 +84,7 @@
 	#define DPRINTHEX(x)
 	#define DPRINTLN(x)
 	#define DPRINTS(s)
+	#define DPRINTSS(s)
 	#define DPRINTLNS(s)
 	#define DPRINTSVAL(s,x)
     #define DPRINTLNSVAL(s,x)
@@ -93,7 +95,7 @@
 	#define DTIME_PICK
 #endif
 
-#define ASSERTP(e,s)	((e) ? (void)0 : ({MPRINTLNS(s);MPRINTLN("[program aborted]");Serial.flush();abort();}));
+#define ASSERTP(e,s)	((e) ? (void)0 : ({XPRINTLNS(s);XPRINTLN("[program aborted]");Serial.flush();abort();}));
 
 extern unsigned long timeStampLastPick;
 extern unsigned long timeDuration;
