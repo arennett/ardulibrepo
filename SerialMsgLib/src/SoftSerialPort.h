@@ -35,7 +35,7 @@ public:
 	virtual ~SoftSerialPort();
 
 
-	SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort();
+	SoftSerialPort* cycleNextSoftSerialPort();
 
 	virtual tPortType getType();
 	virtual byte read();
@@ -49,9 +49,6 @@ public:
 
 private:
 	SoftwareSerial* pSoftwareSerial;
-	bool deleteSoftwareSerial = false;
-
-
-};
+	};
 
 #endif /* SOFTSERIALPORT_H_ */

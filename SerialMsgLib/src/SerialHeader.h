@@ -10,30 +10,30 @@
 #include "Arduino.h"
 #include <tools.h>
 
-#define XPRINTADDR(x)   XPRINT(x.sysId);XPRINTS(".");XPRINT(x.nodeId)
-#define XPRINTLNADDR(x) XPRINTADDR(x);XPRINTLNS("");
-#define XPRINTADDR(x)   XPRINT(x.sysId);XPRINTS(".");XPRINT(x.nodeId)
-#define XPRINTLNADDR(x) XPRINTADDR(x);XPRINTLNS("");
+#define MPRINTADDR(x)   MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
+#define MPRINTLNADDR(x) MPRINTADDR(x);MPRINTLNS("");
+#define MPRINTADDR(x)   MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
+#define MPRINTLNADDR(x) MPRINTADDR(x);MPRINTLNS("");
 
-#define XPRINTLNHEADER(pH) XPRINTADDR(pH->fromAddr);XPRINTS(" to ");XPRINTLNADDR(pH->toAddr);\
-						XPRINTSVAL(" aktId: ",pH->aktid);XPRINTSVAL(" cmd: ",pH->cmd);XPRINTLNSVAL(" par: ",pH->par);
+#define MPRINTLNHEADER(pH) MPRINTADDR(pH->fromAddr);MPRINTS(" to ");MPRINTLNADDR(pH->toAddr);\
+						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTLNSVAL(" par: ",pH->par);
 
-#ifdef MPRINT_ON
-#define MPRINTADDR(x) 	XPRINTADDR(x)
-#define MPRINTLNADDR(x) XPRINTLNADDR(x)
-#define MPRINTADDR(x)	XPRINTADDR(x)
-#define MPRINTLNHEADER(pH) XPRINTLNHEADER(pH)
+#ifdef DPRINT_ON
+#define DPRINTADDR(x) 	MPRINTADDR(x)
+#define DPRINTLNADDR(x) MPRINTLNADDR(x)
+#define DPRINTADDR(x)	MPRINTADDR(x)
+#define DPRINTLNHEADER(pH) MPRINTLNHEADER(pH)
 #else
-	#define MPRINTADDR(x)
-	#define MPRINTLNADDR(x)
-	#define MPRINTADDR(x)
-	#define MPRINTLNHEADER(pH)
+	#define DPRINTADDR(x)
+	#define DPRINTLNADDR(x)
+	#define DPRINTADDR(x)
+	#define DPRINTLNHEADER(pH)
 #endif
 #ifdef DPRINT_ON
-#define DPRINTADDR(x) 	   XPRINTADDR(x)
-#define DPRINTLNADDR(x)    XPRINTLNADDR(x)
-#define DPRINTADDR(x)	   XPRINTADDR(x)
-#define DPRINTLNHEADER(pH) XPRINTLNHEADER(pH)
+#define DPRINTADDR(x) 	   MPRINTADDR(x)
+#define DPRINTLNADDR(x)    MPRINTLNADDR(x)
+#define DPRINTADDR(x)	   MPRINTADDR(x)
+#define DPRINTLNHEADER(pH) MPRINTLNHEADER(pH)
 #else
 	#define DPRINTADDR(x)
 	#define DPRINTLNADDR(x)
@@ -133,6 +133,19 @@ public:
 		case CMD_ARQ:  return STR_ARQ;
 		case CMD_ARP:  return STR_ARP;
 		default:  return STR_UNKOWN_CMD;
+		}
+	}
+
+	static bool isReplyExpected(tSerialCmd cmd) {
+		switch (cmd) {
+		case CMD_NAK:  return false;
+		case CMD_ACK:  return false;
+		case CMD_LIVE: return true;
+		case CMD_CR:   return true;
+		case CMD_ACD:  return false;
+		case CMD_ARQ:  return true;
+		case CMD_ARP:  return false;
+		default:  return false;
 		}
 	}
 

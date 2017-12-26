@@ -117,7 +117,7 @@ bool SerialRx::readNext() {
 				pRecBuffer[dataCount] = lastByte;
 				++dataCount;
 			} else {
-				XPRINTLNSVAL("BUFFER OVERFLOW: dataSize > ",
+				MPRINTLNSVAL("BUFFER OVERFLOW: dataSize > ",
 						bufferSize - sizeof serPostamble);
 				dataCollect = false;
 			}
@@ -127,7 +127,7 @@ bool SerialRx::readNext() {
 		if (lastByte == serPreamble[preAmCount]) {
 			//DPRINTSVAL("serPreamble COUNT:",preAmCount);
 			if (preAmCount == (sizeof serPreamble) - 1) {
-				MPRINTLNSVAL("serPreamble COMPLETE port : ",pSerialPort->remoteSysId);
+				DPRINTLNSVAL("serPreamble COMPLETE port : ",pSerialPort->remoteSysId);
 				preAmCount = 0;
 				dataCollect = true;
 				dataCount = 0;
@@ -146,20 +146,20 @@ bool SerialRx::readNext() {
 
 			//DPRINTSVAL("serPostamble COUNT:",postAmCount);
 			if (postAmCount == (sizeof serPostamble) - 1) {
-				MPRINTLNSVAL("serPostamble COMPLETE port : ", pSerialPort->remoteSysId);
+				DPRINTLNSVAL("serPostamble COMPLETE port : ", pSerialPort->remoteSysId);
 				dataSize = dataCount - sizeof serPostamble;
-				MPRINTLNSVAL("SerialRx::readNext> message size: ",
+				DPRINTLNSVAL("SerialRx::readNext> message size: ",
 						dataSize);
 
 				assert(updateCallback);
 				if (updateCallback && dataCollect) {
 
-					MPRINTLNS(" SerialRx::readNext> call updateCallback");
+					DPRINTLNS(" SerialRx::readNext> call updateCallback");
 					updateCallback(pRecBuffer, dataSize, pSerialPort);
 				}
 
 				messReceived = true;
-				MPRINTLNS("messReceived = true;");
+				DPRINTLNS("messReceived = true;");
 				postAmCount = 0;
 				dataCollect = false;
 				dataCount = 0;

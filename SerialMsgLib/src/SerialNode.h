@@ -14,9 +14,9 @@
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
 
-#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 	200   // check nodes all 200 msec
-#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	5000  // if we didn't hear anything for 2 sec send life
-#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	8000  // if we didn't hear anything for 5 sec, node is diconnected
+#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 	1000   // check nodes all sec
+#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	3000  // if we didn't hear anything for 2 sec send life
+#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	4000  // if we didn't hear anything for 5 sec, node is diconnected
 
 class SerialNode {
 
@@ -263,7 +263,7 @@ public:
 	 * < return 		aktid		... > 0 if message was sent
 	 */
 	tAktId send(tSerialCmd cmd, tAktId replyOn = 0, byte par = 0, byte* pData =
-	NULL, byte datasize = 0, byte replyToSys = 0, byte replyToNode = 0);
+	NULL, size_t datasize = 0, byte replyToSys = 0, byte replyToNode = 0);
 
 	/**
 	 * waits on the reply
@@ -321,9 +321,6 @@ public:
 	unsigned long lastReceiveTimeStamp = 0; // if older as 1 sec  -> send live (and expect ack or nak)
 	//                        ( if nak onMessage() will disconnect)
 	// if older as 2 sec  -> set connection status disconnected
-
-	unsigned long lastConnectionTrialTimeStamp = 0;
-	unsigned long lastLiveTrialTimeStamp = 0;
 
 	static LcbList lcbList;
 	static SerialNode* pSerialNodeList;

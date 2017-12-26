@@ -10,14 +10,18 @@
 #include "SerialMsg.h"
 #include "SoftSerialPort.h"
 #include "AcbList.h"
-#define MAX_SOFT_LISTEN_TIME 0 // mecs if port is idle, only by multiple SoftSerialPorts
+
 //static
 SoftSerialPort* SoftSerialPort::pSoftSerialPortList = NULL;
 
 //static
 void SoftSerialPort::cycleListenerPort() {
 	SoftSerialPort* pPort = getListenerPort();
-	assert(pPort);
+	// if not at least 2 SoftwareSerialPorts we do not need to switch
+	if (!pPort || !pPort->pNext) {
+		return;
+	};
+
 	if (pPort && pPort->available() == 0 && (AcbList::instance.count(pPort->remoteSysId) == 0)
 			//&& ((millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME)) {
 			// uncomment listenTimeStamp in listen
@@ -53,21 +57,18 @@ SoftSerialPort::SoftSerialPort(byte pinRx, byte pinRy, byte remoteSysId) :
 		SerialPort(remoteSysId) {
 
 	pSoftwareSerial = new SoftwareSerial(pinRx, pinRy);
-	deleteSoftwareSerial = true;
 
 }
 
 SoftSerialPort::SoftSerialPort(SoftwareSerial* pSoftwareSerial, byte remoteSysId) :
 		SerialPort(remoteSysId) {
 	this->pSoftwareSerial = pSoftwareSerial;
-	deleteSoftwareSerial = false;
+
 
 }
 
 SoftSerialPort::~SoftSerialPort() {
-	if (deleteSoftwareSerial) {
-		//delete pSoftwareSerial;
-	}
+
 }
 
 
@@ -92,7 +93,7 @@ size_t SoftSerialPort::write(const byte* bb, size_t len) {
 bool SoftSerialPort::listen() {
 	if (!isListening()) {
 		//listenTimeStamp = millis();
-		MPRINTLNSVAL("SoftSerialPort::listen> on port :", remoteSysId);
+		XPRINTLNSVAL("SoftSerialPort::listen> on port :", remoteSysId);
 		return pSoftwareSerial->listen();
 	}
 	return false;

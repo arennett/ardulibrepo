@@ -15,7 +15,7 @@
 SerialPort* SerialPort::pSerialPortList=NULL;
 
 SerialPort::SerialPort(byte remoteSysId){
-	MPRINTLNSVAL("SerialPort::SerialPort> sysId: ", remoteSysId);
+	DPRINTLNSVAL("SerialPort::SerialPort> sysId: ", remoteSysId);
 	ASSERTP( remoteSysId > 0 ,"remoteSysId must be > 0 !");
 	ASSERTP( remoteSysId != SerialNode::systemId,"remoteSysId must be diffrent from systemId");
 
@@ -39,7 +39,7 @@ SerialPort::SerialPort(byte remoteSysId){
 
     pPortRxTxMapper =new SerialPortRxTxMapper(this);
 	createDataBuffer(0);
-	MPRINTLNSVALS("SerialPort::SerialPort> cnt: ",cnt, " inited");
+	DPRINTLNSVALS("SerialPort::SerialPort> cnt: ",cnt, " inited");
 
 
 	//pSerialRx= new SerialRx(this,20,SerialNode::update);
@@ -62,8 +62,8 @@ void SerialPort::readNextOnAllPorts() {
 
 			  int size = pport->available();
 			  if (size > 0) {
-				  MPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
-				  MPRINTLNSVAL("SerialRx::data available size :",size );
+				  DPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
+				  DPRINTLNSVAL("SerialRx::data available size :",size );
 				  while (pport->available()){
 				  	  pport->getRx()->readNext();
 				  }
@@ -71,7 +71,7 @@ void SerialPort::readNextOnAllPorts() {
 			  }
 
 		} else {
-			MPRINTLNSVAL("SerialRx::port has no receiver: ", pport->remoteSysId);
+			DPRINTLNSVAL("SerialRx::port has no receiver: ", pport->remoteSysId);
 		}
 
 
