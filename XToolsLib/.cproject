@@ -21,12 +21,8 @@
 								<option id="io.sloeber.compiler.cpp.sketch.option.incpath.97778690" name="Include Paths (-I)" superClass="io.sloeber.compiler.cpp.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/XToolsLib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/XToolsLib/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XToolsLib/core/core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XToolsLib/core/variant}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1286031692" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -34,12 +30,8 @@
 								<option id="io.sloeber.compiler.c.sketch.option.incpath.1113033537" name="Include Paths (-I)" superClass="io.sloeber.compiler.c.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/XToolsLib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/XToolsLib/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XToolsLib/core/core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XToolsLib/core/variant}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.462424188" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -47,12 +39,8 @@
 								<option id="io.sloeber.compiler.asm.sketch.option.incpath.1059954433" name="Include Paths (-I)" superClass="io.sloeber.compiler.asm.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/XToolsLib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/XToolsLib/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XToolsLib/core/core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XToolsLib/core/variant}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.1918313225" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>
