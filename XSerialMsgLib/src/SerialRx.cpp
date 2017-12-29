@@ -37,6 +37,9 @@ bool SerialRx::setPort(SerialPort* pSerialPort) {
 
 void SerialRx::createBuffer(size_t maxDataSize) {
 	this->bufferSize = maxDataSize + sizeof serPostamble;
+	if(pRecBuffer){
+		delete pRecBuffer;
+	}
 	pRecBuffer = new byte[bufferSize];
 }
 

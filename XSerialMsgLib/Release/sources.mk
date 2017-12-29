@@ -39,7 +39,4 @@ core/coreLib \
 libraries/SoftwareSerial/src \
 libraries/XToolsLib/src \
 src \
-libraries/XToolsLib/Release \
-libraries/XToolsLib/Release/core \
-libraries/XToolsLib/Release/src \
 
