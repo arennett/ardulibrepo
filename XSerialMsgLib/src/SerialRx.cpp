@@ -113,7 +113,7 @@ bool SerialRx::readNext() {
 		lastByte = pSerialPort->read();
 		// pByte[0] =lastByte;
 
-		XPRINTLNSVAL("byte: ", lastByte);
+		DPRINTLNSVAL("byte: ", lastByte);
 		if (dataCollect) {
 			DPRINTLNSVAL("dc: ", dataCount);
 			if (dataCount < bufferSize) {

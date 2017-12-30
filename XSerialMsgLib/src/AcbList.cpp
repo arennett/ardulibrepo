@@ -56,7 +56,8 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 	tAcb* pAcb = pRoot;
 	while (pAcb) {
-		if (pAcb->cmd == pHeader->cmd && pAcb->fromAddr == pHeader->fromAddr
+		if (pAcb->cmd == pHeader->cmd
+				&& pAcb->fromAddr == pHeader->fromAddr
 				&& pAcb->toAddr == pHeader->toAddr) {
 			//reuse open (unacknowledged) acb
 			DPRINTLNSVAL("AcbList::createOrUseAcb> total count : ", count());

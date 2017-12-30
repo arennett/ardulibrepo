@@ -108,15 +108,6 @@ public:
 
 	static void setOnPreConnectCallBack(void (*ptr)(SerialNode* pNode));
 
-	/*
-	 *  static bool connectNodes(unsigned long timeOut, unsigned long reqPeriod);
-	 *  connect all active and passive nodes in the system
-	 *  all nodes have to be ready to connect -> setReady(true)
-	 *  > timeout		...timeout in msec , default/0 = wait until all nodes connected
-	 *  > reqPeriod	...period for active connection requests, default 200 msec
-	 *  < returns 		...true	if the nodes are connected before timeout expires
-	 */
-	static bool connectNodes(unsigned long timeOut = 0, unsigned long reqPeriod = 200);
 
 	/*
 	 *  static bool SerialNode::checkLifeNodes(unsigned long period);
@@ -126,6 +117,17 @@ public:
 	 *  > period	...time period between the lifeChecks, default 500 msec
 	 */
 	static void checkConnection(SerialNode* pNode,unsigned long periodMsec = 1000);
+
+
+
+
+	SerialPort* getPort();
+
+	static SerialNode* getRoot();
+	SerialNode* getNext();
+
+	SerialNode* cycleNextNodeOnPort();
+
 
 	/**
 	 * static void SerialNode::processNodes(bool bLifeCheck);
@@ -175,27 +177,6 @@ public:
 	inline byte getId() {
 		return pCcb->localAddr.nodeId;
 	}
-	;
-
-	/*
-	 * bool connect(byte remoteAddress,bool active=false,unsigned long timeOut=0,unsigned long reqPeriod=0);
-	 * If the node is connected to another node, the nodes will be first diconnected.
-	 * If the node is active (remoteNodeId was passed), it send connection requests (CR) to the other node (remoteAddress)
-	 * If the other node also tries to connect (passive) it replies an ACK on this node request.
-	 * If the node is passive (no remoteId was passed) it wait for a CR of the active node
-	 * > remoteSysId 		...remote systemId 	>0 	try to connect to system with remoteSysId
-	 * 											 0  only for passive nodes, connect with nodes from every system
-	 * > remoteNodeId		...remote nodeId	>0	connect to a remote node with id == remoteNodeId
-	 * 											 0	active node tries to connect to all passive nodes of the remote system
-	 * >                                      		which have no remote node id
-	 * >										 	passive node waits to be connected from any node of the remote system
-	 * >
-	 * > timeout			...timeout in msec , default/0 = wait until connect
-	 * > reqPeriod        	...period for active connection requests, default 200 msec
-	 * < returns 			...true	if the node is connected before timeout expires
-	 */
-	bool connect(byte remoteSysId = 0, byte remoteNodeId = 0, unsigned long timeOut = 0,
-			unsigned long checkPeriod = 500);
 
 	/**
 	 *  bool reconnect();
@@ -310,13 +291,19 @@ public:
 	 */
 	bool isLifeCheckExpired();
 
+
+
 	/**
 	 * public pointer variables
 	 */
-	void* pNext = NULL; 	// next SerialNode , all nodes are in a linked list
-	tCcb* pCcb = NULL;	// connection data
 
-	SerialPort* pSerialPort = NULL; // if set the node is attached to a port
+
+	/*
+	 * called by static Update
+	 */
+
+private:
+	tCcb* pCcb = NULL;	// connection data
 
 	unsigned long lastReceiveTimeStamp = 0; // if older as 1 sec  -> send live (and expect ack or nak)
 	//                        ( if nak onMessage() will disconnect)
@@ -324,6 +311,7 @@ public:
 
 
 	unsigned long lastLiveCheckTimeStamp =0;
+	tAktId    lastSendAcbAktId = 0;
 
 	static LcbList lcbList;
 	static SerialNode* pSerialNodeList;
@@ -332,9 +320,9 @@ public:
 					SerialNode* pNode); // user callback
 	static void (*pCallBackOnPreConnect)(SerialNode* pNode); // user callback before node connects
 
-	/*
-	 * called by static Update
-	 */
+	void* pNext = NULL; 	// next SerialNode , all nodes are in a linked list
+	SerialPort* pSerialPort = NULL; // if set the node is attached to a port
+
 
 };
 
