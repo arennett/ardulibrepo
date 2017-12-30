@@ -14,9 +14,11 @@
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
 
-#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 	1000   // check nodes all sec
-#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	3000  // if we didn't hear anything for 2 sec send life
-#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	4000  // if we didn't hear anything for 5 sec, node is diconnected
+#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 			1000   // check nodes all sec
+#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 			3000  // if we didn't hear anything for 2 sec send life
+#define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 	10000  // if we didn't hear anything for 2 sec send life
+
+#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	2000  // if LIVE or CR-Roundtrip > 2000
 
 class SerialNode {
 
@@ -274,7 +276,7 @@ public:
 	bool isConnected() {
 		// if port was set, the node can only connect over that port
 		// but the node is not connected before the the status is set to connected
-		bool isConnected = pCcb && (pSerialPort && pCcb->status == CONNECTION_STATUS_CONNECTED);
+		bool isConnected = pSerialPort && pCcb->status == CONNECTION_STATUS_CONNECTED;
 		return isConnected;
 	}
 

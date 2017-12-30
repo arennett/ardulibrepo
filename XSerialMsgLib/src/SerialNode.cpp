@@ -262,10 +262,16 @@ bool SerialNode::isLifeCheckExpired() {
 	tAcb* prevSendAcb = AcbList::instance.getAcbEntry(lastSendAcbAktId);
 	if (prevSendAcb) {
 
-		MPRINTLNSVAL("SerialNode::isLifeCheckExpired()> round trip : ",millis()-prevSendAcb->timeStamp);
-
 		if ((millis()-prevSendAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC) {
 			MPRINTSVAL("SerialNode::isLifeCheckExpired> node expired: " ,getId());MPRINTLNSVAL(" round trip : ",millis()-prevSendAcb->timeStamp);
+			AcbList::instance.deleteAcbEntry(prevSendAcb->aktid);
+			return true;
+		}
+
+
+	}else{
+		if ((millis() - lastReceiveTimeStamp) > SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC) {
+			MPRINTSVAL(" SerialNode::isLifeCheckLate> node very late ,expired: " ,getId());MPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
 			return true;
 		}
 	}
@@ -287,7 +293,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 	/* for received replies*/
 
 	bool connected = isConnected();
-	bool userCall = true;
+	bool userCall = false;
 	bool acbNotFound = false;
 
 	MPRINTSVALS("SerialNode::onMessage> node : ", getId(), "  <<< ");
@@ -359,6 +365,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 			}
 			send(CMD_NAK, pSerialHeader->aktid);
 		}
+
 		break;
 	case CMD_CD:
 		if (connected) {
@@ -369,6 +376,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 		} else {
 			send(CMD_NAK, pSerialHeader->aktid);
 		}
+
 		break;
 	case CMD_LIVE:
 		if (connected) {
@@ -377,14 +385,18 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 		} else {
 			send(CMD_NAK, pSerialHeader->aktid);
 		}
+
 		break;
 
 	case CMD_ACD:
+		userCall=true;
 		MPRINTSVALS("SerialNode::onMessage> CMD_ACD : ", getId(), "  <<< ");
 		break;
 	case CMD_ARQ:
+		userCall=true;
 		break;
 	case CMD_ARP:
+		userCall=true;
 		pAcb = AcbList::instance.getAcbEntry(pSerialHeader->aktid);
 		if (!pAcb) {
 			userCall = false;
@@ -396,7 +408,6 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 		if (pAcb) {
 			switch (pAcb->cmd) {
 			case CMD_CR:
-				userCall = false;
 				pSerialPort = pPort;
 				if (!isActive()) {
 					MPRINTSVAL("SerialNode::onMessage>ACK ON CR node is not active: ", pCcb->localAddr.nodeId);
@@ -416,7 +427,6 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 				;
 				break;
 			case CMD_CD:
-				userCall = false;
 				pSerialPort = NULL;
 				pCcb->status = CONNECTION_STATUS_DISCONNECTED;
 				DPRINTS("SerialNode::onMessage> node disconnected : ");
@@ -427,6 +437,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 				userCall = false;
 				break;
 			case CMD_ARQ:
+				userCall=true;
 			case CMD_ACD:
 				break;
 				//nothing to do
@@ -443,17 +454,15 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 				DPRINTSVAL("SerialNode::onMessage> NAK ON CR : ", pCcb->localAddr.nodeId)
 				;
 
-				userCall = false;
 				pCcb->status = CONNECTION_STATUS_DISCONNECTED;
 				break;
 			case CMD_CD:
-				userCall = false;
 				break;
 			case CMD_LIVE:
-				userCall = false;
 				pCcb->status = CONNECTION_STATUS_DISCONNECTED;
 				break;
 			case CMD_ARQ:
+				userCall=true;
 			case CMD_ACD:
 				break;
 			}
@@ -538,7 +547,7 @@ void SerialNode::reconnect() {
 void SerialNode::checkConnection(SerialNode* pNode, unsigned long period) {
 
 	unsigned long now = millis();
-	if ((now - pNode->lastLiveCheckTimeStamp) < period) {
+	if (pNode->lastLiveCheckTimeStamp && (now - pNode->lastLiveCheckTimeStamp) < period) {
 		return;
 	}
 	if (!pNode->isConnected()) {
@@ -605,11 +614,14 @@ void SerialNode::processNodes(bool lifeCheck) {
 
 	if (pProcessingNode == NULL) {
 		pProcessingNode = pSerialNodeList;
+
 	} else if (AcbList::instance.count() == 0) {
 		pProcessingNode = (SerialNode*) pProcessingNode->pNext;
 	} else if (pProcessingNode->getPort()) {
-		SerialNode* pnext=NULL;
-		if (pProcessingNode->getPort()->getType()==PORTTYPE_SOFTSERIAL) {
+
+		if (AcbList::instance.count(pProcessingNode->getPort()==0)) {
+			pProcessingNode = (SerialNode*) pProcessingNode->pNext;
+		}else if (pProcessingNode->getPort()->getType()==PORTTYPE_SOFTSERIAL) {
 			pProcessingNode= pProcessingNode->cycleNextNodeOnPort();
 		}
 	}
@@ -722,12 +734,18 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, byte* pData, size_t datas
 		// open acbs on other SoftSerialPort
 		if (otherAcbCount > 0) {
 
-			if (pHeader->cmd == CMD_CR || pHeader->cmd == CMD_LIVE) {
+			if (pHeader->cmd == CMD_LIVE) {
 				MPRINTLNS("SerialNode::writeToPort> waiting for replies on other soft serial port,  cancel");
 				return 0;
 			} else if (pHeader->cmd == CMD_ARQ) {
-				MPRINTLNS(
-						"SerialNode::writeToPort> waiting for replies on other soft serial port, force listen, data may be lost");
+				MPRINTLNS("SerialNode::writeToPort> waiting for replies on other soft serial port...");
+				MPRINTFREE;
+						unsigned long tStamp= millis();
+						while(otherAcbCount > 0) {
+							 processNodes();
+							 otherAcbCount = AcbList::instance.count(pListener->remoteSysId);
+						}
+				MPRINTLNSVAL("SerialNode::writeToPort> waiting end, waited for : " ,millis()-tStamp);
 				pPort->listen();
 
 			}
@@ -762,13 +780,8 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, byte* pData, size_t datas
 	if (pData) {
 		DPRINTLNSVAL("datasize: ", datasize);
 	}
-
+	MPRINTLNS("SerialNode::writeToPort> success , header...");
 	MPRINTLNHEADER(pHeader);
-	AcbList::instance.printList();
-	DPRINTLNSVAL("SerialNode::writeToPort> --------------------- end ----------------node: ", pHeader->fromAddr.nodeId);
-
-
-
 	return pHeader->aktid;
 }
 

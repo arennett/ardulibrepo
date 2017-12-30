@@ -10,13 +10,15 @@
 #include "Arduino.h"
 #include <tools.h>
 
-#define MPRINTADDR(x)   MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
-#define MPRINTLNADDR(x) MPRINTADDR(x);MPRINTLNS("");
-#define MPRINTADDR(x)   MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
-#define MPRINTLNADDR(x) MPRINTADDR(x);MPRINTLNS("");
 
 #define MPRINTLNHEADER(pH) MPRINTADDR(pH->fromAddr);MPRINTS(" to ");MPRINTLNADDR(pH->toAddr);\
-						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTSVAL(" cmd: ",pH->cmd);MPRINTLNSVAL(" par: ",pH->par);
+						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTS(" cmd: ");MPRINTSS(tSerialHeader::cmd2Str(pH->cmd));MPRINTLNSVAL(" par: ",pH->par);
+
+
+#define MPRINTADDR(x)   MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
+#define MPRINTLNADDR(x) MPRINTADDR(x);MPRINTLNS("");
+#define MPRINTADDR(x)   MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
+#define MPRINTLNADDR(x) MPRINTADDR(x);MPRINTLNS("");
 
 #ifdef DPRINT_ON
 #define DPRINTADDR(x) 	MPRINTADDR(x)
@@ -150,6 +152,8 @@ public:
 	}
 
 };
+
+
 
 #define SERIALHEADER_SIZE  sizeof(tSerialHeader);
 
