@@ -51,9 +51,19 @@ SoftSerialPort* SoftSerialPort::getListenerPort() {
 		}
 
 	}
-	ASSERTP(pPort,"Port not found");
 	return NULL;
 }
+
+byte SoftSerialPort::count() {
+	byte cnt=0;
+	SerialPort* pPort = pSerialPortList;
+	while (pPort) {
+		++cnt;
+		pPort = (SerialPort*) pPort->pNext;
+	}
+	return cnt;
+}
+
 
 SoftSerialPort::SoftSerialPort(byte pinRx, byte pinRy, byte remoteSysId) :
 		SerialPort(remoteSysId) {

@@ -20,6 +20,7 @@ public:
 
 	static SoftSerialPort* pSoftSerialPortList;
 	static SoftSerialPort*  getListenerPort();
+	static byte SoftSerialPort::count();
 	/*
 	 * switch to next port if listen time expired
 	 * and no data available

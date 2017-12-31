@@ -15,8 +15,8 @@
 #define SERIALNODE_H_
 
 #define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 				1000   	// check nodes all sec
-#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 				10000  	// if we didn't hear anything for 3 sec 	->	send LIVE
-#define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 		20000	// if we didn't hear anything for 20 sec 	->	reconnect
+#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 				4000  	// if we didn't hear anything for 3 sec 	->	send LIVE
+#define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 		10000	// if we didn't hear anything for 20 sec 	->	reconnect
 #define SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC 	8000  	// if we didnt hear an expected reply		->	reconnect
 
 class SerialNode {

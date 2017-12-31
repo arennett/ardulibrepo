@@ -623,16 +623,19 @@ void SerialNode::processNodes(bool lifeCheck) {
 
 	}
 
-
-	ASSERTP(SoftSerialPort::getListenerPort()," NO LISTENER PORT" );
-
-	byte cnt=AcbList::instance.count(SoftSerialPort::getListenerPort()->remoteSysId);
-	//MPRINTLNSVAL("SerialNode::processNodes> ACB's : " ,cnt);
-	if (cnt) {
-		pProcessingNode = (SerialNode*) pProcessingNode->cycleNextNodeOnPort();
+	if (SoftSerialPort::count()>1) {
+		byte acbcnt=AcbList::instance.count(SoftSerialPort::getListenerPort()->remoteSysId);
+		if (acbcnt > 0) {
+			pProcessingNode = (SerialNode*) pProcessingNode->cycleNextNodeOnPort();
+			MPRINTLNSVAL("SerialNode::processNodes> ACB's : " ,acbcnt);
+		}else{
+			pProcessingNode = (SerialNode*) pProcessingNode->pNext;
+		}
 	}else{
 		pProcessingNode = (SerialNode*) pProcessingNode->pNext;
 	}
+
+	//
 
 	if (pProcessingNode == NULL) {
 		pProcessingNode = SerialNode::getRoot();
@@ -643,9 +646,7 @@ void SerialNode::processNodes(bool lifeCheck) {
 
 	}
 
-
-
-   // MPRINTSVAL("SerialNode::processNode :---------msec : ",millis());MPRINTLNSVAL(" -------------------------------- ",pProcessingNode->getId());
+    MPRINTSVAL("SerialNode::processNode :---------msec : ",millis());MPRINTLNSVAL(" -------------------------------- ",pProcessingNode->getId());
 
 	ASSERTP(pProcessingNode, "SerialNode::processNodes> no nodes found");
 
