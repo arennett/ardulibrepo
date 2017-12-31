@@ -109,10 +109,12 @@ tAcb* AcbList::getLastAcbEntry() {
 }
 
 unsigned int AcbList::count(byte portId) {
-	tAcb* p = pRoot;
+		tAcb* p = pRoot;
 	unsigned int cnt = 0;
-	while (p && (portId ? p->portId==portId: true)) {
-		++cnt;
+	while (p){
+		if (portId ? p->portId==portId: true) {
+			++cnt;
+		}
 		p = (tAcb*) p->pNext;
 	}
 	return cnt;;

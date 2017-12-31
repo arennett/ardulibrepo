@@ -262,8 +262,10 @@ bool SerialNode::isLifeCheckExpired() {
 	tAcb* prevSendAcb = AcbList::instance.getAcbEntry(lastSendAcbAktId);
 	if (prevSendAcb) {
 
-		if ((millis()-prevSendAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC) {
-			MPRINTSVAL("SerialNode::isLifeCheckExpired> node expired: " ,getId());MPRINTLNSVAL(" round trip : ",millis()-prevSendAcb->timeStamp);
+		if ((millis()-prevSendAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC) {
+			MPRINTSVAL("SerialNode::isLifeCheckExpired> reply time expired for aktid: " ,prevSendAcb->aktid);
+			MPRINTSVAL(" on node: " ,getId());
+			MPRINTLNSVAL(" round trip time : ",millis()-prevSendAcb->timeStamp);
 			AcbList::instance.deleteAcbEntry(prevSendAcb->aktid);
 			return true;
 		}
@@ -619,28 +621,31 @@ void SerialNode::processNodes(bool lifeCheck) {
 	if (pProcessingNode == NULL) {
 		pProcessingNode =  SerialNode::getRoot();
 
-	} else if (AcbList::instance.count() == 0) {
+	}
+
+
+	ASSERTP(SoftSerialPort::getListenerPort()," NO LISTENER PORT" );
+
+	byte cnt=AcbList::instance.count(SoftSerialPort::getListenerPort()->remoteSysId);
+	//MPRINTLNSVAL("SerialNode::processNodes> ACB's : " ,cnt);
+	if (cnt) {
+		pProcessingNode = (SerialNode*) pProcessingNode->cycleNextNodeOnPort();
+	}else{
 		pProcessingNode = (SerialNode*) pProcessingNode->pNext;
-	} else if (pProcessingNode->getPort()) {
-
-		if (AcbList::instance.count(pProcessingNode->getPort()==0)) {
-			pProcessingNode = (SerialNode*) pProcessingNode->pNext;
-		}
-		//}else if (pProcessingNode->getPort()->getType()==PORTTYPE_SOFTSERIAL) {
-		//	pProcessingNode= pProcessingNode->cycleNextNodeOnPort();
-		//}
-		pProcessingNode->getPort()->listen();
-
-	}else {
-		SoftSerialPort::cycleListenerPort();
 	}
 
 	if (pProcessingNode == NULL) {
-			pProcessingNode = SerialNode::getRoot();
+		pProcessingNode = SerialNode::getRoot();
+	}
+
+	if (pProcessingNode->getPort()) {
+		pProcessingNode->getPort()->listen();
 
 	}
 
-    MPRINTLNSVAL("SerialNode::processNode :------------------------------------------ ",pProcessingNode->getId());
+
+
+   // MPRINTSVAL("SerialNode::processNode :---------msec : ",millis());MPRINTLNSVAL(" -------------------------------- ",pProcessingNode->getId());
 
 	ASSERTP(pProcessingNode, "SerialNode::processNodes> no nodes found");
 
@@ -666,6 +671,9 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, const byte* pD
 		MPRINTSVAL("SerialNode::send > not connected, cmd not allowed : ", cmd);
 		return 0;
 	}
+
+
+
 
 	header.fromAddr.sysId = SerialNode::systemId;
 	if (replyOn > 0) {
@@ -790,8 +798,10 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 	if (pData) {
 		DPRINTLNSVAL("datasize: ", datasize);
 	}
+	SerialNode::pProcessingNode = this;
 	MPRINTLNS("SerialNode::writeToPort> success , header...");
 	MPRINTLNHEADER(pHeader);
+
 	return pHeader->aktid;
 }
 

@@ -113,13 +113,17 @@ bool SerialRx::readNext() {
 		lastByte = pSerialPort->read();
 		// pByte[0] =lastByte;
 
+
+
 		DPRINTLNSVAL("byte: ", lastByte);
 		if (dataCollect) {
+			MPRINTLNSVAL("BUFFERSIZE: ",bufferSize);
 			DPRINTLNSVAL("dc: ", dataCount);
 			if (dataCount < bufferSize) {
 				pRecBuffer[dataCount] = lastByte;
 				++dataCount;
 			} else {
+
 				MPRINTLNSVAL("BUFFER OVERFLOW: dataSize > ",
 						bufferSize - sizeof serPostamble);
 				dataCollect = false;
