@@ -117,7 +117,6 @@ bool SerialRx::readNext() {
 
 		DPRINTLNSVAL("byte: ", lastByte);
 		if (dataCollect) {
-			MPRINTLNSVAL("BUFFERSIZE: ",bufferSize);
 			DPRINTLNSVAL("dc: ", dataCount);
 			if (dataCount < bufferSize) {
 				pRecBuffer[dataCount] = lastByte;
