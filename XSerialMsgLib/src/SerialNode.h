@@ -14,11 +14,10 @@
 #ifndef SERIALNODE_H_
 #define SERIALNODE_H_
 
-#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 			1000   // check nodes all sec
-#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 			3000  // if we didn't hear anything for 2 sec send life
-#define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 	10000  // if we didn't hear anything for 2 sec send life
-
-#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	2000  // if LIVE or CR-Roundtrip > 2000
+#define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 	1000   // check nodes all sec
+#define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 	3000  // if we didn't hear anything for 2 sec send life
+#define SERIALNODE_TIME_LIFECHECK_EXPIRED_MSEC 	4000  // if we didn't hear anything for 5 sec, node is diconnected
+#define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 	4000
 
 class SerialNode {
 
@@ -89,7 +88,7 @@ public:
 	 * > pPort		...port to write to
 	 * < returns	...the aktid of the sent header
 	 */
-	tAktId writeToPort(tSerialHeader* pHeader, byte* pData, size_t datasize, SerialPort* pPort);
+	tAktId writeToPort(tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialPort* pPort);
 
 	/* static SerialNode* GetNodeList();
 	 * all instantiated nodes are linked in a node list.
@@ -245,8 +244,7 @@ public:
 	 * 				    0x**  		... send to unconnected node
 	 * < return 		aktid		... > 0 if message was sent
 	 */
-	tAktId send(tSerialCmd cmd, tAktId replyOn = 0, byte par = 0, byte* pData =
-	NULL, size_t datasize = 0, byte replyToSys = 0, byte replyToNode = 0);
+	tAktId send(tSerialCmd cmd, tAktId replyOn = 0, byte par = 0, const byte* pData =	NULL, size_t datasize = 0, byte replyToSys = 0, byte replyToNode = 0);
 
 	/**
 	 * waits on the reply
@@ -276,7 +274,7 @@ public:
 	bool isConnected() {
 		// if port was set, the node can only connect over that port
 		// but the node is not connected before the the status is set to connected
-		bool isConnected = pSerialPort && pCcb->status == CONNECTION_STATUS_CONNECTED;
+		bool isConnected = pCcb && (pSerialPort && pCcb->status == CONNECTION_STATUS_CONNECTED);
 		return isConnected;
 	}
 

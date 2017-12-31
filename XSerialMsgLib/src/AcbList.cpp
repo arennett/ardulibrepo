@@ -182,7 +182,7 @@ bool AcbList::deleteAcbEntry(tCcb* pCcb, byte cmd) {
 
 void AcbList::printList(){
 	tAcb* pEntry=pRoot;
-	DPRINTLNSVAL("AcbList::printList>>>>>>>>begin>>>>>>>> count: " ,count());
+	MPRINTLNSVAL("AcbList::printList>>>>>>>>begin>>>>>>>> count: " ,count());
 	while (pEntry) {
 		DPRINTLNSVAL("AcbList::printList> ACB: ", pEntry->aktid);
 		pEntry=(tAcb*)pEntry->pNext;
