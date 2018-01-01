@@ -37,6 +37,9 @@ CPP_DEPS :=
 SUBDIRS := \
 core/coreLib \
 libraries/SoftwareSerial/src \
+libraries/XToolsLib/Release \
+libraries/XToolsLib/Release/core \
+libraries/XToolsLib/Release/src \
 libraries/XToolsLib/src \
 src \
 

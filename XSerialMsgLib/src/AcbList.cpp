@@ -54,20 +54,23 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 }
 
 tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
-	tAcb* pAcb = pRoot;
-	while (pAcb) {
-		if (pAcb->cmd == pHeader->cmd
-				&& pAcb->fromAddr == pHeader->fromAddr
-				&& pAcb->toAddr == pHeader->toAddr) {
-			//reuse open (unacknowledged) acb
-			DPRINTLNSVAL("AcbList::createOrUseAcb> total count : ", count());
-			DPRINTSVAL("AcbList::createOrUseAcb> reuse acb   : ", pAcb->aktid);
-			pAcb->status = ACB_STATUS_OPEN;
+	tAcb* pAcb = NULL;
+	if (pHeader->cmd==CMD_CR|| pHeader->cmd==CMD_LIVE || pHeader->cmd==CMD_CD){
+		pAcb = pRoot;
+		while (pAcb) {
+			if (pAcb->cmd == pHeader->cmd
+					&& pAcb->fromAddr == pHeader->fromAddr
+					&& pAcb->toAddr == pHeader->toAddr) {
+				//reuse open (unacknowledged) acb
+				DPRINTLNSVAL("AcbList::createOrUseAcb> total count : ", count());
+				DPRINTSVAL("AcbList::createOrUseAcb> reuse acb   : ", pAcb->aktid);
+				pAcb->status = ACB_STATUS_OPEN;
 
-			break;
+				break;
+			}
+			pAcb = (tAcb*) pAcb->pNext;
+
 		}
-		pAcb = (tAcb*) pAcb->pNext;
-
 	}
 	if (!pAcb) {
 		pAcb = createAcb(pHeader);
@@ -86,6 +89,32 @@ tAcb* AcbList::getAcbEntry(tAktId aktId) {
 	}
 	return pAcb;
 }
+
+tAcb* AcbList::getLastestAcbEntry(byte portId) {
+	unsigned long now =millis();
+	tAcb* pAcb = pRoot;
+
+	while (pAcb) {
+		if (pAcb->portId==portId){
+			break;
+		}
+		pAcb = (tAcb*) pAcb->pNext;
+	}
+
+	tAcb* pLatestAcb = pAcb;
+	while (pAcb) {
+		if (pAcb->portId==portId){
+			if (pAcb->timeStamp < pLatestAcb->timeStamp) {
+				pLatestAcb=pAcb;
+			}
+		}
+		pAcb = (tAcb*) pAcb->pNext;
+	}
+	return pLatestAcb;
+}
+
+
+
 
 tAcb* AcbList::getAcbEntry(tCcb* pCcb, byte cmd) {
 	tAcb* pAcb = pRoot;

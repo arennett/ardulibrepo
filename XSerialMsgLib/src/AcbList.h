@@ -42,6 +42,7 @@ public:
 	tAcb* 	createOrUseAcb(tSerialHeader* pHeader);
 	//void 	mprintAcb(tAcb* pAcb);
 	tAcb*   getAcbEntry(tAktId aktId);
+	tAcb*   getLastestAcbEntry(byte portId);
 
 	/*
 	 * tAcb*   getAcbEntry(tCcb* pCcb,byte cmd);

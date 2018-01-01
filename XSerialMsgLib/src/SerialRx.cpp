@@ -123,7 +123,7 @@ bool SerialRx::readNext() {
 				++dataCount;
 			} else {
 
-				MPRINTLNSVAL("BUFFER OVERFLOW: dataSize > ",
+				XPRINTLNSVAL("BUFFER OVERFLOW: dataSize > ",
 						bufferSize - sizeof serPostamble);
 				dataCollect = false;
 			}
@@ -133,7 +133,7 @@ bool SerialRx::readNext() {
 		if (lastByte == serPreamble[preAmCount]) {
 			//DPRINTSVAL("serPreamble COUNT:",preAmCount);
 			if (preAmCount == (sizeof serPreamble) - 1) {
-				DPRINTLNSVAL("serPreamble COMPLETE port : ",pSerialPort->remoteSysId);
+				XPRINTLNSVAL("serPreamble COMPLETE port : ",pSerialPort->remoteSysId);
 				preAmCount = 0;
 				dataCollect = true;
 				dataCount = 0;
@@ -152,7 +152,7 @@ bool SerialRx::readNext() {
 
 			//DPRINTSVAL("serPostamble COUNT:",postAmCount);
 			if (postAmCount == (sizeof serPostamble) - 1) {
-				DPRINTLNSVAL("serPostamble COMPLETE port : ", pSerialPort->remoteSysId);
+				XPRINTLNSVAL("serPostamble COMPLETE port : ", pSerialPort->remoteSysId);
 				dataSize = dataCount - sizeof serPostamble;
 				DPRINTLNSVAL("SerialRx::readNext> message size: ",
 						dataSize);

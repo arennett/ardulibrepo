@@ -11,6 +11,9 @@ RM := del
 -include subdir.mk
 -include src\subdir.mk
 -include libraries\XToolsLib\src\subdir.mk
+-include libraries\XToolsLib\Release\src\subdir.mk
+-include libraries\XToolsLib\Release\core\subdir.mk
+-include libraries\XToolsLib\Release\subdir.mk
 -include libraries\SoftwareSerial\src\subdir.mk
 -include core\coreLib\subdir.mk
 -include objects.mk
