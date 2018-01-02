@@ -60,7 +60,8 @@ typedef enum {
 	CMD_ARQ,		//	> Application Request  	(opt. data)	(reply exp.)
 	CMD_ARP		 	//	> Application Reply   	(opt. data)
 } tSerialCmd;
-typedef unsigned int tAktId;
+typedef  unsigned int tAktId;
+typedef  unsigned long tStamp;
 #define MAX_AKTID  65535
 
 const char STR_NAK[] PROGMEM = { "NAK" };

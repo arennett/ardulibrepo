@@ -6,6 +6,8 @@
  */
 #include "SerialPortRxTxMapper.h"
 #include "SerialNode.h"
+#include "SerialNodeNet.h"
+
 
 SerialPortRxTxMapper::SerialPortRxTxMapper(){
 	pSerialRx=NULL;
@@ -28,7 +30,7 @@ SerialPortRxTxMapper::SerialPortRxTxMapper(SerialPort* pSerialPort) {
 	pSerialTx->setPort(pSerialPort);
 
 	this->pSerialPort = pSerialPort;
-	pSerialRx->setUpdateCallback(SerialNode::update);
+	pSerialRx->setUpdateCallback(SerialNodeNet::pInst->update);
 
 
 }
@@ -38,7 +40,7 @@ SerialPortRxTxMapper::SerialPortRxTxMapper(SerialPort* pSerialPort,SerialRx* pSe
 	this->pSerialRx = pSerialRx;
 	this->pSerialTx = pSerialTx;
 	this->pSerialPort = pSerialPort;
-	pSerialRx->setUpdateCallback(SerialNode::update);
+	pSerialRx->setUpdateCallback(SerialNodeNet::pInst->update);
 
 }
 

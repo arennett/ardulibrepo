@@ -82,7 +82,7 @@ public:
 
 
 	/**
-	 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
+	 * bool waitOnMessage(byte* data, size_t& data_size, tStamp timeout);
 	 * > waits until complete message is received or timeout is expired
 	 * ppData 		...reference for : pointer on the received data
 	 * data_size 	...reference data size
@@ -90,10 +90,10 @@ public:
 	 * checkPeriod  ...time until next read trial is done
 	 *
 	 */
-	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout, unsigned long checkPeriod);
+	bool waitOnMessage(byte*& pData, size_t& data_size, tStamp timeout, tStamp checkPeriod);
 
 	/**
-		 * bool waitOnMessage(byte* data, size_t& data_size, unsigned long timeout);
+		 * bool waitOnMessage(byte* data, size_t& data_size, tStamp timeout);
 		 * > waits until complete message is received or timeout is expired
 		 * > the checkPeriod is 10msec
 		 * ppData 		...reference for : pointer on the received data
@@ -102,7 +102,7 @@ public:
 		 *
 		 *
 		 */
-	bool waitOnMessage(byte*& pData, size_t& data_size, unsigned long timeout);
+	bool waitOnMessage(byte*& pData, size_t& data_size, tStamp timeout);
 
 	/**
 	 * bool listen ();

@@ -11,6 +11,7 @@
 
 
 #include "Arduino.h"
+#include "SerialHeader.h"
 #include "SerialPortRxTxMapper.h"
 
 enum tPortType{
@@ -89,7 +90,7 @@ public:
 
 	SerialPortRxTxMapper* pPortRxTxMapper =NULL;
 
-	unsigned long listenTimeStamp = 0;
+	tStamp listenTimeStamp = 0;
 
 
 private:

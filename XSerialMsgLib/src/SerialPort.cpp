@@ -10,14 +10,14 @@
 #include "SerialHeader.h"
 #include "SerialPort.h"
 #include "SerialNode.h"
-
+#include "SerialNodeNet.h"
 
 SerialPort* SerialPort::pSerialPortList=NULL;
 
 SerialPort::SerialPort(byte remoteSysId){
 	DPRINTLNSVAL("SerialPort::SerialPort> sysId: ", remoteSysId);
 	ASSERTP( remoteSysId > 0 ,"remoteSysId must be > 0 !");
-	ASSERTP( remoteSysId != SerialNode::systemId,"remoteSysId must be diffrent from systemId");
+	ASSERTP( remoteSysId != SerialNodeNet::pInst->getSystemId(),"remoteSysId must be diffrent from systemId");
 
 	this->remoteSysId=remoteSysId;
 	SerialPort* pLast = pSerialPortList;

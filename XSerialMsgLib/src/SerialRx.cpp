@@ -60,7 +60,7 @@ SerialPort* SerialRx::getPort() {
 
 
 bool SerialRx::waitOnMessage(byte*& pData, size_t& data_size,
-		unsigned long timeOut, unsigned long checkPeriod) {
+		tStamp timeOut, tStamp checkPeriod) {
 	DPRINTLNS("waitOnMessage");
 
 	data_size = 0;
@@ -71,7 +71,7 @@ bool SerialRx::waitOnMessage(byte*& pData, size_t& data_size,
 	if (timeOut == 0) {
 		timeOut = WAITED_READ_TIMEOUT_DEFAULT_MSEC;
 	}
-	unsigned long restOfTime = timeOut;
+	tStamp restOfTime = timeOut;
 
 	while (restOfTime >= checkPeriod) {
 		if (readNext()) {
@@ -89,7 +89,7 @@ bool SerialRx::waitOnMessage(byte*& pData, size_t& data_size,
 }
 
 bool SerialRx::waitOnMessage(byte*& pData, size_t& data_size,
-		unsigned long timeOut) {
+		tStamp timeOut) {
 	return waitOnMessage(pData, data_size, timeOut, 0);
 }
 

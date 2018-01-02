@@ -21,7 +21,7 @@ typedef struct {
 #define ACB_STATUS_OPEN			2
 	byte 	status = ACB_STATUS_CREATED;
 	byte    portId = 0;
-	unsigned long timeStamp= 0;
+	tStamp timeStamp= 0;
 	void* 	pNext = NULL;
 } tAcb;
 
@@ -42,7 +42,13 @@ public:
 	tAcb* 	createOrUseAcb(tSerialHeader* pHeader);
 	//void 	mprintAcb(tAcb* pAcb);
 	tAcb*   getAcbEntry(tAktId aktId);
-	tAcb*   getLastestAcbEntry(byte portId);
+
+	/**
+	 * getLastestAcbEntry(byte portId=0);
+	 * > portId 	...port, default all ports
+	 * > returns 	...the latest acb entry
+	 */
+	tAcb*   getLastestAcbEntry(byte portId=0);
 
 	/*
 	 * tAcb*   getAcbEntry(tCcb* pCcb,byte cmd);
@@ -53,6 +59,10 @@ public:
 	 * > cmd	message cmd
 	 */
 	tAcb*   getAcbEntry(tCcb* pCcb,byte cmd);
+
+	/* tAcb* 	getLastAcbEntry();
+	 * return the last created acb in list
+	 */
 	tAcb* 	getLastAcbEntry();
 
 	/**

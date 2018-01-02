@@ -17,137 +17,18 @@
 #define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 				1000   	// check nodes all sec
 #define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 				4000  	// if we didn't hear anything for 3 sec 	->	send LIVE
 #define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 		10000	// if we didn't hear anything for 20 sec 	->	reconnect
-#define SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC 	8000  	// if we didnt hear an expected reply		->	reconnect
+#define SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC 	3000  	// if we didnt hear an expected reply		->	reconnect
 
 class SerialNode {
 
 public:
 
-	static byte systemId;
-
-	//static unsigned long lastConnectTimeStamp;
-	static SerialNode* pProcessingNode;
-
-	/**
-	 * void update(byte* pMessage,size_t messageSize,SerialPort *pPort);
-	 * callback routine.
-	 * Is called if a message was received by serialRx.
-	 * It checks the address, and searches for the node
-	 * If a local node is found, it calls the node callback routine.
-	 * If the node isn't found , it asks on all ports for
-	 * the remote systemId, if found it forwards the message exclusive to the port.
-	 * If not found, search for link (see forward) to a port
-	 * If no links found, the message is sent to all ports without the ports that have the same remote systemId
-	 * as the message fromAddress. This means, it is only forwarded to other systems.
-	 * >pMessage 	...complete message: header (+data)
-	 * >messageSize	...size of header+data
-	 * >pPort  		...the port on which the message was received
-	 *
-	 */
-	static void update(const byte* pMessage, size_t messageSize, SerialPort *pPort);
-
-	/**
-	 * forward(const byte* pMessage, size_t messageSize,SerialPort* pSourcePort)
-	 * A message received from pSourcePort but no node found in the system
-	 * If the node isn't found , it asks on all ports for
-	 * the remote systemId, if found it forwards the message exclusive to the port.
-	 * If not found, search for link (see forward) to a port
-	 * If no links found, the message is sent to all ports without the ports that have the same remote systemId
-	 * as the message fromAddress. This means, it is only forwarded to other systems.
-	 * In case of connection request:
-	 * 1. delete existing link to remote system
-	 * 2. create a open link.
-	 *    the link is closed by the ACK of the remote system
-	 */
-	static bool forward(const byte* pMessage, size_t messageSize, SerialPort* pSourcePort);
-
-	/**
-	 * static void init(byte systemId);
-	 * has to be called in the setup routine
-	 * sytemId		id of the local system
-	 * 				the id must be unique for all systems in the node network
-	 */
-	static void init(byte systemId);
-
-	/**
-	 * SerialNode* createNode(byte localNodeId, bool active=false, byte remoteSysId=0,byte remoteNodeId=0,SerialPort* pSerialPort=NULL);
-	 * factory method for SerialNodes
-	 * see SerialNode(...)
-	 */
-	static SerialNode* createNode(byte localNodeId, bool active = false, byte remoteSysId = 0, byte remoteNodeId = 0,
-			SerialPort* pSerialPort = NULL);
-
-	/*
-	 * void writeToPort(tSerialHeader* pHeader,byte* data, size_t datasize ,SerialPort* pPort);
-	 * help routine
-	 * creates an aktid if needed
-	 * writes the message to a port
-	 * > pHeader	...header
-	 * > pData		...optional data
-	 * > datasize	...size of optional data
-	 * > pPort		...port to write to
-	 * < returns	...the aktid of the sent header
-	 */
-	tAktId writeToPort(tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialPort* pPort);
-
-	/* static SerialNode* GetNodeList();
-	 * all instantiated nodes are linked in a node list.
-	 * < returns 	...the root node of the node list
-	 */
-	static SerialNode* getNodeList();
-
-	/*
-	 * void setOnMessageCallBack(void (*ptr)(byte* pData,size_t datasize));
-	 * set your callback method for this node.
-	 * (>) pHeader 		Header of the received data, see SerialHeader.h
-	 * (>) pData		Application Data
-	 * (>) datasize		datasize of application data
-	 * (>) pNode		node on that message was received
-	 */
-	static void setOnMessageCallBack(
-			void (*ptr)(const tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialNode* pNode));
-
-	static void setOnPreConnectCallBack(void (*ptr)(SerialNode* pNode));
-
-
-	/*
-	 *  static bool SerialNode::checkLifeNodes(unsigned long period);
-	 *  check for all period msec for each node, if there was a message received
-	 *  in the last second (see SERIALONODE_TIMELIFECHECK_LATE), if not it send a life message
-	 *  if node is disconnected it sends a CR message
-	 *  > period	...time period between the lifeChecks, default 500 msec
-	 */
-	static void checkConnection(SerialNode* pNode,unsigned long periodMsec = 1000);
-
-
-
-
-	SerialPort* getPort();
-
-	static SerialNode* getRoot();
-	SerialNode* getNext();
-
-	SerialNode* cycleNextNodeOnPort();
-
-
-	/**
-	 * static void SerialNode::processNodes(bool bLifeCheck);
-	 * this routine has to be put into the main loop
-	 * it reads on all ports for all nodes
-	 * > lifeCheck					...checks periodically all node connections
-
-	 */
-	static void processNodes(bool lifeCheck=true);
-
-	/**
-	 * static bool areAllNodesConnected();
-	 * <  returns 		...true	if all nodes connected , or no node found
-	 */
-	static bool areAllNodesConnected();
 
 	/**
 	 * SerialNode(byte addr,SerialPort* pSerialPort);
-	 * - creates a SerialNode with a local address.
+	 * - creates a SerialNode with a local address,
+	 *  please use SerialNodeNet::createNode to create nodes
+	 *
 	 * A SeriaNode can transmit and receive messages to other nodes.
 	 * To exchange messages the node have to be connected.
 	 * All local nodes are directly reachable. All remote nodes are reachable
@@ -171,9 +52,38 @@ public:
 	 * > pSerialPort	... if set the node can only communicate over this port.
 	 */
 	SerialNode(byte localNodeId, bool active = false, byte remoteSysId = 0, byte remoteNodeId = 0,
-			SerialPort* pSerialPort = NULL);
+				SerialPort* pSerialPort = NULL);
+
 
 	virtual ~SerialNode();
+
+
+	/*
+	 * void writeToPort(tSerialHeader* pHeader,byte* data, size_t datasize ,SerialPort* pPort);
+	 * help routine
+	 * creates an aktid if needed
+	 * writes the message to a port
+	 * > pHeader	...header
+	 * > pData		...optional data
+	 * > datasize	...size of optional data
+	 * > pPort		...port to write to
+	 * < returns	...the aktid of the sent header
+	 */
+	tAktId writeToPort(tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialPort* pPort);
+
+	SerialPort* getPort();
+
+	SerialNode* getNext();
+
+	/*
+	 * SerialNode* getNode(tAcb* acb);
+	 * >
+	 * <returns		a node on which the acb was created
+	 */
+	static SerialNode* getNode(tAcb* acb);
+
+	SerialNode* cycleNextNodeOnPort();
+
 
 	inline byte getId() {
 		return pCcb->localAddr.nodeId;
@@ -216,7 +126,7 @@ public:
 
 	/*
 	 * void onMessage(tSerialHeader* pHeader,byte* pData,size_t datasize);
-	 * is called by the static update routine if a message for
+	 * is called by the static update routine of SerialNodeNet if a message for
 	 * this node came in
 	 * it handles all types of incoming messages
 	 * > pHeader	...header
@@ -230,11 +140,11 @@ public:
 	 * bool send(tSerialHeader* pHeader,byte* pData,byte datasize);
 	 * sends a message to the remote node.
 	 * > cmd		see SerialHeader.h
-	 * 				CMD_ACK,CMD_NAK		 confirm, disaffirm
-	 * 				CMD_ACD  	... user command , you can use par 	, data opt.
-	 * 				CMD_ARQ		... user request , you can use par	, data opt.
-	 * 				CMD_ARP		...	user reply   , you can use par	, data opt.
-	 * > replyOn    aktid 		... aktid of the received message, see SerialHeader
+	 * 				CMD_ACK,CMD_NAK		... confirm, disaffirm (you can use par of header,if a reply is expected)
+	 * 				CMD_ACD  			... user command, you can use par, data opt.
+	 * 				CMD_ARQ				... user request, you can use par, data opt.
+	 * 				CMD_ARP				...	user reply  , you can use par, data opt.
+	 * > replyOn    aktid 				... aktid of the received message, see SerialHeader
 	 * > par		parameter or subcommand for commands  ACD,ARQ,ARP
 	 *
 	 * > pData		optionally data
@@ -251,7 +161,7 @@ public:
 	 * > aktid		...aktid of the sent message
 	 * > timeout 	...in msec
 	 */
-	bool waitOnReply(tAktId aktId, unsigned long timeout = 500);
+	bool waitOnReply(tAktId aktId, tStamp timeout = 500);
 
 	/*
 	 * 	bool isReadyToConnect() ;
@@ -294,32 +204,34 @@ public:
 
 
 
-	/**
-	 * public pointer variables
-	 */
+	inline tStamp getLastLifeCheckTime() {
+		return lastLiveCheckTimeStamp;
+	}
+
+	inline void setLastLifeCheckTime(tStamp stamp) {
+		lastLiveCheckTimeStamp=stamp;
+	}
 
 
-	/*
-	 * called by static Update
-	 */
+	inline tCcb* getCcb() {
+		return pCcb;
+	}
+
+	inline tAktId getLastSendAktId(){
+		return lastSendAcbAktId;
+	}
 
 private:
 	tCcb* pCcb = NULL;	// connection data
 
-	unsigned long lastReceiveTimeStamp = 0; // if older as 1 sec  -> send live (and expect ack or nak)
+	tStamp lastReceiveTimeStamp = 0; // if older as 1 sec  -> send live (and expect ack or nak)
 	//                        ( if nak onMessage() will disconnect)
 	// if older as 2 sec  -> set connection status disconnected
 
 
-	unsigned long lastLiveCheckTimeStamp =0;
+	tStamp lastLiveCheckTimeStamp =0;
 	tAktId    lastSendAcbAktId = 0;
 
-	static LcbList lcbList;
-	static SerialNode* pSerialNodeList;
-
-	static void (*pCallBackOnMessage)(const tSerialHeader* pHeader, const byte* pData, size_t datasize,
-					SerialNode* pNode); // user callback
-	static void (*pCallBackOnPreConnect)(SerialNode* pNode); // user callback before node connects
 
 	void* pNext = NULL; 	// next SerialNode , all nodes are in a linked list
 	SerialPort* pSerialPort = NULL; // if set the node is attached to a port

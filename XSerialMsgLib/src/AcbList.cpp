@@ -91,7 +91,6 @@ tAcb* AcbList::getAcbEntry(tAktId aktId) {
 }
 
 tAcb* AcbList::getLastestAcbEntry(byte portId) {
-	unsigned long now =millis();
 	tAcb* pAcb = pRoot;
 
 	while (pAcb) {
@@ -146,10 +145,8 @@ unsigned int AcbList::count(byte portId) {
 		}
 		p = (tAcb*) p->pNext;
 	}
-	return cnt;;
+	return cnt;
 }
-
-//unsigned int AcbList::getCountAcbEntries();
 
 void AcbList::deleteAcbList() {
 	while (pRoot) {

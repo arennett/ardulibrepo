@@ -124,7 +124,7 @@ bool SoftSerialPort::isListening() {
 
 SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort() {
 
-	SoftSerialPort* pPort= this->pNext;
+	SerialPort* pPort=  (SerialPort*) this->pNext;
 	if (!pPort) {// next is first one
 		pPort= SerialPort::pSerialPortList;
 	}
@@ -133,7 +133,7 @@ SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort() {
 		if (pPort->getType()==PORTTYPE_SOFTSERIAL) {
 			return (SoftSerialPort*)pPort;
 		}
-		pPort = pPort->pNext;
+		pPort =  (SerialPort*) pPort->pNext;
 
 		if(!pPort) {
 			pPort= SerialPort::pSerialPortList;

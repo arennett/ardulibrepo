@@ -7,7 +7,7 @@
 
 // serial output
 //#define DPRINT_ON     //...debugging level
-//#define MPRINT_ON     //...monitoring level
+#define MPRINT_ON     //...monitoring level
 //#define  XPRINT_ON    //...application messages / errors
 
 
