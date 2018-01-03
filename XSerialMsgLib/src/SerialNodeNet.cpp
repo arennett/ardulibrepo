@@ -14,15 +14,21 @@
 //static
 SerialNodeNet* SerialNodeNet::pInst =NULL;
 
+//static
 SerialNodeNet*  SerialNodeNet::init(byte systemId){
 	if (pInst) {
 		delete pInst;
 	}
-
 	pInst = new SerialNodeNet(systemId);
 	return pInst;
 }
 
+//static
+SerialNodeNet*  SerialNodeNet::getInstance(){
+	return pInst;
+}
+
+//private
 SerialNodeNet::SerialNodeNet(byte systemId) {
 	this->systemId=systemId;
 }
@@ -42,6 +48,20 @@ SerialNode* SerialNodeNet::getProcessingNode() {
 void SerialNodeNet::setProcessingNode(SerialNode* pNode) {
 	pProcessingNode=pNode;
 }
+
+
+SerialNode* SerialNodeNet::getNodeByAcb(tAcb* pAcb){
+	SerialNode* pNode = getRootNode();
+	while(pNode) {
+		if (pNode->getCcb()->localAddr==pAcb->fromAddr) {
+				return pNode;
+		}
+		pNode=pNode->getNext();
+	}
+	return NULL;
+}
+
+
 
 SerialNode* SerialNodeNet::createNode(byte localNodeId, bool active, byte remoteSysId, byte remoteNodeId,
 		SerialPort* pPort) {
@@ -280,37 +300,54 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 
 	tStamp now = millis();
 
-	tAcb* pLatestAcb = AcbList::instance.getLastestAcbEntry();
 
-	if (pLatestAcb) {
-
-
-		if ((millis()-pLatestAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC) {
-			SerialNode* pNodeExpired = SerialNode::getNode(pLatestAcb);
-			MPRINTSVAL("SerialNodeNet::checkConnection::isLifeCheckExpired> reply time expired for aktid: " ,pLatestAcb->aktid);
-			MPRINTSVAL(" on node: " ,pNodeExpired ? pNodeExpired->getId(): 0);
-			MPRINTLNSVAL(" round trip time : ",millis()-pLatestAcb->timeStamp);
-			AcbList::instance.deleteAcbEntry(pLatestAcb->aktid);
+	unsigned int acb_count =AcbList::instance.count();
+	if (acb_count > 0) {
+		tAcb* pAcb = AcbList::instance.getRoot();
+		MPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs start, count : ",acb_count);
+		while (pAcb) {
+			if ((millis()-pAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC) {
+				SerialNode* pNodeExpired = getNodeByAcb(pAcb);
+				MPRINTSVAL("SerialNodeNet::checkConnection::isLifeCheckExpired> reply time expired for aktid: " ,pAcb->aktid);
+				MPRINTSVAL(" on node: " ,pNodeExpired ? pNodeExpired->getId(): 0);
+				MPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
+				tAcb* pNext = (tAcb*) pAcb->pNext; //save next pointer
+				AcbList::instance.deleteAcbEntry(pAcb->aktid);
+				pAcb=pNext;
+			}else{
+				pAcb=(tAcb*) pAcb->pNext;
+			}
 		}
+		acb_count =AcbList::instance.count();
+		MPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs end, count : ",acb_count);
 	}
 
 	if (pNode->getLastLifeCheckTime() && (now - pNode->getLastLifeCheckTime()) < period) {
 		return;
 	}
+	tAcb* prevSendAcb = AcbList::instance.getAcbEntry(pNode->getLastSendAktId());
 
 	if (!pNode->isConnected()) {
 		MPRINTLNS("SerialNodeNet::checkConnection> not connected");
-		pNode->reconnect();
+		if (prevSendAcb && prevSendAcb->cmd==CMD_CR) {
+			MPRINTLNS("SerialNodeNet::checkConnection> CR already sent, waiting for reply ");
+		}else{
+			pNode->reconnect();
+		}
 	} else if (pNode->isLifeCheckExpired()) {
 		// set all nodes setReady(false)
 		MPRINTLNS("SerialNodeNet::checkConnection> isLifeCheckExpired");
-		pNode->reconnect();
+		if (prevSendAcb && prevSendAcb->cmd==CMD_CR) {
+			MPRINTLNS("SerialNodeNet::checkConnection> CR already sent, waiting for reply ");
+		}else{
+			pNode->reconnect();
+		}
 
 	} else if (pNode->isLifeCheckLate()) {
 		//if (AcbList::instance.count(pNode->getPort()->remoteSysId) == 0) { // node waited on other nodes
 		//	pNode->lastReceiveTimeStamp = now; // reset time stamp
 		//}
-		tAcb* prevSendAcb = AcbList::instance.getAcbEntry(pNode->getLastSendAktId());
+
 		MPRINTLNSVAL("SerialNodeNet::checkConnection> lastSendAktId: " ,pNode->getLastSendAktId());
 
 		if (!prevSendAcb) {

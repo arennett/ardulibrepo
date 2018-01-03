@@ -75,15 +75,7 @@ public:
 
 	SerialNode* getNext();
 
-	/*
-	 * SerialNode* getNode(tAcb* acb);
-	 * >
-	 * <returns		a node on which the acb was created
-	 */
-	static SerialNode* getNode(tAcb* acb);
-
 	SerialNode* cycleNextNodeOnPort();
-
 
 	inline byte getId() {
 		return pCcb->localAddr.nodeId;

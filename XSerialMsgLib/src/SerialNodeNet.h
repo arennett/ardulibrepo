@@ -15,12 +15,11 @@
 class SerialNodeNet {
 public:
 
-
-
-
 	virtual ~SerialNodeNet();
 
 	static SerialNodeNet* init(byte systemId);
+
+	static SerialNodeNet* getInstance();
 
 	byte getSystemId();
 
@@ -41,14 +40,14 @@ public:
 	void setRootNode(SerialNode* pNode);
 
 
+	SerialNode* getNodeByAcb(tAcb* pAcb);
+
+
 	/**
 	 * static bool areAllNodesConnected();
 	 * <  returns 		...true	if all nodes connected , or no node found
 	 */
 	static bool areAllNodesConnected();
-
-
-
 
 	/**
 	 * void update(byte* pMessage,size_t messageSize,SerialPort *pPort);
@@ -162,10 +161,10 @@ public:
 	void checkConnection(SerialNode* pNode,tStamp periodMsec = 500);
 
 
+private:
 	// a single instance of SerialNodeNet
 	static SerialNodeNet* pInst;
 
-private:
 	SerialNodeNet(byte systemId);
 
 	// the id of the local system

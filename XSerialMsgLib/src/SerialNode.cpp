@@ -23,24 +23,24 @@ byte par = 0;
 SerialNode::SerialNode(byte localNodeId, bool active, byte remoteSysId, byte remoteNodeId, SerialPort* pPort) {
 
 	DPRINTLNS("SerialNode::SerialNode>");
-	ASSERTP(SerialNodeNet::pInst->getSystemId() > 0, "please call System.init(yourSystemId) before you create nodes.");
+	ASSERTP(SerialNodeNet::getInstance()->getSystemId() > 0, "please call System.init(yourSystemId) before you create nodes.");
 
 	this->pSerialPort = pPort;
 	this->pCcb = new tCcb();
-	tAddr lAddr(SerialNodeNet::pInst->getSystemId(), localNodeId);
+	tAddr lAddr(SerialNodeNet::getInstance()->getSystemId(), localNodeId);
 	tAddr rAddr(remoteSysId, remoteNodeId);
 
 	pCcb->localAddr = lAddr;
 	pCcb->remoteAddr = rAddr;
 	setActive(active);
 
-	SerialNode* pNode = SerialNodeNet::pInst->getRootNode();
+	SerialNode* pNode = SerialNodeNet::getInstance()->getRootNode();
 
 	while (pNode && pNode->pNext) {
 		pNode = (SerialNode*) pNode->pNext;
 	}
 	if (!pNode) {
-		SerialNodeNet::pInst->setRootNode(this);
+		SerialNodeNet::getInstance()->setRootNode(this);
 	} else {
 		pNode->pNext = this;
 	}DPRINTS("SerialNode:SerialNode> created : ");
@@ -50,7 +50,7 @@ SerialNode::SerialNode(byte localNodeId, bool active, byte remoteSysId, byte rem
 
 SerialNode::~SerialNode() {
 	if (this->pNext) {
-		SerialNode* pPrev = SerialNodeNet::pInst->getRootNode();
+		SerialNode* pPrev = SerialNodeNet::getInstance()->getRootNode();
 		while (pPrev && pPrev->pNext) {
 			if (pPrev->pNext == this) {
 				break;
@@ -119,7 +119,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 	DPRINTLNHEADER(pSerialHeader);
 	assert(pData ? datasize > 0 : datasize == 0);
 	assert(pPort);
-	assert(pCcb->remoteAddr.sysId != SerialNodeNet::pInst->getSystemId());
+	assert(pCcb->remoteAddr.sysId != SerialNodeNet::getInstance()->getSystemId());
 	lastReceiveTimeStamp = millis();
 
 	tSerialCmd cmd = pSerialHeader->cmd;
@@ -154,7 +154,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 	case CMD_CR:
 
 		if (!isActive() ){
-			SerialNodeNet::pInst->callOnPreConnect(this);
+			SerialNodeNet::getInstance()->callOnPreConnect(this);
 
 			if (!isReadyToConnect()){
 				MPRINTLNSVAL("SerialNode::onMessage> node not ready :" ,getId());
@@ -304,12 +304,12 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 	} // end of switch
 
 	if (acbNotFound) {
-		DPRINTLNSVAL("SerialNode::onMessage> acb not found - aktid:", pSerialHeader->aktid);
+		MPRINTLNSVAL("SerialNode::onMessage> acb not found - aktid:", pSerialHeader->aktid);
 		userCall = false;
 	}
 
 	if (userCall) {
-		SerialNodeNet::pInst->callOnMessage(pSerialHeader, pData, datasize, this);
+		SerialNodeNet::getInstance()->callOnMessage(pSerialHeader, pData, datasize, this);
 	}
 	if (pAcb) {
 
@@ -339,7 +339,7 @@ void SerialNode::reconnect() {
 	// call on reconnect();
 	setReady(false);
 	if (isActive()) {
-		SerialNodeNet::pInst->callOnPreConnect(this);
+		SerialNodeNet::getInstance()->callOnPreConnect(this);
 	}else{
 		MPRINTLNSVAL("SerialNode:reconnect()> waiting for CR message, node: ", getId());
 		return;
@@ -372,7 +372,7 @@ SerialNode* SerialNode::cycleNextNodeOnPort() {
 
 		_pnext=_pnext->getNext();
 		if (!_pnext) {
-			_pnext=SerialNodeNet::pInst->getRootNode();
+			_pnext=SerialNodeNet::getInstance()->getRootNode();
 		}
 		if (!(getPort() && _pnext->getPort())) {
 			return this;
@@ -393,7 +393,7 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, const byte* pD
 	tSerialHeader header, *pHeader;
 	pHeader = &header;
 	MPRINTS("SerialNode::send>  >>> ");MPRINTSS(tSerialHeader::cmd2Str(cmd));MPRINTLNS(" >>>");
-	assert(pCcb->remoteAddr.sysId != SerialNodeNet::pInst->getSystemId());
+	assert(pCcb->remoteAddr.sysId != SerialNodeNet::getInstance()->getSystemId());
 
 // not connected
 	if (pCcb->status != CONNECTION_STATUS_CONNECTED && !(cmd == CMD_CR || cmd == CMD_ACK || cmd == CMD_NAK)) {
@@ -404,7 +404,7 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, const byte* pD
 
 
 
-	header.fromAddr.sysId = SerialNodeNet::pInst->getSystemId();
+	header.fromAddr.sysId = SerialNodeNet::getInstance()->getSystemId();
 	if (replyOn > 0) {
 		MPRINTLNSVAL("SerialNode::send> reply to:", replyOn);
 		header.aktid = replyOn;
@@ -477,32 +477,32 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 	if (pPort->getType() == PORTTYPE_SOFTSERIAL && !pPort->isListening()) {
 		SoftSerialPort* pListener = SoftSerialPort::getListenerPort();
 		ASSERTP(pListener != pPort, "SerialNode::writeToPort> GLEICHER LISTENER ?");
-		unsigned int otherAcbCount = AcbList::instance.count(pListener->remoteSysId);
+		unsigned int listenerAcbCount = AcbList::instance.count(pListener->remoteSysId);
 		// open acbs on other SoftSerialPort
-		if (otherAcbCount > 0) {
+		if (listenerAcbCount > 0) {
 
 			if (pHeader->cmd == CMD_LIVE) {
-				XPRINTLNSVAL("SerialNode::writeToPort> waiting for replies on other soft serial port,  cancel, acb count: " ,otherAcbCount);
+				XPRINTLNSVAL("SerialNode::writeToPort> waiting for replies on other soft serial port,  cancel, acb count: " ,listenerAcbCount);
 				return 0;
 			} else if (pHeader->cmd == CMD_ARQ) {
 				XPRINTSVAL("SerialNode::writeToPort> waiting for replies on port: ",pListener->remoteSysId);
-				XPRINTLNSVAL(" acb count: " ,otherAcbCount);
+				XPRINTLNSVAL(" acb count: " ,listenerAcbCount);
 				XPRINTFREE;
 				unsigned long tStamp= millis();
-				pListener->listen();
-				while(otherAcbCount > 0) {
+				pListener->listen(); // to be sure
+				while(listenerAcbCount > 0) {
 					while (pListener->available() > 0)  {
 						pListener->pPortRxTxMapper->getRx()->readNext();
+
 					}
-					otherAcbCount = AcbList::instance.count(pListener->remoteSysId);
-					if ((millis()-tStamp) > 3000){
-						tAcb* pAcb= AcbList::instance.getLastestAcbEntry(pListener->remoteSysId);
-						SerialNode* pWaitNode=SerialNodeNet::getNode(pAcb);
-						XPRINTLNSVAL("SerialNode::writeToPort> waiting too long for acb aktid : ",pAcb->aktid);
-						XPRINTLNSVAL("SerialNode::writeToPort> check connection for node: ", pWaitNode->getId());
-						SerialNodeNet::pInst->checkConnection(pWaitNode);
-						break;
+					tAcb* pAcb= AcbList::instance.getLastestAcbEntry(pListener->remoteSysId);
+					if (pAcb) {
+						SerialNode* pWaitNode=SerialNodeNet::getInstance()->getNodeByAcb(pAcb);
+						if (pWaitNode) {
+							SerialNodeNet::getInstance()->checkConnection(pWaitNode);
+						}
 					}
+					listenerAcbCount = AcbList::instance.count(pListener->remoteSysId);
 				}
 				XPRINTSVAL("SerialNode::writeToPort> waiting end, node : ",getId());
 				XPRINTLNSVAL(" waited for : " ,millis()-tStamp);
@@ -540,7 +540,7 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 	if (pData) {
 		DPRINTLNSVAL("datasize: ", datasize);
 	}
-	SerialNodeNet::pInst->setProcessingNode(this);
+	SerialNodeNet::getInstance()->setProcessingNode(this);
 	MPRINTLNS("SerialNode::writeToPort> success , header...");
 	MPRINTLNHEADER(pHeader);
 
