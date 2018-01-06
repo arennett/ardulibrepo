@@ -26,12 +26,12 @@ typedef struct {
 } tAcb;
 
 
-
+namespace SerialMsgLib {
 class AcbList {
 public:
 
 	//static
-	static AcbList instance;
+	static AcbList* getInstance();
 
 	AcbList();
 
@@ -82,6 +82,7 @@ public:
 private:
 	unsigned int aktId;
 	tAcb* pRoot = NULL;
+	static AcbList* pInst;
 };
-
+};
 #endif /* ACBLIST_H_ */

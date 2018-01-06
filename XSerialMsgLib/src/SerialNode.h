@@ -19,6 +19,8 @@
 #define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 		10000	// if we didn't hear anything for 20 sec 	->	reconnect
 #define SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC 	3000  	// if we didnt hear an expected reply		->	reconnect
 
+namespace SerialMsgLib {
+
 class SerialNode {
 
 public:
@@ -220,14 +222,14 @@ private:
 	//                        ( if nak onMessage() will disconnect)
 	// if older as 2 sec  -> set connection status disconnected
 
-
 	tStamp lastLiveCheckTimeStamp =0;
 	tAktId    lastSendAcbAktId = 0;
-
 
 	void* pNext = NULL; 	// next SerialNode , all nodes are in a linked list
 	SerialPort* pSerialPort = NULL; // if set the node is attached to a port
 
+
+};
 
 };
 

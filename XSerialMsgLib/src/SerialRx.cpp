@@ -14,20 +14,25 @@
 #include "SerialMsg.h"
 #include "SerialRx.h"
 #include "SerialNode.h"
+#include "SerialNodeNet.h"
 
+namespace SerialMsgLib {
 SerialRx::SerialRx() {
-	updateCallback = NULL;
+	//updateCallback = NULL;
+	lastByte = 0;
+	XPRINTLNSVAL("SerialRx::SerialRx() free ",freeRam());
 }
 
 SerialRx::~SerialRx() {
 
 }
-SerialRx::SerialRx(SerialPort* pSerialPort, size_t maxDataSize,
-		void (*ptr)(const byte* data, size_t data_size, SerialPort* pPort)) {
+SerialRx::SerialRx(SerialPort* pSerialPort, size_t maxDataSize/*,
+		void (*ptr)(const byte* data, size_t data_size, SerialPort* pPort)*/) {
 	this->pSerialPort = pSerialPort;
-	updateCallback = ptr;
+	//updateCallback = ptr;
 	lastByte = 0;
 	createBuffer(maxDataSize);
+	XPRINTLNSVAL("SerialRx::SerialRx() free ",freeRam());
 }
 
 bool SerialRx::setPort(SerialPort* pSerialPort) {
@@ -35,19 +40,29 @@ bool SerialRx::setPort(SerialPort* pSerialPort) {
 	return true;
 }
 
+byte* SerialRx::getBuffer(){
+	return pRecBuffer;
+}
+
+size_t SerialRx::getBufferSize(){
+	return bufferSize;
+}
+
+
 void SerialRx::createBuffer(size_t maxDataSize) {
 	this->bufferSize = maxDataSize + sizeof serPostamble;
 	if(pRecBuffer){
 		delete pRecBuffer;
 	}
 	pRecBuffer = new byte[bufferSize];
-}
-
-void SerialRx::setUpdateCallback(
-		void (*ptr)(const byte* data, size_t data_size, SerialPort* pPort)) {
-	updateCallback = ptr;
 
 }
+
+//void SerialRx::setUpdateCallback(
+//		void (*ptr)(const byte* data, size_t data_size, SerialPort* pPort)) {
+//	updateCallback = ptr;
+//
+//}
 
 bool SerialRx::listen() {
 	return pSerialPort->listen();
@@ -157,11 +172,12 @@ bool SerialRx::readNext() {
 				DPRINTLNSVAL("SerialRx::readNext> message size: ",
 						dataSize);
 
-				assert(updateCallback);
-				if (updateCallback && dataCollect) {
+				//assert(updateCallback);
+				if (/*updateCallback && */dataCollect) {
 
 					DPRINTLNS(" SerialRx::readNext> call updateCallback");
-					updateCallback(pRecBuffer, dataSize, pSerialPort);
+					//updateCallback(pRecBuffer, dataSize, pSerialPort);
+					SerialNodeNet::getInstance()->update(pRecBuffer, dataSize, pSerialPort);
 				}
 
 				messReceived = true;
@@ -183,4 +199,5 @@ bool SerialRx::readNext() {
 	}
 
 	return messReceived;
+}
 }

@@ -12,9 +12,12 @@
 #include "SerialNode.h"
 #include "SerialNodeNet.h"
 
+namespace SerialMsgLib {
 SerialPort* SerialPort::pSerialPortList=NULL;
 
 SerialPort::SerialPort(byte remoteSysId){
+
+
 	DPRINTLNSVAL("SerialPort::SerialPort> sysId: ", remoteSysId);
 	ASSERTP( remoteSysId > 0 ,"remoteSysId must be > 0 !");
 	ASSERTP( remoteSysId != SerialNodeNet::getInstance()->getSystemId(),"remoteSysId must be diffrent from systemId");
@@ -40,7 +43,7 @@ SerialPort::SerialPort(byte remoteSysId){
     pPortRxTxMapper =new SerialPortRxTxMapper(this);
 	createDataBuffer(0);
 	DPRINTLNSVALS("SerialPort::SerialPort> cnt: ",cnt, " inited");
-
+	XPRINTLNSVAL("SerialPort::SerialPort() free ",freeRam());
 
 	//pSerialRx= new SerialRx(this,20,SerialNode::update);
 };
@@ -120,6 +123,6 @@ void SerialPort::createDataBuffer(size_t maxDataSize) {
 	pPortRxTxMapper->createRxBuffer(maxDataSize);
 
 }
-
+}
 
 

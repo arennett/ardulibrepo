@@ -8,12 +8,21 @@
 #include <tools.h>
 #include "AcbList.h"
 
+namespace SerialMsgLib {
 
-AcbList AcbList::instance ;
+
+AcbList* AcbList::pInst=NULL;
+
+AcbList* AcbList::getInstance(){
+	if (!pInst) {
+		pInst = new AcbList();
+	}
+	return pInst;
+}
 
 AcbList::AcbList() {
 	aktId = 0;
-
+	XPRINTLNSVAL("AcbList::AcbList() free ",freeRam());
 }
 
 AcbList::~AcbList() {
@@ -217,5 +226,5 @@ void AcbList::printList(){
 	}
 	DPRINTLNS("AcbList::printList<<<<<<<<end<<<<<<<<<<<<<<<<");
 }
-
+};
 

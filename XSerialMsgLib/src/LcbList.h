@@ -9,8 +9,9 @@
 #define LCBLIST_H_
 #include "SerialHeader.h"
 
-class SerialPort;
 
+namespace SerialMsgLib {
+class SerialPort;
 /* a link between two ports*/
 struct tLcb {
 	//aktid of CR and corresponding ACK
@@ -38,5 +39,5 @@ public:
 	void 	deleteLcbList();
 	tLcb* pRoot = NULL;
 };
-
+};
 #endif /* LCBLIST_H_ */

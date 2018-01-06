@@ -11,9 +11,14 @@
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
 
+
+
+namespace SerialMsgLib {
+
 class SerialPort;
 
 class SerialTx {
+
 public:
 
 
@@ -93,5 +98,5 @@ public:
 private:
 	SerialPort* pSerialPort;
 };
-
+};
 #endif /* SERIALTX_H_ */

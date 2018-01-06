@@ -11,6 +11,8 @@
 #include "SoftSerialPort.h"
 #include "SerialNode.h"
 
+
+namespace SerialMsgLib {
 //static
 SerialNodeNet* SerialNodeNet::pInst =NULL;
 
@@ -89,8 +91,8 @@ bool SerialNodeNet::areAllNodesConnected() {
 	if (connected ) {
 		if (!bStart) {
 			MPRINTLNS(" SerialNodeNet::areAllNodesConnected()> *** ALL NODES CONNECTED WITH REMOTE ***");
-			//AcbList::instance.deleteAcbList();
-			//AcbList::instance.printList();
+			//AcbList::getInstance()->deleteAcbList();
+			//AcbList::getInstance()->printList();
 			bStart = true;
 		}
 	}else{
@@ -237,9 +239,12 @@ void SerialNodeNet::processNodes(bool lifeCheck) {
 		pProcessingNode =  getRootNode();
 
 	}
+    if (!pProcessingNode) {
+    	MPRINTLNS("SerialNodeNet::processNodes> any nodes found");
+    }
 
 	if (SoftSerialPort::count()>1) {
-		byte acbcnt=AcbList::instance.count(SoftSerialPort::getListenerPort()->remoteSysId);
+		byte acbcnt=AcbList::getInstance()->count(SoftSerialPort::getListenerPort()->remoteSysId);
 		if (acbcnt > 0) {
 			pProcessingNode = (SerialNode*) pProcessingNode->cycleNextNodeOnPort();
 			MPRINTLNSVAL("SerialNodeNet::processNodes> ACB's : " ,acbcnt);
@@ -274,25 +279,24 @@ void SerialNodeNet::processNodes(bool lifeCheck) {
 }
 
 
-void SerialNodeNet::setOnMessageCallBack(
-		void (*ptr)(const tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialNode* pNode)) {
-	pCallBackOnMessage = ptr;
+void SerialNodeNet::setOnMessageHandler(OnMessageHandler* pOnMessageHandler) {
+	this->pOnMessageHandler = pOnMessageHandler;
 }
 
-void SerialNodeNet::callOnMessage(const tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialNode* pNode){
-	if (pCallBackOnMessage) {
-		pCallBackOnMessage(pHeader,pData,datasize,pNode);
+void SerialNodeNet::callOnMessage(const tSerialHeader* pHeader, const byte* pData, size_t dataSize, SerialNode* pNode){
+	if (pOnMessageHandler) {
+		pOnMessageHandler->onMessage(pHeader, pData, dataSize, pNode);
 	}
 }
 
 
-void SerialNodeNet::setOnPreConnectCallBack(void (*ptr)(SerialNode* pNode)) {
-	pCallBackOnPreConnect = ptr;
+void SerialNodeNet::setOnPreConnectHandler(OnPreConnectHandler* pOnPreConnectHandler) {
+	this->pOnPreConnectHandler=pOnPreConnectHandler;
 }
 
 void SerialNodeNet::callOnPreConnect(SerialNode* pNode){
-	if (pCallBackOnPreConnect) {
-		pCallBackOnPreConnect(pNode);
+	if (pOnPreConnectHandler) {
+		pOnPreConnectHandler->onPreConnect(pNode);
 	}
 }
 
@@ -301,9 +305,9 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 	tStamp now = millis();
 
 
-	unsigned int acb_count =AcbList::instance.count();
+	unsigned int acb_count =AcbList::getInstance()->count();
 	if (acb_count > 0) {
-		tAcb* pAcb = AcbList::instance.getRoot();
+		tAcb* pAcb = AcbList::getInstance()->getRoot();
 		MPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs start, count : ",acb_count);
 		while (pAcb) {
 			if ((millis()-pAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC) {
@@ -312,20 +316,20 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 				MPRINTSVAL(" on node: " ,pNodeExpired ? pNodeExpired->getId(): 0);
 				MPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
 				tAcb* pNext = (tAcb*) pAcb->pNext; //save next pointer
-				AcbList::instance.deleteAcbEntry(pAcb->aktid);
+				AcbList::getInstance()->deleteAcbEntry(pAcb->aktid);
 				pAcb=pNext;
 			}else{
 				pAcb=(tAcb*) pAcb->pNext;
 			}
 		}
-		acb_count =AcbList::instance.count();
+		acb_count =AcbList::getInstance()->count();
 		MPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs end, count : ",acb_count);
 	}
 
 	if (pNode->getLastLifeCheckTime() && (now - pNode->getLastLifeCheckTime()) < period) {
 		return;
 	}
-	tAcb* prevSendAcb = AcbList::instance.getAcbEntry(pNode->getLastSendAktId());
+	tAcb* prevSendAcb = AcbList::getInstance()->getAcbEntry(pNode->getLastSendAktId());
 
 	if (!pNode->isConnected()) {
 		MPRINTLNS("SerialNodeNet::checkConnection> not connected");
@@ -344,7 +348,7 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 		}
 
 	} else if (pNode->isLifeCheckLate()) {
-		//if (AcbList::instance.count(pNode->getPort()->remoteSysId) == 0) { // node waited on other nodes
+		//if (AcbList::getInstance()->count(pNode->getPort()->remoteSysId) == 0) { // node waited on other nodes
 		//	pNode->lastReceiveTimeStamp = now; // reset time stamp
 		//}
 
@@ -360,4 +364,5 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 
 	pNode->setLastLifeCheckTime(now);
 
-}
+};
+};

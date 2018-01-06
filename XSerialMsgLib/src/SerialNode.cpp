@@ -19,6 +19,7 @@ byte par = 0;
 
 
 
+namespace SerialMsgLib {
 
 SerialNode::SerialNode(byte localNodeId, bool active, byte remoteSysId, byte remoteNodeId, SerialPort* pPort) {
 
@@ -229,14 +230,14 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 		break;
 	case CMD_ARP:
 		userCall=true;
-		pAcb = AcbList::instance.getAcbEntry(pSerialHeader->aktid);
+		pAcb = AcbList::getInstance()->getAcbEntry(pSerialHeader->aktid);
 		if (!pAcb) {
 			userCall = false;
 			acbNotFound = true;
 		}
 		break;
 	case CMD_ACK:
-		pAcb = AcbList::instance.getAcbEntry(pSerialHeader->aktid);
+		pAcb = AcbList::getInstance()->getAcbEntry(pSerialHeader->aktid);
 		if (pAcb) {
 			switch (pAcb->cmd) {
 			case CMD_CR:
@@ -279,7 +280,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 		}
 		break;
 	case CMD_NAK:
-		pAcb = AcbList::instance.getAcbEntry(pSerialHeader->aktid);
+		pAcb = AcbList::getInstance()->getAcbEntry(pSerialHeader->aktid);
 		if (pAcb) {
 			switch (pAcb->cmd) {
 			case CMD_CR:
@@ -315,12 +316,12 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 
 		XPRINTLNSVAL("SerialNode::onMessage> round trip time : ", millis() - pAcb->timeStamp);
 
-		unsigned int count = AcbList::instance.count();
+		unsigned int count = AcbList::getInstance()->count();
 
 		DPRINTLNSVAL("SerialNode::onMessage> ACB COUNT : ",count );
 
-		AcbList::instance.deleteAcbEntry(pSerialHeader->aktid);
-		assert(AcbList::instance.count() < count);
+		AcbList::getInstance()->deleteAcbEntry(pSerialHeader->aktid);
+		assert(AcbList::getInstance()->count() < count);
 		XPRINTFREE
 		;
 
@@ -469,7 +470,7 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 	XPRINTLNSVAL(" >>> port: ", pPort->remoteSysId);
 
 	// no outstanding replies required by CR or LIVE messages ( for better round trip time)
-//	if (pHeader->cmd == CMD_LIVE && AcbList::instance.count() >0  && pPort->isListening() ) {
+//	if (pHeader->cmd == CMD_LIVE && AcbList::getInstance()->count() >0  && pPort->isListening() ) {
 //		MPRINTLNS("SerialNode::writeToPort> waiting for reply,  LIVE message canceled");
 //		return 0;
 //	}
@@ -477,7 +478,7 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 	if (pPort->getType() == PORTTYPE_SOFTSERIAL && !pPort->isListening()) {
 		SoftSerialPort* pListener = SoftSerialPort::getListenerPort();
 		ASSERTP(pListener != pPort, "SerialNode::writeToPort> GLEICHER LISTENER ?");
-		unsigned int listenerAcbCount = AcbList::instance.count(pListener->remoteSysId);
+		unsigned int listenerAcbCount = AcbList::getInstance()->count(pListener->remoteSysId);
 		// open acbs on other SoftSerialPort
 		if (listenerAcbCount > 0) {
 
@@ -495,14 +496,14 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 						pListener->pPortRxTxMapper->getRx()->readNext();
 
 					}
-					tAcb* pAcb= AcbList::instance.getLastestAcbEntry(pListener->remoteSysId);
+					tAcb* pAcb= AcbList::getInstance()->getLastestAcbEntry(pListener->remoteSysId);
 					if (pAcb) {
 						SerialNode* pWaitNode=SerialNodeNet::getInstance()->getNodeByAcb(pAcb);
 						if (pWaitNode) {
 							SerialNodeNet::getInstance()->checkConnection(pWaitNode);
 						}
 					}
-					listenerAcbCount = AcbList::instance.count(pListener->remoteSysId);
+					listenerAcbCount = AcbList::getInstance()->count(pListener->remoteSysId);
 				}
 				XPRINTSVAL("SerialNode::writeToPort> waiting end, node : ",getId());
 				XPRINTLNSVAL(" waited for : " ,millis()-tStamp);
@@ -522,10 +523,10 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 	assert(pHeader->toAddr.sysId != pHeader->fromAddr.sysId);
 
 	if (pHeader->aktid == 0) { // we need an aktId
-		pHeader->aktid = AcbList::instance.getNextAktId();
+		pHeader->aktid = AcbList::getInstance()->getNextAktId();
 
 		if (tSerialHeader::isReplyExpected(pHeader->cmd)) {
-			AcbList::instance.createOrUseAcb(pHeader)->portId = pPort->remoteSysId;
+			AcbList::getInstance()->createOrUseAcb(pHeader)->portId = pPort->remoteSysId;
 			lastSendAcbAktId = pHeader->aktid;
 		}
 	}
@@ -552,5 +553,5 @@ bool SerialNode::waitOnReply(tAktId, tStamp) {
 	XPRINTLNS("SerialNode::waitOnReply , not implemented yet");
 	return false;
 
-}
-
+};
+};

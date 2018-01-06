@@ -10,9 +10,15 @@
 
 #include <stddef.h>
 #include "SerialNode.h"
+#include "OnMessageHandler.h"
+#include "OnPreConnectHandler.h"
 
+
+
+namespace SerialMsgLib{
 
 class SerialNodeNet {
+
 public:
 
 	virtual ~SerialNodeNet();
@@ -47,11 +53,10 @@ public:
 	 * static bool areAllNodesConnected();
 	 * <  returns 		...true	if all nodes connected , or no node found
 	 */
-	static bool areAllNodesConnected();
+	bool areAllNodesConnected();
 
 	/**
 	 * void update(byte* pMessage,size_t messageSize,SerialPort *pPort);
-	 * callback routine.
 	 * Is called if a message was received by serialRx.
 	 * It checks the address, and searches for the node
 	 * If a local node is found, it calls the onMessage routine of the node
@@ -61,7 +66,7 @@ public:
 	 * >pPort  		...the port on which the message was received
 	 *
 	 */
-	static void update(const byte* pMessage, size_t messageSize, SerialPort *pPort);
+	void update(const byte* pMessage, size_t messageSize, SerialPort *pPort);
 
 	/**
 	 * forward(const byte* pMessage, size_t messageSize,SerialPort* pSourcePort)
@@ -120,28 +125,28 @@ public:
 
 
 	/*
-	 * void setOnMessageCallBack(void (*ptr)(byte* pData,size_t datasize));
-	 * set your callback method for this node.
-	 * (>) pHeader 		Header of the received data, see SerialHeader.h
+	 * void setOnMessageHandler(OnMessageHandler* pOnMessageHandler)
+	 * set your MessageHandler for nodes
+	 * (>) pHeader 		Header of the received data, see OnMessageHandler.h
 	 * (>) pData		Application Data
 	 * (>) datasize		datasize of application data
 	 * (>) pNode		node on that message was received
 	 */
-	void setOnMessageCallBack(
-			void (*ptr)(const tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialNode* pNode));
+
+	void setOnMessageHandler(OnMessageHandler* pOnMessageHandler);
 
 	/*
-	 * void callOnMessage(const tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialNode* pNode);
-	 * call the onMessageCallBack routine , is called by a node
+	 * void callOnMessage(const tSerialHeader* pHeader, const byte* pData, size_t dataSize, SerialNode* pNode);
+	 * sets the user onMessageHandler, that handles all application messages
 	 */
 
-	void callOnMessage(const tSerialHeader* pHeader, const byte* pData, size_t datasize, SerialNode* pNode);
+	void callOnMessage(const tSerialHeader* pHeader, const byte* pData, size_t dataSize, SerialNode* pNode);
 
 	/*
-	 * setOnPreConnectCallBack(void (*ptr)(SerialNode* pNode));
+	 * setOnPreConnectHandler(OnPreConnectHandler& rOnPreConnectHandler)
 	 * sets a user preConnect handler, where a node can be set ready to connect (setReady())
 	 */
-	void setOnPreConnectCallBack(void (*ptr)(SerialNode* pNode));
+	void setOnPreConnectHandler(OnPreConnectHandler* pOnPreConnectHandler);
 
 
 	/*
@@ -174,9 +179,11 @@ private:
 	byte systemId=0;
 	SerialNode* pSerialNodeList = NULL;
 	LcbList lcbList;
-	void (*pCallBackOnPreConnect)(SerialNode* pNode) =NULL; // user callback before node connects
-	void (*pCallBackOnMessage)(const tSerialHeader* pHeader, const byte* pData, size_t datasize,
-							SerialNode* pNode)=NULL; // user callback
+
+	OnMessageHandler* pOnMessageHandler=NULL;
+	OnPreConnectHandler* pOnPreConnectHandler=NULL;
+};
+
 };
 
 #endif /* SERIALNODENET_H_ */

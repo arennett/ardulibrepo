@@ -19,13 +19,16 @@
 
 
 
+namespace SerialMsgLib {
 
 SerialTx::SerialTx(){
 	pSerialPort=NULL;
+	XPRINTLNSVAL("SerialTx::SerialTx() free ",freeRam());
 }
 
 SerialTx::SerialTx(SerialPort* pSerialPort){
 	setPort(pSerialPort);
+	XPRINTLNSVAL("SerialTx::SerialTx() free ",freeRam());
 }
 
 
@@ -34,7 +37,6 @@ SerialTx::~SerialTx() {
 }
 
 bool SerialTx::setPort(SerialPort* pSerialPort) {
-	assert(pSerialPort);
 	this->pSerialPort =pSerialPort;
 	return true;
 }
@@ -69,7 +71,7 @@ void SerialTx::sendPostamble() {
 	pSerialPort->write(serPostamble,sizeof serPostamble);
 
 }
-
+};
 
 
 

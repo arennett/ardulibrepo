@@ -8,12 +8,12 @@
 #include "SerialNode.h"
 #include "SerialNodeNet.h"
 
-
+namespace SerialMsgLib {
 SerialPortRxTxMapper::SerialPortRxTxMapper(){
 	pSerialRx=NULL;
 	pSerialTx=NULL;
 	pSerialPort=NULL;
-
+	XPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
 }
 
 SerialPortRxTxMapper::~SerialPortRxTxMapper() {
@@ -23,15 +23,17 @@ SerialPortRxTxMapper::~SerialPortRxTxMapper() {
 }
 
 SerialPortRxTxMapper::SerialPortRxTxMapper(SerialPort* pSerialPort) {
+
 	pSerialRx = new SerialRx();
+
 	pSerialTx = new SerialTx();
 
 	pSerialRx->setPort(pSerialPort);
 	pSerialTx->setPort(pSerialPort);
 
 	this->pSerialPort = pSerialPort;
-	pSerialRx->setUpdateCallback(SerialNodeNet::getInstance()->update);
-
+	//pSerialRx->setUpdateCallback(SerialNodeNet::getInstance()->update);
+	XPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
 
 }
 
@@ -40,8 +42,8 @@ SerialPortRxTxMapper::SerialPortRxTxMapper(SerialPort* pSerialPort,SerialRx* pSe
 	this->pSerialRx = pSerialRx;
 	this->pSerialTx = pSerialTx;
 	this->pSerialPort = pSerialPort;
-	pSerialRx->setUpdateCallback(SerialNodeNet::getInstance()->update);
-
+	//pSerialRx->setUpdateCallback(SerialNodeNet::getInstance()->update);
+	XPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
 }
 
 void SerialPortRxTxMapper::createRxBuffer(size_t datasize){
@@ -58,6 +60,6 @@ SerialTx*	SerialPortRxTxMapper::getTx(){
 SerialPort* SerialPortRxTxMapper::getPort(){
 	return pSerialPort;
 }
-
+};
 
 

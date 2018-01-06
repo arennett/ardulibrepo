@@ -8,7 +8,7 @@
 #include <tools.h>
 #include "LcbList.h"
 
-
+namespace SerialMsgLib {
 LcbList::LcbList() {
 	// TODO Auto-generated constructor stub
 
@@ -124,3 +124,4 @@ void LcbList::deleteLcbList() {
 		delete pLastEntry;
 	}
 }
+};

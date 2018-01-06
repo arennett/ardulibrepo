@@ -9,11 +9,11 @@
 #define SERIALPORTRXTXMAPPER_H_
 #include <stddef.h>
 
+namespace SerialMsgLib {
 
 class SerialTx;
 class SerialRx;
 class SerialPort;
-
 class SerialPortRxTxMapper {
 public:
 	SerialPortRxTxMapper();
@@ -32,5 +32,5 @@ private:
 	SerialTx* pSerialTx;
 
 };
-
+};
 #endif /* SERIALPORTRXTXMAPPER_H_ */

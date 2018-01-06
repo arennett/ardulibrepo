@@ -13,6 +13,7 @@
 #include <SoftwareSerial.h>
 #include "SerialMsg.h"
 #include "SerialPort.h"
+namespace SerialMsgLib {
 
 class SerialRx {
 public:
@@ -32,11 +33,20 @@ public:
 	 */
 	SerialRx(size_t maxDataSize);
 
-	SerialRx(SerialPort* pSerialPort,size_t maxDataSize,void (*ptr)(const byte* data, size_t data_size,SerialPort* pPort)) ;
+	SerialRx(SerialPort* pSerialPort,size_t maxDataSize/*,void (*ptr)(const byte* data, size_t data_size,SerialPort* pPort)*/) ;
 
 
+	/*
+	 * *byte getBuffer();
+	 * < pointer on receive buffer
+	 */
+	byte* getBuffer();
 
-
+	/*
+	 * size_t getBufferSize();
+	 * < return size of receive buffer
+	 */
+	size_t getBufferSize();
 
 	/**
 	 * void createBuffer(size_t maxDatasize);
@@ -55,16 +65,16 @@ public:
 	bool setPort(SerialPort* pSerialPort);
 
 
-	/**
-	 * void setUpdateCallback(void (*ptr)(byte* data, size_t data_size));
-	 * > registering a static callback method
-	 * > method will be called when data is completely received
-	 * > see also readNext()
-	 * pData 		...pointer on the received data
-	 * data_size 	...what you think ? ;-)
-	 * pSerialPort  ...the port from which the message was received
-	 */
-	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size,SerialPort* pPort));
+//	/**
+//	 * void setUpdateCallback(void (*ptr)(byte* data, size_t data_size));
+//	 * > registering a static callback method
+//	 * > method will be called when data is completely received
+//	 * > see also readNext()
+//	 * pData 		...pointer on the received data
+//	 * data_size 	...what you think ? ;-)
+//	 * pSerialPort  ...the port from which the message was received
+//	 */
+//	void setUpdateCallback(void (*ptr)(const byte* pData, size_t data_size,SerialPort* pPort));
 
 
 
@@ -127,7 +137,7 @@ public:
 	 */
 	virtual ~SerialRx();
 private:
-	void (*updateCallback)(const byte* data, size_t data_size,SerialPort* pPort);
+	//void (*updateCallback)(const byte* data, size_t data_size,SerialPort* pPort);
 	byte* pRecBuffer=NULL;
 	SerialPort* pSerialPort= NULL;
 	byte preAmCount=0;
@@ -139,5 +149,5 @@ private:
 	byte lastByte=0;
 
 };
-
+};
 #endif /* SERIALRX_H_ */

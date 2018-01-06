@@ -1,27 +1,25 @@
 /*
- * SoftSerialPort.cpp
+ * DummySerialPort.cpp
  *
  *  Created on: 04.11.2017
  *      Author: User
  */
 
-#include <SoftwareSerial.h>
 #include <tools.h>
 #include "SerialMsg.h"
-#include "SoftSerialPort.h"
+#include "SerialPort.h"
+#include "DummySerialPort.h"
 #include "AcbList.h"
-
 #define MAX_SOFT_LISTEN_TIME 200
 
 namespace SerialMsgLib {
-
 //static
-SoftSerialPort* SoftSerialPort::pSoftSerialPortList = NULL;
+DummySerialPort* DummySerialPort::pDummySerialPortList = NULL;
 
 //--------------------static---------------------------------------------
 
-void SoftSerialPort::cycleListenerPort() {
-	SoftSerialPort* pPort = getListenerPort();
+void DummySerialPort::cycleListenerPort() {
+	DummySerialPort* pPort = getListenerPort();
 	// if not at least 2 SoftwareSerialPorts we do not need to switch
 	if (!pPort || !pPort->pNext) {
 		return;
@@ -32,15 +30,15 @@ void SoftSerialPort::cycleListenerPort() {
 			&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME
 			// uncomment listenTimeStamp in listen
 		){
-		pPort->cycleNextSoftSerialPort()->listen();
+		pPort->cycleNextDummySerialPort()->listen();
 	}
 }
 
-SoftSerialPort* SoftSerialPort::getListenerPort() {
+DummySerialPort* DummySerialPort::getListenerPort() {
 	SerialPort* pPort = pSerialPortList;
 	while (pPort) {
 		if (pPort->getType() == PORTTYPE_SOFTSERIAL && pPort->isListening()) {
-			return (SoftSerialPort*) pPort;
+			return (DummySerialPort*) pPort;
 		}
 		pPort = (SerialPort*) pPort->pNext;
 	}
@@ -49,7 +47,7 @@ SoftSerialPort* SoftSerialPort::getListenerPort() {
 		while (pPort) {
 			if (pPort->getType() == PORTTYPE_SOFTSERIAL) {
 				pPort->listen();
-				return (SoftSerialPort*) pPort;
+				return (DummySerialPort*) pPort;
 			}
 			pPort = (SerialPort*) pPort->pNext;
 		}
@@ -58,7 +56,7 @@ SoftSerialPort* SoftSerialPort::getListenerPort() {
 	return NULL;
 }
 
-byte SoftSerialPort::count() {
+byte DummySerialPort::count() {
 	byte cnt=0;
 	SerialPort* pPort = pSerialPortList;
 	while (pPort) {
@@ -70,65 +68,70 @@ byte SoftSerialPort::count() {
 
 //-----------------------end static------------------------------------------
 
-SoftSerialPort::SoftSerialPort(byte pinRx, byte pinRy, byte remoteSysId) :
+DummySerialPort::DummySerialPort(byte , byte , byte remoteSysId) :
 		SerialPort(remoteSysId) {
 
-	pSoftwareSerial = new SoftwareSerial(pinRx, pinRy);
-	XPRINTLNSVAL("SoftSerialPort::SoftSerialPort free ",freeRam());
+	//pSoftwareSerial = new SoftwareSerial(pinRx, pinRy);
+
 }
 
-SoftSerialPort::SoftSerialPort(SoftwareSerial* pSoftwareSerial, byte remoteSysId) :
+DummySerialPort::DummySerialPort(byte remoteSysId) :
 		SerialPort(remoteSysId) {
-	this->pSoftwareSerial = pSoftwareSerial;
+	//this->pSoftwareSerial = pSoftwareSerial;
 
-	XPRINTLNSVAL("SoftSerialPort::SoftSerialPort free ",freeRam());
-}
-
-SoftSerialPort::~SoftSerialPort() {
 
 }
 
+DummySerialPort::~DummySerialPort() {
+
+}
 
 
 
-tPortType SoftSerialPort::getType() {
+
+tPortType DummySerialPort::getType() {
 	return tPortType::PORTTYPE_SOFTSERIAL;
 }
 
-byte SoftSerialPort::read() {
-	byte b = pSoftwareSerial->read();
-	return b;
+byte DummySerialPort::read() {
+	//byte b = pSoftwareSerial->read();
+	return 0;
 }
 
-bool SoftSerialPort::write(byte b) {
-	return (pSoftwareSerial->write(b)) > 0;
+bool DummySerialPort::write(byte ) {
+	//return (pSoftwareSerial->write(b)) > 0;
+	return true;
 }
 
-size_t SoftSerialPort::write(const byte* bb, size_t len) {
-	return pSoftwareSerial->write(bb, len);
+size_t DummySerialPort::write(const byte* , size_t ) {
+	//return pSoftwareSerial->write(bb, len);
+	return 0;
 }
 
-bool SoftSerialPort::listen() {
+bool DummySerialPort::listen() {
 	if (!isListening()) {
 		listenTimeStamp = millis();
-		XPRINTLNSVAL("SoftSerialPort::listen> on port :", remoteSysId);
-		return pSoftwareSerial->listen();
+		XPRINTLNSVAL("DummySerialPort::listen> on port :", remoteSysId);
+		//return pSoftwareSerial->listen();
+		return false;
 	}
 	return false;
 }
 
-void SoftSerialPort::begin(long speed) {
-	pSoftwareSerial->begin(speed);
+void DummySerialPort::begin(long ) {
+	//pSoftwareSerial->begin(speed);
 }
 
-int SoftSerialPort::available() {
-	return pSoftwareSerial->available();
+int DummySerialPort::available() {
+	//return pSoftwareSerial->available();
+	return 0;
 }
-bool SoftSerialPort::isListening() {
-	return pSoftwareSerial->isListening();
+bool DummySerialPort::isListening() {
+	//return pSoftwareSerial->isListening();
+	return true;
 }
 
-SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort() {
+DummySerialPort* DummySerialPort::cycleNextDummySerialPort() {
 
 	SerialPort* pPort=  (SerialPort*) this->pNext;
 	if (!pPort) {// next is first one
@@ -137,7 +140,7 @@ SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort() {
 	while (pPort) {
 		// its supposed to find at least itself
 		if (pPort->getType()==PORTTYPE_SOFTSERIAL) {
-			return (SoftSerialPort*)pPort;
+			return (DummySerialPort*)pPort;
 		}
 		pPort =  (SerialPort*) pPort->pNext;
 
@@ -148,4 +151,4 @@ SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort() {
 	assert(false);
 	return NULL;
 }
-}
+};

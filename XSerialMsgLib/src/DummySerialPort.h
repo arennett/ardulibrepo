@@ -1,25 +1,24 @@
 /*
- * SoftSerialPort.h
+ * DummySerialPort.h
  *
  *  Created on: 04.11.2017
  *      Author: User
  */
 
-#ifndef SOFTSERIALPORT_H_
-#define SOFTSERIALPORT_H_
+#ifndef DummySerialPort_H_
+#define DummySerialPort_H_
 
 #include "Arduino.h"
-#include <SoftwareSerial.h>
 #include "SerialMsg.h"
 #include "SerialPort.h"
 
 namespace SerialMsgLib {
 
-class SoftSerialPort: public SerialPort {
+class DummySerialPort: public SerialPort {
 public:
 
-	static SoftSerialPort* pSoftSerialPortList;
-	static SoftSerialPort*  getListenerPort();
+	static DummySerialPort* pDummySerialPortList;
+	static DummySerialPort*  getListenerPort();
 
 	/**
 	 * static byte count();
@@ -29,39 +28,38 @@ public:
 
 	/*
 	 * static void cycleListenerPort();
-	 * switch to next port if we have multiple SoftSerialPorts
+	 * switch to next port if we have multiple DummySerialPorts
 	 * if listen time expired and no data available
 	 * only for software serial ports important
 	 */
 	static void cycleListenerPort();
 
 
-	SoftSerialPort();
+	DummySerialPort();
 
 	/**
-	 * SoftSerialPort(byte pinRx, byte pinTx,byte remoteSysId) ;
+	 * DummySerialPort(byte pinRx, byte pinTx,byte remoteSysId) ;
 	 * >pinRx	receivePin on board
 	 * >pinTx	transmitPin on board
 	 * >remoteSysId systemId of the remote SerialNodeNet
 	 *
 	 */
-	SoftSerialPort(byte pinRx, byte pinTx,byte remoteSysId) ;
+	DummySerialPort(byte pinRx, byte pinTx,byte remoteSysId) ;
 
 	/**
-	 * SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte remoteSysId);
-	 * > pSoftwareSerial 	pointer of an SoftwareSerialPort
+	 * DummySerialPort(byte remoteSysId);
 	 * > remoteSysId systemId of the remote SerialNodeNet
 	 */
-	SoftSerialPort(SoftwareSerial* pSoftwareSerial,byte remoteSysId);
-	virtual ~SoftSerialPort();
+	DummySerialPort(byte remoteSysId);
+	virtual ~DummySerialPort();
 
 
 
 	/*
-	 * SoftSerialPort* cycleNextSoftSerialPort();
-	 * switch to next port if we have multiple SoftSerialPorts
+	 * DummySerialPort* cycleNextDummySerialPort();
+	 * switch to next port if we have multiple DummySerialPorts
 	 */
-	SoftSerialPort* cycleNextSoftSerialPort();
+	DummySerialPort* cycleNextDummySerialPort();
 
 
 	/**
@@ -84,9 +82,8 @@ public:
 	virtual bool isListening();
 
 private:
-	SoftwareSerial* pSoftwareSerial;
+
 	};
+};
 
-}
-
-#endif /* SOFTSERIALPORT_H_ */
+#endif /* DummySerialPort_H_ */

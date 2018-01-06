@@ -11,10 +11,13 @@
 #ifndef SERIALMSGLIB_H_
 #define SERIALMSGLIB_H_
 
-#include <SerialHeader.h>
-#include <SoftSerialPort.h>
-#include <SerialNode.h>
 #include <SerialNodeNet.h>
+#include <SerialHeader.h>
+#include <SerialPort.h>
+#include <SerialRx.h>
+#include <SoftSerialPort.h>
+#include <DummySerialPort.h>
+#include <SerialNode.h>
 
 
 #endif /* SERIALMSG_H_ */

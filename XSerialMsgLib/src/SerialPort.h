@@ -14,15 +14,15 @@
 #include "SerialHeader.h"
 #include "SerialPortRxTxMapper.h"
 
+namespace SerialMsgLib {
+class SerialRx;
+class SerialTx;
+
 enum tPortType{
 PORTTYPE_MOCK		=0,
 PORTTYPE_SOFTSERIAL	=1,
 PORTTYPE_HARDSERIAL	=2,
-
 };
-
-class SerialRx;
-class SerialTx;
 
 class SerialPort {
 public:
@@ -37,9 +37,6 @@ public:
 	static void readNextOnAllPorts() ;
 
 
-
-
-
 	/**
 	 * SerialPort(byte remoteSysId);
 	 * the SerialPort get the ID of the remote system
@@ -48,8 +45,6 @@ public:
 	SerialPort(byte remoteSysId);
 
 	virtual ~SerialPort();
-
-
 
 
 	/*
@@ -97,7 +92,7 @@ private:
 	SerialPort();
 
 };
-
+};
 //SerialPort* pSerialPortList = NULL;
 
 #endif /* SERIALPORT_H_ */
