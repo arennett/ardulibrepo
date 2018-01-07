@@ -6,27 +6,52 @@
  */
 
 #include <tools.h>
+#include "SerialNodeNet.h"
 #include "AcbList.h"
+
 
 namespace SerialMsgLib {
 
 
-AcbList* AcbList::pInst=NULL;
+AcbList* AcbList::pAcbListList=NULL;
 
 AcbList* AcbList::getInstance(){
-	if (!pInst) {
-		pInst = new AcbList();
-	}
-	return pInst;
+	return getList(SerialNodeNet::getInstance()->getSystemId());
 }
 
-AcbList::AcbList() {
+AcbList* AcbList::getList(byte sysId){
+	AcbList* pAcbList = pAcbListList;
+	if (!pAcbListList) {
+		pAcbListList = new AcbList(sysId);
+	    return pAcbListList;
+	}
+	while(pAcbList) {
+		if (pAcbList->getId() == sysId) {
+			break;
+		}
+		if (!pAcbList->pNext) {
+			pAcbList->pNext= new AcbList(sysId);
+			pAcbList = (AcbList*)  pAcbList->pNext;
+			break;
+		}
+		pAcbList = (AcbList*)  pAcbList->pNext;
+	};
+	return pAcbList;
+}
+
+AcbList::AcbList(byte sysId) {
+	this->sysId=sysId;
 	aktId = 0;
 	XPRINTLNSVAL("AcbList::AcbList() free ",freeRam());
+	XPRINTLNSVAL("AcbList::AcbList() created for system : ",sysId);
 }
 
 AcbList::~AcbList() {
 	deleteAcbList();
+}
+
+byte AcbList::getId(){
+	return sysId;
 }
 
 

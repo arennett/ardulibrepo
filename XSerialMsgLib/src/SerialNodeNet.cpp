@@ -206,11 +206,11 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize, SerialPort
 	if (pTargetPort) {
 		MPRINTLNS("SerialNodeNet::forward> port found");
 		if (pHeader->isReplyExpected()) {
-			tAcb* pAcb=AcbList::getInstance()->createOrUseAcb(pHeader);
+			tAcb* pAcb=AcbList::getList(pTargetPort->getId())->createOrUseAcb(pHeader);
 			pAcb->portId= pTargetPort->getId();
 
 		}else{
-			AcbList::getInstance()->deleteAcbEntry(pHeader->aktid);
+			AcbList::getList(pSourcePort->getId())->deleteAcbEntry(pHeader->aktid);
 		}
 		pTargetPort->getTx()->sendData(pMessage, messageSize);
 		pTargetPort->listen();

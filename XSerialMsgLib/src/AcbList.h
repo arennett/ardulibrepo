@@ -32,8 +32,9 @@ public:
 
 	//static
 	static AcbList* getInstance();
+	static AcbList* getList(byte portId);
 
-	AcbList();
+	AcbList(byte sysId);
 
 	virtual ~AcbList();
 	tAcb* 	getRoot();
@@ -76,14 +77,16 @@ public:
 	bool  	deleteAcbEntry(tAktId aktId);
 	bool  	deleteAcbEntry(tCcb* pCcb,byte cmd);
 	void    setAktId(tAktId aktId);
+	byte 	getId();
 	void	printList();
-
+	void*	pNext=NULL;
 
 
 private:
 	unsigned int aktId;
+	byte sysId;
 	tAcb* pRoot = NULL;
-	static AcbList* pInst;
+	static AcbList* pAcbListList;
 };
 };
 #endif /* ACBLIST_H_ */

@@ -32,6 +32,7 @@ void SoftSerialPort::cycleListenerPort() {
 
 	if (pPort && pPort->available() == 0
 			&& AcbList::getInstance()->count(pPort->getId()) == 0
+			&& AcbList::getList(pPort->getId())->count() == 0  // gateway acbs
 			&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME
 
 		){
