@@ -34,6 +34,11 @@ tAcb* AcbList::getRoot() {
 	return pRoot;
 }
 
+void    AcbList::setAktId(tAktId aktId){
+	this->aktId=aktId;
+}
+
+
 unsigned int AcbList::getNextAktId() {
 	if (aktId >= 65535) {
 		aktId = 0;
@@ -55,9 +60,13 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 	pNew->fromAddr = pHeader->fromAddr;
 	pNew->toAddr = pHeader->toAddr;
 	pNew->status = ACB_STATUS_CREATED;
-	pHeader->aktid = pNew->aktid = getNextAktId();
-	DPRINTLNSVAL("AcbList::createAcb> aktId: ", pNew->aktid);
-	DPRINTLNSVAL("AcbList::createAcb> count: ", count());
+	if (!pHeader->aktid) {
+		pHeader->aktid = pNew->aktid = getNextAktId();
+	}else {
+		pNew->aktid = pHeader->aktid;
+	}
+	MPRINTLNSVAL("AcbList::createAcb> aktId: ", pNew->aktid);
+	MPRINTLNSVAL("AcbList::createAcb> count: ", count());
 	return pNew;
 
 }
@@ -71,8 +80,7 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 					&& pAcb->fromAddr == pHeader->fromAddr
 					&& pAcb->toAddr == pHeader->toAddr) {
 				//reuse open (unacknowledged) acb
-				DPRINTLNSVAL("AcbList::createOrUseAcb> total count : ", count());
-				DPRINTSVAL("AcbList::createOrUseAcb> reuse acb   : ", pAcb->aktid);
+				MPRINTLNSVAL("AcbList::createOrUseAcb> reuse acb   : ", pAcb->aktid);
 				pAcb->status = ACB_STATUS_OPEN;
 
 				break;
@@ -164,7 +172,7 @@ void AcbList::deleteAcbList() {
 }
 
 bool AcbList::deleteAcbEntry(tAktId aktId) {
-	DPRINTLNSVAL("AcbList::deleteAcbEntry> ", aktId);
+	MPRINTLNSVAL("AcbList::deleteAcbEntry> ", aktId);
 	tAcb* pAcb = getAcbEntry(aktId);
 
 	if (pAcb) {

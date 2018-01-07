@@ -47,6 +47,10 @@ public:
 	virtual ~SerialPort();
 
 
+	byte getId();
+	SerialPort* getNext();
+
+
 	/*
 	 *  createDataBuffer(size_t dataSize);
 	 *  creates (recreates) the data buffer for receiving messages
@@ -78,9 +82,6 @@ public:
 	virtual bool listen()=0;
 	virtual int  available()=0;
 	virtual bool isListening()=0;
-	void* pNext = NULL;
-	byte portType = 0;
-	byte remoteSysId=0;
 
 
 	SerialPortRxTxMapper* pPortRxTxMapper =NULL;
@@ -89,6 +90,10 @@ public:
 
 
 private:
+	void* pNext = NULL;
+	byte portType = 0;
+	byte remoteSysId=0;
+
 	SerialPort();
 
 };

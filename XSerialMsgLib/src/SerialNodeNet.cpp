@@ -70,6 +70,17 @@ SerialNode* SerialNodeNet::createNode(byte localNodeId, bool active, byte remote
 	return new SerialNode(localNodeId, active, remoteSysId, remoteNodeId, pPort);
 }
 
+SerialNode* SerialNodeNet::getNode(byte nodeId){
+	SerialNode* pNode = getRootNode();
+	while(pNode) {
+		if(pNode->getId()==nodeId) {
+			return pNode;
+		}
+		pNode= pNode->getNext();
+	}
+	return NULL;
+}
+
 
 SerialNode* SerialNodeNet::getRootNode(){
 	return pSerialNodeList;
@@ -193,14 +204,23 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize, SerialPort
 
 // port or linked port found
 	if (pTargetPort) {
+		MPRINTLNS("SerialNodeNet::forward> port found");
+		if (pHeader->isReplyExpected()) {
+			tAcb* pAcb=AcbList::getInstance()->createOrUseAcb(pHeader);
+			pAcb->portId= pTargetPort->getId();
+
+		}else{
+			AcbList::getInstance()->deleteAcbEntry(pHeader->aktid);
+		}
 		pTargetPort->getTx()->sendData(pMessage, messageSize);
+		pTargetPort->listen();
 		return true;
 	}
 
 // if CR create a link an send to all ports without ports to the source system
 
 	if (pHeader->cmd != CMD_CR) { //create a link only by connection request
-		MPRINTSVAL("SerialNodeNet::Update> no link found to system: ", pHeader->toAddr.sysId);
+		MPRINTLNSVAL("SerialNodeNet::Update> no link found to system: ", pHeader->toAddr.sysId);
 		return false;
 	}
 
@@ -214,11 +234,11 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize, SerialPort
 	byte cnt = 0;
 	// send CR only to foreign systems, and not to system where CR was sent.
 	while (pport) {
-		if(pport->remoteSysId != pSourcePort->remoteSysId){
+		if(pport->getId() != pSourcePort->getId()){
 			pport->getTx()->sendData(pMessage, messageSize);
 			++cnt;
 		}
-		pport = (SerialPort*) pport->pNext;
+		pport = (SerialPort*) pport->getNext();
 	}
 
 	if (cnt) {
@@ -235,47 +255,54 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize, SerialPort
 
 void SerialNodeNet::processNodes(bool lifeCheck) {
 
+	SerialPort::readNextOnAllPorts();
+
 	if (pProcessingNode == NULL) {
 		pProcessingNode =  getRootNode();
 
 	}
     if (!pProcessingNode) {
-    	MPRINTLNS("SerialNodeNet::processNodes> any nodes found");
+    	//DPRINTLNS("SerialNodeNet::processNodes> any nodes found");
+    	if (SoftSerialPort::count()>1) {
+    		SoftSerialPort::cycleListenerPort();
+    	}
+    	return;
     }
 
-	if (SoftSerialPort::count()>1) {
-		byte acbcnt=AcbList::getInstance()->count(SoftSerialPort::getListenerPort()->remoteSysId);
-		if (acbcnt > 0) {
-			pProcessingNode = (SerialNode*) pProcessingNode->cycleNextNodeOnPort();
-			MPRINTLNSVAL("SerialNodeNet::processNodes> ACB's : " ,acbcnt);
+		if (SoftSerialPort::count()>1) {
+			byte acbcnt=AcbList::getInstance()->count(SoftSerialPort::getListenerPort()->getId());
+			if (acbcnt > 0) {
+				pProcessingNode = (SerialNode*) pProcessingNode->cycleNextNodeOnPort();
+				MPRINTLNSVAL("SerialNodeNet::processNodes> ACB's : " ,acbcnt);
+			}else{
+				pProcessingNode = (SerialNode*) pProcessingNode->getNext();
+			}
 		}else{
 			pProcessingNode = (SerialNode*) pProcessingNode->getNext();
 		}
-	}else{
-		pProcessingNode = (SerialNode*) pProcessingNode->getNext();
-	}
 
-	//
+		//
 
-	if (pProcessingNode == NULL) {
-		pProcessingNode = getRootNode();
-	}
+		if (pProcessingNode == NULL) {
+			pProcessingNode = getRootNode();
+		}
 
-	if (pProcessingNode->getPort()) {
-		pProcessingNode->getPort()->listen();
 
-	}
+		if (pProcessingNode->getPort()) {
+			pProcessingNode->getPort()->listen();
 
-    MPRINTSVAL("SerialNodeNet::processNode :---------msec : ",millis());MPRINTLNSVAL(" -------------------------------- ",pProcessingNode->getId());
+		}
 
-	ASSERTP(pProcessingNode, "SerialNodeNet::processNodes> no nodes found");
+		DPRINTSVAL("SerialNodeNet::processNode :---------msec : ",millis());DPRINTLNSVAL(" -------------------------------- ",pProcessingNode->getId());
+
+		ASSERTP(pProcessingNode, "SerialNodeNet::processNodes> no nodes found");
 
 
 
-	if (lifeCheck) {
-		checkConnection(pProcessingNode);
-	}
-	SerialPort::readNextOnAllPorts();
+		if (lifeCheck) {
+			checkConnection(pProcessingNode);
+		}
+
 }
 
 
@@ -308,13 +335,13 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 	unsigned int acb_count =AcbList::getInstance()->count();
 	if (acb_count > 0) {
 		tAcb* pAcb = AcbList::getInstance()->getRoot();
-		MPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs start, count : ",acb_count);
+		DPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs start, count : ",acb_count);
 		while (pAcb) {
 			if ((millis()-pAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC) {
 				SerialNode* pNodeExpired = getNodeByAcb(pAcb);
-				MPRINTSVAL("SerialNodeNet::checkConnection::isLifeCheckExpired> reply time expired for aktid: " ,pAcb->aktid);
-				MPRINTSVAL(" on node: " ,pNodeExpired ? pNodeExpired->getId(): 0);
-				MPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
+				DPRINTSVAL("SerialNodeNet::checkConnection::isLifeCheckExpired> reply time expired for aktid: " ,pAcb->aktid);
+				DPRINTSVAL(" on node: " ,pNodeExpired ? pNodeExpired->getId(): 0);
+				DPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
 				tAcb* pNext = (tAcb*) pAcb->pNext; //save next pointer
 				AcbList::getInstance()->deleteAcbEntry(pAcb->aktid);
 				pAcb=pNext;
@@ -323,7 +350,7 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 			}
 		}
 		acb_count =AcbList::getInstance()->count();
-		MPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs end, count : ",acb_count);
+		DPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs end, count : ",acb_count);
 	}
 
 	if (pNode->getLastLifeCheckTime() && (now - pNode->getLastLifeCheckTime()) < period) {
@@ -332,7 +359,7 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 	tAcb* prevSendAcb = AcbList::getInstance()->getAcbEntry(pNode->getLastSendAktId());
 
 	if (!pNode->isConnected()) {
-		MPRINTLNS("SerialNodeNet::checkConnection> not connected");
+		DPRINTLNS("SerialNodeNet::checkConnection> not connected");
 		if (prevSendAcb && prevSendAcb->cmd==CMD_CR) {
 			MPRINTLNS("SerialNodeNet::checkConnection> CR already sent, waiting for reply ");
 		}else{
@@ -340,9 +367,9 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 		}
 	} else if (pNode->isLifeCheckExpired()) {
 		// set all nodes setReady(false)
-		MPRINTLNS("SerialNodeNet::checkConnection> isLifeCheckExpired");
+		DPRINTLNS("SerialNodeNet::checkConnection> isLifeCheckExpired");
 		if (prevSendAcb && prevSendAcb->cmd==CMD_CR) {
-			MPRINTLNS("SerialNodeNet::checkConnection> CR already sent, waiting for reply ");
+			DPRINTLNS("SerialNodeNet::checkConnection> CR already sent, waiting for reply ");
 		}else{
 			pNode->reconnect();
 		}
@@ -352,13 +379,13 @@ void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
 		//	pNode->lastReceiveTimeStamp = now; // reset time stamp
 		//}
 
-		MPRINTLNSVAL("SerialNodeNet::checkConnection> lastSendAktId: " ,pNode->getLastSendAktId());
+		DPRINTLNSVAL("SerialNodeNet::checkConnection> lastSendAktId: " ,pNode->getLastSendAktId());
 
 		if (!prevSendAcb) {
 			pNode->send(CMD_LIVE);
 			//pNode->lastReceiveTimeStamp = now;
 		}else{
-			MPRINTLNS("SerialNodeNet::checkConnection> acb found, waiting for reply ");
+			DPRINTLNS("SerialNodeNet::checkConnection> acb found, waiting for reply ");
 		}
 	}
 

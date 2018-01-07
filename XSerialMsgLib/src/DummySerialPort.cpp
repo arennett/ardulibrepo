@@ -21,12 +21,12 @@ DummySerialPort* DummySerialPort::pDummySerialPortList = NULL;
 void DummySerialPort::cycleListenerPort() {
 	DummySerialPort* pPort = getListenerPort();
 	// if not at least 2 SoftwareSerialPorts we do not need to switch
-	if (!pPort || !pPort->pNext) {
+	if (!pPort || !pPort->getNext()) {
 		return;
 	};
 
 	if (pPort && pPort->available() == 0
-			&& AcbList::getInstance()->count(pPort->remoteSysId) == 0
+			&& AcbList::getInstance()->count(pPort->getId()) == 0
 			&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME
 			// uncomment listenTimeStamp in listen
 		){
@@ -40,7 +40,7 @@ DummySerialPort* DummySerialPort::getListenerPort() {
 		if (pPort->getType() == PORTTYPE_SOFTSERIAL && pPort->isListening()) {
 			return (DummySerialPort*) pPort;
 		}
-		pPort = (SerialPort*) pPort->pNext;
+		pPort = (SerialPort*) pPort->getNext();
 	}
 	if (!pPort){
 		pPort = pSerialPortList;
@@ -49,7 +49,7 @@ DummySerialPort* DummySerialPort::getListenerPort() {
 				pPort->listen();
 				return (DummySerialPort*) pPort;
 			}
-			pPort = (SerialPort*) pPort->pNext;
+			pPort = (SerialPort*) pPort->getNext();
 		}
 
 	}
@@ -61,7 +61,7 @@ byte DummySerialPort::count() {
 	SerialPort* pPort = pSerialPortList;
 	while (pPort) {
 		++cnt;
-		pPort = (SerialPort*) pPort->pNext;
+		pPort = (SerialPort*) pPort->getNext();
 	}
 	return cnt;
 }
@@ -111,7 +111,7 @@ size_t DummySerialPort::write(const byte* , size_t ) {
 bool DummySerialPort::listen() {
 	if (!isListening()) {
 		listenTimeStamp = millis();
-		XPRINTLNSVAL("DummySerialPort::listen> on port :", remoteSysId);
+		XPRINTLNSVAL("DummySerialPort::listen> on port :", getId());
 		//return pSoftwareSerial->listen();
 		return false;
 	}
@@ -133,7 +133,7 @@ bool DummySerialPort::isListening() {
 
 DummySerialPort* DummySerialPort::cycleNextDummySerialPort() {
 
-	SerialPort* pPort=  (SerialPort*) this->pNext;
+	SerialPort* pPort=  (SerialPort*) this->getNext();
 	if (!pPort) {// next is first one
 		pPort= SerialPort::pSerialPortList;
 	}
@@ -142,7 +142,7 @@ DummySerialPort* DummySerialPort::cycleNextDummySerialPort() {
 		if (pPort->getType()==PORTTYPE_SOFTSERIAL) {
 			return (DummySerialPort*)pPort;
 		}
-		pPort =  (SerialPort*) pPort->pNext;
+		pPort =  (SerialPort*) pPort->getNext();
 
 		if(!pPort) {
 			pPort= SerialPort::pSerialPortList;

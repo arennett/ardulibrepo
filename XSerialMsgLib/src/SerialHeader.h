@@ -10,36 +10,41 @@
 #include "Arduino.h"
 #include <tools.h>
 
+#define XPRINTADDR(x)   XPRINT(x.sysId);XPRINTS(".");XPRINT(x.nodeId)
+#define XPRINTLNADDR(x) XPRINTADDR(x);XPRINTLNS("");
+#define XPRINTLNHEADER(pH) XPRINTADDR(pH->fromAddr);XPRINTS(" to ");XPRINTLNADDR(pH->toAddr);\
+			XPRINTSVAL(" aktId: ",pH->aktid);XPRINTS(" cmd: ");XPRINTSS(tSerialHeader::cmd2Str(pH->cmd));XPRINTLNSVAL(" par: ",pH->par);
 
-#define MPRINTLNHEADER(pH) MPRINTADDR(pH->fromAddr);MPRINTS(" to ");MPRINTLNADDR(pH->toAddr);\
-						MPRINTSVAL(" aktId: ",pH->aktid);MPRINTS(" cmd: ");MPRINTSS(tSerialHeader::cmd2Str(pH->cmd));MPRINTLNSVAL(" par: ",pH->par);
+
+#ifdef MPRINT_ON
+	#define MPRINTADDR(x)   XPRINTADDR(x)
+	#define MPRINTLNADDR(x) XPRINTLNADDR(x)
+	#define MPRINTLNHEADER(pH)  XPRINTLNHEADER(pH)
+
+#else
+	#define MPRINTADDR(x)
+	#define MPRINTLNADDR(x)
+	#define MPRINTLNHEADER(pH)
+#endif
 
 
-#define MPRINTADDR(x)   MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
-#define MPRINTLNADDR(x) MPRINTADDR(x);MPRINTLNS("");
-#define MPRINTADDR(x)   MPRINT(x.sysId);MPRINTS(".");MPRINT(x.nodeId)
-#define MPRINTLNADDR(x) MPRINTADDR(x);MPRINTLNS("");
 
 #ifdef DPRINT_ON
 #define DPRINTADDR(x) 	MPRINTADDR(x)
 #define DPRINTLNADDR(x) MPRINTLNADDR(x)
-#define DPRINTADDR(x)	MPRINTADDR(x)
 #define DPRINTLNHEADER(pH) MPRINTLNHEADER(pH)
 #else
 	#define DPRINTADDR(x)
 	#define DPRINTLNADDR(x)
-	#define DPRINTADDR(x)
 	#define DPRINTLNHEADER(pH)
 #endif
 #ifdef DPRINT_ON
 #define DPRINTADDR(x) 	   MPRINTADDR(x)
 #define DPRINTLNADDR(x)    MPRINTLNADDR(x)
-#define DPRINTADDR(x)	   MPRINTADDR(x)
 #define DPRINTLNHEADER(pH) MPRINTLNHEADER(pH)
 #else
 	#define DPRINTADDR(x)
 	#define DPRINTLNADDR(x)
-	#define DPRINTADDR(x)
 	#define DPRINTLNHEADER(pH)
 #endif
 
@@ -151,6 +156,10 @@ public:
 		default:  return false;
 		}
 	}
+	bool isReplyExpected() {
+	  return tSerialHeader::isReplyExpected(cmd);
+	}
+
 
 };
 

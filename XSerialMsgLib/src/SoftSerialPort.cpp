@@ -23,14 +23,17 @@ SoftSerialPort* SoftSerialPort::pSoftSerialPortList = NULL;
 void SoftSerialPort::cycleListenerPort() {
 	SoftSerialPort* pPort = getListenerPort();
 	// if not at least 2 SoftwareSerialPorts we do not need to switch
-	if (!pPort || !pPort->pNext) {
+	if (!pPort || count() < 2) {
 		return;
 	};
 
+	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() listener : ",pPort->getId());
+	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() listener acb count : ",AcbList::getInstance()->count(pPort->getId()));
+
 	if (pPort && pPort->available() == 0
-			&& AcbList::getInstance()->count(pPort->remoteSysId) == 0
+			&& AcbList::getInstance()->count(pPort->getId()) == 0
 			&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME
-			// uncomment listenTimeStamp in listen
+
 		){
 		pPort->cycleNextSoftSerialPort()->listen();
 	}
@@ -42,7 +45,7 @@ SoftSerialPort* SoftSerialPort::getListenerPort() {
 		if (pPort->getType() == PORTTYPE_SOFTSERIAL && pPort->isListening()) {
 			return (SoftSerialPort*) pPort;
 		}
-		pPort = (SerialPort*) pPort->pNext;
+		pPort = (SerialPort*) pPort->getNext();
 	}
 	if (!pPort){
 		pPort = pSerialPortList;
@@ -51,7 +54,7 @@ SoftSerialPort* SoftSerialPort::getListenerPort() {
 				pPort->listen();
 				return (SoftSerialPort*) pPort;
 			}
-			pPort = (SerialPort*) pPort->pNext;
+			pPort = (SerialPort*) pPort->getNext();
 		}
 
 	}
@@ -63,7 +66,7 @@ byte SoftSerialPort::count() {
 	SerialPort* pPort = pSerialPortList;
 	while (pPort) {
 		++cnt;
-		pPort = (SerialPort*) pPort->pNext;
+		pPort = (SerialPort*) pPort->getNext();
 	}
 	return cnt;
 }
@@ -111,7 +114,7 @@ size_t SoftSerialPort::write(const byte* bb, size_t len) {
 bool SoftSerialPort::listen() {
 	if (!isListening()) {
 		listenTimeStamp = millis();
-		XPRINTLNSVAL("SoftSerialPort::listen> on port :", remoteSysId);
+		MPRINTLNSVAL("SoftSerialPort::listen> on port :", getId());
 		return pSoftwareSerial->listen();
 	}
 	return false;
@@ -130,7 +133,7 @@ bool SoftSerialPort::isListening() {
 
 SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort() {
 
-	SerialPort* pPort=  (SerialPort*) this->pNext;
+	SerialPort* pPort=  (SerialPort*) this->getNext();
 	if (!pPort) {// next is first one
 		pPort= SerialPort::pSerialPortList;
 	}
@@ -139,7 +142,7 @@ SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort() {
 		if (pPort->getType()==PORTTYPE_SOFTSERIAL) {
 			return (SoftSerialPort*)pPort;
 		}
-		pPort =  (SerialPort*) pPort->pNext;
+		pPort =  (SerialPort*) pPort->getNext();
 
 		if(!pPort) {
 			pPort= SerialPort::pSerialPortList;

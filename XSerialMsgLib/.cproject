@@ -19,8 +19,6 @@
 							<builder buildPath="${workspace_loc:/TestLib}/Release" id="io.sloeber.sketch.builder.1945507756" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Arduino sketch builder" superClass="io.sloeber.sketch.builder"/>
 							<tool id="io.sloeber.tool.sketch.compiler.cpp.1832068759" name="Arduino C++ Compiler" superClass="io.sloeber.tool.sketch.compiler.cpp">
 								<option id="io.sloeber.compiler.cpp.sketch.option.incpath.97778690" name="Include Paths (-I)" superClass="io.sloeber.compiler.cpp.sketch.option.incpath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial}&quot;"/>
@@ -32,8 +30,6 @@
 							</tool>
 							<tool id="io.sloeber.tool.compiler.c.309946835" name="Arduino C Compiler" superClass="io.sloeber.tool.compiler.c">
 								<option id="io.sloeber.compiler.c.sketch.option.incpath.1113033537" name="Include Paths (-I)" superClass="io.sloeber.compiler.c.sketch.option.incpath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial}&quot;"/>
@@ -45,8 +41,6 @@
 							</tool>
 							<tool id="io.sloeber.tool.sketch.compiler.s.521778266" name="Arduino Assembler" superClass="io.sloeber.tool.sketch.compiler.s">
 								<option id="io.sloeber.compiler.asm.sketch.option.incpath.1059954433" name="Include Paths (-I)" superClass="io.sloeber.compiler.asm.sketch.option.incpath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/TestLib/core/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/core/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSerialMsgLib/libraries/SoftwareSerial}&quot;"/>

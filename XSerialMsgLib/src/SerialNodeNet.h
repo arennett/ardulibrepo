@@ -37,6 +37,14 @@ public:
 
 	void setProcessingNode(SerialNode* pNode);
 
+
+	/*
+	 * SerialNode* SerialNodeNet::getNode(byte nodeId);
+	 * > nodeId		... id of node
+	 * > returns	...	node
+	 */
+	SerialNode* getNode(byte nodeId);
+
 	/**
 	 * SerialNode* getRootNode();
 	 * return the first node in the node list

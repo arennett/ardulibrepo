@@ -89,6 +89,14 @@ SerialPort::~SerialPort() {
 
 };
 
+byte SerialPort::getId(){
+	return remoteSysId;
+}
+
+SerialPort* SerialPort::getNext(){
+	return (SerialPort*) pNext;
+}
+
 
 SerialPort* SerialPort::getPort(byte remoteSysId){
 	SerialPort* pPort = pSerialPortList;

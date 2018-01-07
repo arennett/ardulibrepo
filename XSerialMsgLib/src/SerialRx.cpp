@@ -148,8 +148,12 @@ bool SerialRx::readNext() {
 		if (lastByte == serPreamble[preAmCount]) {
 			//DPRINTSVAL("serPreamble COUNT:",preAmCount);
 			if (preAmCount == (sizeof serPreamble) - 1) {
-				XPRINTLNSVAL("serPreamble COMPLETE port : ",pSerialPort->remoteSysId);
+				DPRINTLNSVAL("SerialRx::readNext> preamble COMPLETE port : ",pSerialPort->remoteSysId);
 				preAmCount = 0;
+				if (dataCollect) {
+					XPRINTLNSVAL("SerialRx::readNext> preamble without prev postamble. DATA LOSS ON PORT: ", pSerialPort->getId());
+				}
+
 				dataCollect = true;
 				dataCount = 0;
 			} else {
@@ -167,7 +171,7 @@ bool SerialRx::readNext() {
 
 			//DPRINTSVAL("serPostamble COUNT:",postAmCount);
 			if (postAmCount == (sizeof serPostamble) - 1) {
-				XPRINTLNSVAL("serPostamble COMPLETE port : ", pSerialPort->remoteSysId);
+				MPRINTLNSVAL("SerialRx::readNext> postamble COMPLETE port : ", pSerialPort->getId());
 				dataSize = dataCount - sizeof serPostamble;
 				DPRINTLNSVAL("SerialRx::readNext> message size: ",
 						dataSize);
@@ -178,6 +182,8 @@ bool SerialRx::readNext() {
 					DPRINTLNS(" SerialRx::readNext> call updateCallback");
 					//updateCallback(pRecBuffer, dataSize, pSerialPort);
 					SerialNodeNet::getInstance()->update(pRecBuffer, dataSize, pSerialPort);
+				}else {
+					XPRINTLNSVAL("SerialRx::readNext> postamble without prev preamble. DATA LOSS ON PORT: ", pSerialPort->getId());
 				}
 
 				messReceived = true;
