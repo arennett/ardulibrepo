@@ -30,10 +30,9 @@ void SoftSerialPort::cycleListenerPort() {
 	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() listener : ",pPort->getId());
 	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() listener acb count : ",AcbList::getInstance()->count(pPort->getId()));
 
-	if (pPort && pPort->available() == 0
-			&& AcbList::getInstance()->count(pPort->getId()) == 0
-			&& AcbList::getList(pPort->getId())->count() == 0  // gateway acbs
-			&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME
+	if (pPort && pPort->available() == 0  // no unread data on listener port
+			&& AcbList::countAll(pPort->getId()) == 0 //no acbs to listener port found
+			&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME // we listen long enough
 
 		){
 		pPort->cycleNextSoftSerialPort()->listen();

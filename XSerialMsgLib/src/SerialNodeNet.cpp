@@ -196,37 +196,95 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize, SerialPort
 	MPRINTLNHEADER(pHeader);
 
 	SerialPort* pTargetPort = SerialPort::getPort(pHeader->toAddr.sysId);
+	SerialPort* pMessageSourcePort = SerialPort::getPort(pHeader->fromAddr.sysId);
+
 
 	if (!pTargetPort) {
 		// find link
 		pTargetPort = lcbList.getTargetPort(pHeader);
+		if (pTargetPort) {
+			MPRINTLNSVAL("SerialNodeNet::forward> LINK found to port : ",pTargetPort->getId());
+		}else {
+			MPRINTLNS("SerialNodeNet::forward> no Link found");
+		}
 	}
 
 // port or linked port found
 	if (pTargetPort) {
 		MPRINTLNS("SerialNodeNet::forward> port found");
 		if (pHeader->isReplyExpected()) {
-			tAcb* pAcb=AcbList::getList(pTargetPort->getId())->createOrUseAcb(pHeader);
+			// add a acb for the forwarded request
+			tAcb* pAcb=AcbList::getList(pHeader->fromAddr.sysId,true)->createOrUseAcb(pHeader);
 			pAcb->portId= pTargetPort->getId();
 
 		}else{
-			AcbList::getList(pSourcePort->getId())->deleteAcbEntry(pHeader->aktid);
+			// if reply -> find the acb of the forwarded request and delete it
+			AcbList* pList =AcbList::getList(pHeader->toAddr.sysId);
+			if(pList) {
+				tAcb* pAcb = pList->getAcbEntry(pHeader->aktid);
+				if (pAcb) {
+					pList->deleteAcbEntry(pHeader->aktid);
+				}
+			}
 		}
+		if (!pMessageSourcePort){
+			if (!lcbList.getLinkedLcb(pHeader)){
+				MPRINTLNSVAL("SerialNodeNet::forward> message source port not found: ",pHeader->fromAddr.sysId);
+				if (!lcbList.getOpenLcb(pHeader)){
+					lcbList.createLcb(pHeader, pSourcePort);
+					MPRINTLNSVAL("SerialNodeNet::forward> LINK created from: ",pSourcePort->getId());
+				}else{
+					MPRINTLNS("SerialNodeNet::forward> open LINK found");
+				}
+			}else{
+				MPRINTLNS("SerialNodeNet::forward> LINK found (far source port)");
+			}
+		}
+		MPRINTLNSVAL("SerialNodeNet::forward> send message to port : ",pTargetPort->getId());
+		MPRINTLNHEADER(pHeader);
 		pTargetPort->getTx()->sendData(pMessage, messageSize);
 		pTargetPort->listen();
+		return true;
+	}else if(pHeader->cmd==CMD_ACK){ //no port no link
+
+		AcbList* pList =AcbList::getList(pHeader->toAddr.sysId);
+		if(pList) {
+
+			tAcb* pAcb = pList->getAcbEntry(pHeader->aktid);
+			if (pAcb) {
+				if (pAcb->cmd==CMD_CR) {
+						tLcb* pLcb= lcbList.getOpenLcb(pHeader);
+						if (pLcb) { //close link
+							pLcb->addrB=pHeader->fromAddr;
+							pLcb->pPortB=pSourcePort;
+							MPRINTLNS("SerialNodeNet::forward> LINK completed");
+							MPRINTLNSVAL("SerialNodeNet::forward> send message to port : ",pLcb->pPortA->getId());
+							MPRINTLNHEADER(pHeader);
+							pLcb->pPortA->getTx()->sendData(pMessage, messageSize);
+						}
+				}else {
+					MPRINTLNS("SerialNodeNet::forward>  NO PORT NO LINK !!!");
+				}
+
+				pList->deleteAcbEntry(pHeader->aktid);
+			}
+		}
+
 		return true;
 	}
 
 // if CR create a link an send to all ports without ports to the source system
 
 	if (pHeader->cmd != CMD_CR) { //create a link only by connection request
-		MPRINTLNSVAL("SerialNodeNet::Update> no link found to system: ", pHeader->toAddr.sysId);
+		MPRINTLNSVAL("SerialNodeNet::forward> no link found to system: ", pHeader->toAddr.sysId);
 		return false;
 	}
 
-	if (lcbList.createLcb(pHeader, pSourcePort)) {
-		MPRINTS("SerialNodeNet::Update> LINK created: ");
-		MPRINTLNADDR(pHeader->fromAddr);
+	if (!lcbList.getOpenLcb(pHeader)){
+		lcbList.createLcb(pHeader, pSourcePort);
+		MPRINTSVAL("SerialNodeNet::forward> LINK created from: ",pSourcePort->getId());
+	}else{
+		MPRINTLNS("SerialNodeNet::forward> open LINK found");
 	}
 
 	SerialPort* pport = SerialPort::pSerialPortList;
@@ -235,8 +293,18 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize, SerialPort
 	// send CR only to foreign systems, and not to system where CR was sent.
 	while (pport) {
 		if(pport->getId() != pSourcePort->getId()){
+			// add a acb for the forwarded request
+			// ??? same sys aktid but differnent portIDs
+			// send and wait or aktid mapping is needed
+
+			tAcb* pAcb=AcbList::getList(pHeader->fromAddr.sysId,true)->createOrUseAcb(pHeader);
+			pAcb->portId= pTargetPort->getId();
+			// wait , if (acb deleted, check link or next port) timeout next CR
+			MPRINTLNSVAL("SerialNodeNet::forward> send message to port : ",pport->getId());
+			MPRINTLNHEADER(pHeader);
 			pport->getTx()->sendData(pMessage, messageSize);
 			++cnt;
+			// while acb.count > 0 checkConnection
 		}
 		pport = (SerialPort*) pport->getNext();
 	}
@@ -254,7 +322,7 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize, SerialPort
 }
 
 void SerialNodeNet::processNodes(bool lifeCheck) {
-
+	DPRINTLNS("SerialNodeNet::processNodes> [start]");
 	SerialPort::readNextOnAllPorts();
 
 	if (pProcessingNode == NULL) {
@@ -270,7 +338,7 @@ void SerialNodeNet::processNodes(bool lifeCheck) {
     }
 
 		if (SoftSerialPort::count()>1) {
-			byte acbcnt=AcbList::getInstance()->count(SoftSerialPort::getListenerPort()->getId());
+			byte acbcnt=AcbList::countAll(SoftSerialPort::getListenerPort()->getId());
 			if (acbcnt > 0) {
 				pProcessingNode = (SerialNode*) pProcessingNode->cycleNextNodeOnPort();
 				MPRINTLNSVAL("SerialNodeNet::processNodes> ACB's : " ,acbcnt);
@@ -293,7 +361,8 @@ void SerialNodeNet::processNodes(bool lifeCheck) {
 
 		}
 
-		DPRINTSVAL("SerialNodeNet::processNode :---------msec : ",millis());DPRINTLNSVAL(" -------------------------------- ",pProcessingNode->getId());
+		MPRINTSVAL("SerialNodeNet::processNode :---------msec : ",millis());
+		MPRINTLNSVAL(" -------------------------------- ",pProcessingNode->getId());
 
 		ASSERTP(pProcessingNode, "SerialNodeNet::processNodes> no nodes found");
 
@@ -328,29 +397,37 @@ void SerialNodeNet::callOnPreConnect(SerialNode* pNode){
 }
 
 void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {
-
+	MPRINTLNS("SerialNodeNet::checkConnection> [start]");
 	tStamp now = millis();
 
+	AcbList* pAcbList = AcbList::getRootAcbList();
 
-	unsigned int acb_count =AcbList::getInstance()->count();
-	if (acb_count > 0) {
-		tAcb* pAcb = AcbList::getInstance()->getRoot();
-		DPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs start, count : ",acb_count);
-		while (pAcb) {
-			if ((millis()-pAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC) {
-				SerialNode* pNodeExpired = getNodeByAcb(pAcb);
-				DPRINTSVAL("SerialNodeNet::checkConnection::isLifeCheckExpired> reply time expired for aktid: " ,pAcb->aktid);
-				DPRINTSVAL(" on node: " ,pNodeExpired ? pNodeExpired->getId(): 0);
-				DPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
-				tAcb* pNext = (tAcb*) pAcb->pNext; //save next pointer
-				AcbList::getInstance()->deleteAcbEntry(pAcb->aktid);
-				pAcb=pNext;
-			}else{
-				pAcb=(tAcb*) pAcb->pNext;
+	while (pAcbList) {
+		unsigned int acb_count =pAcbList->count();
+		if (acb_count > 0) {
+			tAcb* pAcb = pAcbList->getRoot();
+			MPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs (start) sys: ",pAcbList->getId());
+			MPRINTLNSVAL(" acbs count : ",acb_count);
+			while (pAcb) {
+				if ((millis()-pAcb->timeStamp) > SERIALNODE_TIME_LIFECHECK_REPLYTIME_EXPIRED_MSEC) {
+
+					MPRINTSVAL("SerialNodeNet::checkConnection::isLifeCheckExpired> reply time expired for aktid: " ,pAcb->aktid);
+					MPRINTSVAL(" src node: " ,pAcb->fromAddr.nodeId);
+					MPRINTS(" to node: ");MPRINTLNADDR(pAcb->toAddr);
+					MPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
+					tAcb* pNext = (tAcb*) pAcb->pNext; //save next pointer
+					AcbList::getInstance()->deleteAcbEntry(pAcb->aktid);
+					pAcb=pNext;
+				}else{
+					pAcb=(tAcb*) pAcb->pNext;
+				}
 			}
+
+			acb_count =pAcbList->count();
+			MPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs (end) sys: ",pAcbList->getId());
+			MPRINTLNSVAL(" acbs count : ",acb_count);
 		}
-		acb_count =AcbList::getInstance()->count();
-		DPRINTLNSVAL("SerialNodeNet::checkConnection> check acbs end, count : ",acb_count);
+		pAcbList=(AcbList*) pAcbList->pNext;
 	}
 
 	if (pNode->getLastLifeCheckTime() && (now - pNode->getLastLifeCheckTime()) < period) {

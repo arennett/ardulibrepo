@@ -15,11 +15,16 @@ namespace SerialMsgLib {
 
 AcbList* AcbList::pAcbListList=NULL;
 
-AcbList* AcbList::getInstance(){
-	return getList(SerialNodeNet::getInstance()->getSystemId());
+
+AcbList* AcbList::getRootAcbList(){
+	return pAcbListList;
 }
 
-AcbList* AcbList::getList(byte sysId){
+AcbList* AcbList::getInstance(){
+	return getList(SerialNodeNet::getInstance()->getSystemId(),true);
+}
+
+AcbList* AcbList::getList(byte sysId,bool create){
 	AcbList* pAcbList = pAcbListList;
 	if (!pAcbListList) {
 		pAcbListList = new AcbList(sysId);
@@ -29,8 +34,10 @@ AcbList* AcbList::getList(byte sysId){
 		if (pAcbList->getId() == sysId) {
 			break;
 		}
-		if (!pAcbList->pNext) {
-			pAcbList->pNext= new AcbList(sysId);
+		if (!pAcbList->pNext) { // end is reached
+			if (create) {
+				pAcbList->pNext= new AcbList(sysId);
+			}
 			pAcbList = (AcbList*)  pAcbList->pNext;
 			break;
 		}
@@ -90,8 +97,8 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 	}else {
 		pNew->aktid = pHeader->aktid;
 	}
-	MPRINTLNSVAL("AcbList::createAcb> aktId: ", pNew->aktid);
-	MPRINTLNSVAL("AcbList::createAcb> count: ", count());
+	MPRINTSVAL("AcbList::createAcb> sys: ",sysId);MPRINTLNSVAL(" aktId: ", pNew->aktid);
+	MPRINTLNSVAL("AcbList::createAcb> count : ", count());MPRINTLNSVAL(" all :", countAll());
 	return pNew;
 
 }
@@ -189,6 +196,18 @@ unsigned int AcbList::count(byte portId) {
 	}
 	return cnt;
 }
+
+unsigned int AcbList::countAll(byte portId) {
+	unsigned int cnt=0;
+	AcbList* pAcbList =pAcbListList;
+	while(pAcbList) {
+		cnt+= pAcbList->count(portId);
+		pAcbList = (AcbList*) pAcbList->pNext;
+	}
+	return cnt;
+}
+
+
 
 void AcbList::deleteAcbList() {
 	while (pRoot) {

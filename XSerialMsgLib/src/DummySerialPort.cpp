@@ -26,7 +26,7 @@ void DummySerialPort::cycleListenerPort() {
 	};
 
 	if (pPort && pPort->available() == 0
-			&& AcbList::getInstance()->count(pPort->getId()) == 0
+			&& AcbList::getInstance()->countAll(pPort->getId()) == 0
 			&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME
 			// uncomment listenTimeStamp in listen
 		){

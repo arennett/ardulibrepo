@@ -338,6 +338,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 
 void SerialNode::reconnect() {
 	// call on reconnect();
+	MPRINTLNS("SerialNode:reconnect()> [start]");
 	setReady(false);
 	if (isActive()) {
 		SerialNodeNet::getInstance()->callOnPreConnect(this);
@@ -398,7 +399,7 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, const byte* pD
 
 // not connected
 	if (pCcb->status != CONNECTION_STATUS_CONNECTED && !(cmd == CMD_CR || cmd == CMD_ACK || cmd == CMD_NAK)) {
-		MPRINTSVAL("SerialNode::send > not connected, cmd not allowed : ", cmd);
+		MPRINTLNSVAL("SerialNode::send > not connected, cmd not allowed : ", cmd);
 		return 0;
 	}
 
@@ -478,7 +479,7 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 	if (pPort->getType() == PORTTYPE_SOFTSERIAL && !pPort->isListening()) {
 		SoftSerialPort* pListener = SoftSerialPort::getListenerPort();
 		ASSERTP(pListener != pPort, "SerialNode::writeToPort> GLEICHER LISTENER ?");
-		unsigned int listenerAcbCount = AcbList::getInstance()->count(pListener->getId());
+		unsigned int listenerAcbCount = AcbList::countAll(pListener->getId());
 		// open acbs on other SoftSerialPort
 		if (listenerAcbCount > 0) {
 
@@ -503,7 +504,7 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 							SerialNodeNet::getInstance()->checkConnection(pWaitNode);
 						}
 					}
-					listenerAcbCount = AcbList::getInstance()->count(pListener->getId());
+					listenerAcbCount = AcbList::countAll(pListener->getId());
 				}
 				XPRINTSVAL("SerialNode::writeToPort> waiting end, node : ",getId());
 				XPRINTLNSVAL(" waited for : " ,millis()-tStamp);

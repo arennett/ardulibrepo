@@ -73,11 +73,13 @@ tLcb* LcbList::getLinkedLcb(tSerialHeader* pHeader) {
 SerialPort* LcbList::getTargetPort(tSerialHeader* pHeader) {
 	tLcb* pLcb = getLinkedLcb(pHeader);
 	if (pLcb) {
-		if (pLcb->addrA==pHeader->fromAddr && pLcb->addrB == pHeader->toAddr ) {
+		if (pLcb->addrA == pHeader->fromAddr
+				&& pLcb->addrB == pHeader->toAddr) {
 			return pLcb->pPortB;
-		}else if (pLcb->addrB==pHeader->fromAddr && pLcb->addrA == pHeader->toAddr ) {
+		} else if (pLcb->addrB == pHeader->fromAddr
+				&& pLcb->addrA == pHeader->toAddr) {
 			return pLcb->pPortA;
-		}else{
+		} else {
 			DPRINTLNS("LcbList::getTargetPort ERROR");
 		}
 		return NULL;
@@ -88,10 +90,30 @@ SerialPort* LcbList::getTargetPort(tSerialHeader* pHeader) {
 tLcb* LcbList::getOpenLcb(tSerialHeader* pHeader) {
 	tLcb* pLcb = pRoot;
 	while (pLcb) {
-		if (pLcb->pPortA && !(pLcb->pPortB)
-				&& (pLcb->addrA == pHeader->fromAddr && pHeader->cmd == CMD_CR)
-				&& (pLcb->addrA == pHeader->toAddr && pHeader->cmd == CMD_ACK)
-				&& pLcb->aktid == pHeader->aktid) {
+
+		DPRINTLNS("LcbList::getOpenLcb> [START] ");
+		DPRINTLNHEADER(pHeader);
+		DPRINTS("pLcb addrA");
+		DPRINTLNADDR(pLcb->addrA);
+		DPRINTS("pLcb addrB");
+		DPRINTLNADDR(pLcb->addrB);
+
+		DPRINTLNSVAL("pLcb->pPortA && !(pLcb->pPortB : ",
+				(pLcb->pPortA && !(pLcb->pPortB)));
+		DPRINTLNSVAL(
+				"pLcb->addrA == pHeader->fromAddr && pHeader->cmd == CMD_CR : ",
+				pLcb->addrA == pHeader->fromAddr && pHeader->cmd == CMD_CR);
+
+		DPRINTLNSVAL("pLcb->aktid == pHeader->aktid : ",
+				pLcb->aktid == pHeader->aktid);
+
+		if ( (pLcb->pPortA && !(pLcb->pPortB) )
+				&& ( (pLcb->addrA == pHeader->fromAddr   && pHeader->cmd == CMD_CR)
+					 || ( pLcb->addrA == pHeader->toAddr	&& pHeader->cmd == CMD_ACK
+						  && (pLcb->aktid == pHeader->aktid)
+					 	)
+					)
+			) {
 			return pLcb;
 		}
 
@@ -109,12 +131,12 @@ tLcb* LcbList::getLastLcbEntry() {
 	return pLast;
 
 }
-unsigned int LcbList::count(){
+unsigned int LcbList::count() {
 	tLcb* p = pRoot;
-	unsigned int cnt= 0;
-	while (p ) {
+	unsigned int cnt = 0;
+	while (p) {
 		++cnt;
-		p=p->pNext;
+		p = p->pNext;
 	}
 	return cnt;;
 }
@@ -124,4 +146,5 @@ void LcbList::deleteLcbList() {
 		delete pLastEntry;
 	}
 }
-};
+}
+;

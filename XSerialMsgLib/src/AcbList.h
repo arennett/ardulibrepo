@@ -30,9 +30,23 @@ namespace SerialMsgLib {
 class AcbList {
 public:
 
-	//static
+	/*
+	 * static AcbList* getInstance();
+	 * creates the AcbList for the own SerialNodeNet (systemId) , if not created yet.
+	 * < return		... the system AcbList for handling self created request messages.
+	 */
 	static AcbList* getInstance();
-	static AcbList* getList(byte portId);
+
+	static AcbList* getRootAcbList();
+
+
+	/*
+	 * static AcbList* getList(byte portId,bool create=false);
+	 * create/returns AcbLists of forwarded request messages
+	 * > portId, of the port who send the request
+	 * > create a new list if not found
+	 */
+	static AcbList* getList(byte portId,bool create=false);
 
 	AcbList(byte sysId);
 
@@ -73,6 +87,8 @@ public:
 	 * 				> 0 	...acbs on a port
 	 */
 	unsigned int count(byte portId=0);
+	static unsigned int countAll(byte portId=0);
+
 	void 	deleteAcbList();
 	bool  	deleteAcbEntry(tAktId aktId);
 	bool  	deleteAcbEntry(tCcb* pCcb,byte cmd);
