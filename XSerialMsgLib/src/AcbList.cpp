@@ -24,6 +24,7 @@ AcbList* AcbList::getInstance(){
 	return getList(SerialNodeNet::getInstance()->getSystemId(),true);
 }
 
+
 AcbList* AcbList::getList(byte sysId,bool create){
 	AcbList* pAcbList = pAcbListList;
 	if (!pAcbListList) {
@@ -46,11 +47,47 @@ AcbList* AcbList::getList(byte sysId,bool create){
 	return pAcbList;
 }
 
+tStamp AcbList::lastAcbCheck=0;
+void AcbList::removeOldAcbs(){
+	tStamp now =millis();
+	if ((now-lastAcbCheck) < ACB_REPLYTIME_EXPIRED_CHECK_PERIOD_MSEC){
+		return ;
+	}
+	AcbList* pAcbList = AcbList::getRootAcbList();
+	while (pAcbList) {
+		unsigned int acb_count =pAcbList->count();
+		if (acb_count > 0) {
+			tAcb* pAcb = pAcbList->getRoot();
+			DPRINTLNSVAL("AcbList::removeOldAcbs> check acbs (start) sys: ",pAcbList->getId());
+			DPRINTLNSVAL(" acbs count : ",acb_count);
+			while (pAcb) {
+				if ((millis()-pAcb->timeStamp) > ACB_REPLYTIME_EXPIRED_MSEC) {
+
+					MPRINTLNSVAL("AcbList::removeOldAcbs>::isLifeCheckExpired> reply time expired for aktid: " ,pAcb->aktid);
+					MPRINTS("cmd : ");MPRINTLNSS(tSerialHeader::cmd2Str(pAcb->cmd));
+					MPRINTS("from: ");MPRINTLNADDR(pAcb->fromAddr);
+					MPRINTS("to  : ");MPRINTLNADDR(pAcb->toAddr);
+					MPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
+					tAcb* pNext = (tAcb*) pAcb->pNext; //save next pointer
+					pAcbList->deleteAcbEntry(pAcb->aktid);
+					pAcb=pNext;
+				}else{
+					pAcb=(tAcb*) pAcb->pNext;
+				}
+			}
+
+			acb_count =pAcbList->count();
+			DPRINTLNSVAL("AcbList::removeOldAcbs> check acbs (end) sys: ",pAcbList->getId());
+			DPRINTLNSVAL("acbs count : ",acb_count);
+		}
+		pAcbList=(AcbList*) pAcbList->pNext;
+	}
+}
+
 AcbList::AcbList(byte sysId) {
 	this->sysId=sysId;
 	aktId = 0;
-	XPRINTLNSVAL("AcbList::AcbList() free ",freeRam());
-	XPRINTLNSVAL("AcbList::AcbList() created for system : ",sysId);
+	XPRINTSVAL("AcbList::AcbList(",sysId);XPRINTLNSVAL(") free ",freeRam());
 }
 
 AcbList::~AcbList() {
@@ -97,8 +134,9 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 	}else {
 		pNew->aktid = pHeader->aktid;
 	}
+	pNew->timeStamp=millis();
 	MPRINTSVAL("AcbList::createAcb> sys: ",sysId);MPRINTLNSVAL(" aktId: ", pNew->aktid);
-	MPRINTLNSVAL("AcbList::createAcb> count : ", count());MPRINTLNSVAL(" all :", countAll());
+	MPRINTSVAL("AcbList::createAcb> count : ", count());MPRINTLNSVAL(" all :", countAll());
 	return pNew;
 
 }
@@ -112,7 +150,6 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 					&& pAcb->fromAddr == pHeader->fromAddr
 					&& pAcb->toAddr == pHeader->toAddr) {
 				//reuse open (unacknowledged) acb
-				MPRINTLNSVAL("AcbList::createOrUseAcb> reuse acb   : ", pAcb->aktid);
 				pAcb->status = ACB_STATUS_OPEN;
 
 				break;
@@ -123,11 +160,18 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 	}
 	if (!pAcb) {
 		pAcb = createAcb(pHeader);
+
+
 	} else {
-		DPRINTLNSVAL(" , new aktid: ", pAcb->aktid);
+		pAcb->aktid=pHeader->aktid;
+		pAcb->timeStamp=millis();
+		MPRINTSVAL("AcbList::reUseAcb> sys: ",sysId);MPRINTLNSVAL(" aktId: ", pAcb->aktid);
+		MPRINTSVAL("AcbList::reUseAcb> count : ", count());MPRINTLNSVAL(" all :", countAll());
+
 	}
-	pAcb->timeStamp=millis();
-	pAcb->aktid=pHeader->aktid;
+
+
+
 	return pAcb;
 }
 

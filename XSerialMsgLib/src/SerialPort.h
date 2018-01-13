@@ -58,6 +58,10 @@ public:
 	 */
 	void    createDataBuffer(size_t dataSize);
 
+	void sendMessage(const tSerialHeader* pHeader,const byte* data, size_t datsize);
+	void sendMessage(const byte* message, size_t messagesize);
+
+
 	/*
 	 * SerialRx* getRx();
 	 * < returns	...the receiver for this port

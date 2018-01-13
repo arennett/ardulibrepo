@@ -28,7 +28,7 @@ void SoftSerialPort::cycleListenerPort() {
 	};
 
 	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() listener : ",pPort->getId());
-	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() listener acb count : ",AcbList::getInstance()->count(pPort->getId()));
+	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() acb count all for listener: ",AcbList::countAll(pPort->getId()));
 
 	if (pPort && pPort->available() == 0  // no unread data on listener port
 			&& AcbList::countAll(pPort->getId()) == 0 //no acbs to listener port found
@@ -132,7 +132,7 @@ bool SoftSerialPort::isListening() {
 }
 
 SoftSerialPort* SoftSerialPort::cycleNextSoftSerialPort() {
-
+	DPRINTLNS("SoftSerialPort::cycleNextSoftSerialPort>");
 	SerialPort* pPort=  (SerialPort*) this->getNext();
 	if (!pPort) {// next is first one
 		pPort= SerialPort::pSerialPortList;

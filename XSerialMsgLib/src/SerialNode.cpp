@@ -532,16 +532,8 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 		}
 	}
 
-	pPort->getTx()->sendPreamble();
-	pPort->getTx()->sendRawData((byte*) pHeader, sizeof(tSerialHeader));
-	if (pData && datasize > 0) {
-		pPort->getTx()->sendRawData((byte*) pData, datasize);
-	}
-	pPort->getTx()->sendPostamble();
+	pPort->sendMessage(pHeader,pData,datasize);
 
-	if (pData) {
-		DPRINTLNSVAL("datasize: ", datasize);
-	}
 	SerialNodeNet::getInstance()->setProcessingNode(this);
 	MPRINTLNS("SerialNode::writeToPort> success , header...");
 	MPRINTLNHEADER(pHeader);

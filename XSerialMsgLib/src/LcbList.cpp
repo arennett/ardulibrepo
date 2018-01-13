@@ -42,6 +42,7 @@ tLcb* LcbList::createLcb(tSerialHeader* pHeader, SerialPort* pFromPort) {
 	}
 
 	pLcb = new tLcb();
+
 	tLcb* pLast = getLastLcbEntry();
 	if (pLast) {
 		pLast->pNext = pLcb;
@@ -51,7 +52,7 @@ tLcb* LcbList::createLcb(tSerialHeader* pHeader, SerialPort* pFromPort) {
 	pLcb->addrA = pHeader->fromAddr;
 	pLcb->pPortA = pFromPort;
 	pLcb->aktid = pHeader->aktid;
-
+	MPRINTLNSVAL("cbList::createLcb> new LCB created, count :",count());
 	return pLcb;
 }
 

@@ -10,6 +10,8 @@
 
 #ifndef ACBLIST_H_
 #define ACBLIST_H_
+#define ACB_REPLYTIME_EXPIRED_CHECK_PERIOD_MSEC 	200
+#define ACB_REPLYTIME_EXPIRED_MSEC 	6000       // if we didnt hear anything , acb is deleted after 3 seconds
 
 typedef struct {
 	tAktId 	aktid;
@@ -47,6 +49,13 @@ public:
 	 * > create a new list if not found
 	 */
 	static AcbList* getList(byte portId,bool create=false);
+
+	/*
+	 * static void removeOldAcbs();
+	 * removes old unreplied acbs
+	 */
+	static void removeOldAcbs();
+	static tStamp lastAcbCheck;
 
 	AcbList(byte sysId);
 

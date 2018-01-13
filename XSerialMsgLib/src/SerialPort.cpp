@@ -6,11 +6,13 @@
  */
 
 
+#include  <tools.h>
 #include "SerialMsg.h"
 #include "SerialHeader.h"
 #include "SerialPort.h"
 #include "SerialNode.h"
 #include "SerialNodeNet.h"
+
 
 namespace SerialMsgLib {
 SerialPort* SerialPort::pSerialPortList=NULL;
@@ -83,6 +85,26 @@ void SerialPort::readNextOnAllPorts() {
 
 }
 
+void SerialPort::sendMessage(const tSerialHeader* pHeader,const byte* pData,size_t datasize) {
+		XPRINTS("SerialPort::sendMessage> ");XPRINTLNHEADER(pHeader);
+	    getTx()->sendPreamble();
+		getTx()->sendRawData((byte*) pHeader, sizeof(tSerialHeader));
+		if (pData && datasize > 0) {
+			getTx()->sendRawData((byte*) pData, datasize);
+		}
+		getTx()->sendPostamble();
+
+		if (pData) {
+			XPRINTLNSVAL(" datasize: ", datasize);
+		}else{
+			XPRINTLN("");
+		}
+}
+
+void SerialPort::sendMessage(const byte* pMessage, size_t messageSize) {
+	XPRINTS("SerialPort::sendMessage> ");XPRINTLNHEADER(((tSerialHeader*)pMessage));
+	getTx()->sendData((byte*) pMessage, messageSize);
+}
 
 SerialPort::~SerialPort() {
 	delete pPortRxTxMapper;
