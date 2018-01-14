@@ -114,7 +114,7 @@ size_t SoftSerialPort::write(const byte* bb, size_t len) {
 bool SoftSerialPort::listen() {
 	if (!isListening()) {
 		listenTimeStamp = millis();
-		MPRINTLNSVAL("SoftSerialPort::listen> on port :", getId());
+		XPRINTLNSVAL("SoftSerialPort::listen> on port :", getId());
 		return pSoftwareSerial->listen();
 	}
 	return false;

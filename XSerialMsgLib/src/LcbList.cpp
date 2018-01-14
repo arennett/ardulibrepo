@@ -52,7 +52,7 @@ tLcb* LcbList::createLcb(tSerialHeader* pHeader, SerialPort* pFromPort) {
 	pLcb->addrA = pHeader->fromAddr;
 	pLcb->pPortA = pFromPort;
 	pLcb->aktid = pHeader->aktid;
-	MPRINTLNSVAL("cbList::createLcb> new LCB created, count :",count());
+	XPRINTLNSVAL("cbList::createLcb> new LCB created, count :",count());
 	return pLcb;
 }
 

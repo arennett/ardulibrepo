@@ -86,6 +86,18 @@ void SerialPort::readNextOnAllPorts() {
 }
 
 void SerialPort::sendMessage(const tSerialHeader* pHeader,const byte* pData,size_t datasize) {
+		/* must be moved to SoftSerialPort
+		if (available()) {
+		  int size =available();
+		   if (size > 0) {
+			  XPRINTLNSVAL("SerialPort::sendMessage: data available by send on port: ", remoteSysId);
+			  XPRINTLNSVAL("SerialPort::sendMessage read first: ",size );
+			  while (available()){
+				  getRx()->readNext();
+			  }
+
+		  }
+		} */
 		XPRINTS("SerialPort::sendMessage> ");XPRINTLNHEADER(pHeader);
 	    getTx()->sendPreamble();
 		getTx()->sendRawData((byte*) pHeader, sizeof(tSerialHeader));
@@ -102,6 +114,7 @@ void SerialPort::sendMessage(const tSerialHeader* pHeader,const byte* pData,size
 }
 
 void SerialPort::sendMessage(const byte* pMessage, size_t messageSize) {
+
 	XPRINTS("SerialPort::sendMessage> ");XPRINTLNHEADER(((tSerialHeader*)pMessage));
 	getTx()->sendData((byte*) pMessage, messageSize);
 }
