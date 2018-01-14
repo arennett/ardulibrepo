@@ -148,7 +148,7 @@ bool SerialRx::readNext() {
 		if (lastByte == serPreamble[preAmCount]) {
 			//DPRINTSVAL("serPreamble COUNT:",preAmCount);
 			if (preAmCount == (sizeof serPreamble) - 1) {
-				DPRINTLNSVAL("SerialRx::readNext> preamble COMPLETE port : ",pSerialPort->remoteSysId);
+				XPRINTLNSVAL("SerialRx::readNext> preamble COMPLETE port : ",pSerialPort->getId());
 				preAmCount = 0;
 				if (dataCollect) {
 					XPRINTLNSVAL("SerialRx::readNext> preamble without prev postamble. DATA LOSS ON PORT: ", pSerialPort->getId());
@@ -171,7 +171,7 @@ bool SerialRx::readNext() {
 
 			//DPRINTSVAL("serPostamble COUNT:",postAmCount);
 			if (postAmCount == (sizeof serPostamble) - 1) {
-				MPRINTLNSVAL("SerialRx::readNext> postamble COMPLETE port : ", pSerialPort->getId());
+				XPRINTLNSVAL("SerialRx::readNext> postamble COMPLETE port : ", pSerialPort->getId());
 				dataSize = dataCount - sizeof serPostamble;
 				DPRINTLNSVAL("SerialRx::readNext> message size: ",
 						dataSize);

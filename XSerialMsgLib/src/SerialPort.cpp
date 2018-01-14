@@ -67,8 +67,8 @@ void SerialPort::readNextOnAllPorts() {
 
 			  int size = pport->available();
 			  if (size > 0) {
-				  DPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
-				  DPRINTLNSVAL("SerialRx::data available size :",size );
+				  XPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
+				  XPRINTLNSVAL("SerialRx::data available size :",size );
 				  while (pport->available()){
 				  	  pport->getRx()->readNext();
 				  }
@@ -85,7 +85,7 @@ void SerialPort::readNextOnAllPorts() {
 
 }
 
-void SerialPort::sendMessage(const tSerialHeader* pHeader,const byte* pData,size_t datasize) {
+void SerialPort::sendMessage(tSerialHeader* pHeader,const byte* pData,size_t datasize) {
 		/* must be moved to SoftSerialPort
 		if (available()) {
 		  int size =available();
@@ -98,6 +98,16 @@ void SerialPort::sendMessage(const tSerialHeader* pHeader,const byte* pData,size
 
 		  }
 		} */
+
+
+		if (pHeader->aktid == 0) { // we need an aktId
+			pHeader->aktid = AcbList::getInstance()->getNextAktId();
+		}
+
+	 	if (pHeader->isReplyExpected()) {
+	 		tAcb* pAcb =AcbList::getList(pHeader->fromAddr.sysId, true)->createOrUseAcb(pHeader);
+			pAcb->portId = getId();
+		}
 		XPRINTS("SerialPort::sendMessage> ");XPRINTLNHEADER(pHeader);
 	    getTx()->sendPreamble();
 		getTx()->sendRawData((byte*) pHeader, sizeof(tSerialHeader));
@@ -114,9 +124,11 @@ void SerialPort::sendMessage(const tSerialHeader* pHeader,const byte* pData,size
 }
 
 void SerialPort::sendMessage(const byte* pMessage, size_t messageSize) {
-
-	XPRINTS("SerialPort::sendMessage> ");XPRINTLNHEADER(((tSerialHeader*)pMessage));
-	getTx()->sendData((byte*) pMessage, messageSize);
+	ASSERTP( sizeof(tSerialHeader) <= messageSize, "SerialPort::sendMessage message < header size");
+	tSerialHeader*  pHeader = ( tSerialHeader* ) pMessage;
+	byte* pData = ( byte*) pHeader + sizeof(tSerialHeader);
+	size_t datsize = messageSize- sizeof(tSerialHeader);
+	return sendMessage(pHeader,pData,datsize);
 }
 
 SerialPort::~SerialPort() {

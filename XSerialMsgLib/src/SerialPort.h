@@ -58,7 +58,7 @@ public:
 	 */
 	void    createDataBuffer(size_t dataSize);
 
-	void sendMessage(const tSerialHeader* pHeader,const byte* data, size_t datsize);
+	void sendMessage(tSerialHeader* pHeader,const byte* data, size_t datsize);
 	void sendMessage(const byte* message, size_t messagesize);
 
 

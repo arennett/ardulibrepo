@@ -144,7 +144,7 @@ public:
 		}
 	}
 
-	static bool isReplyExpected(tSerialCmd cmd) {
+	static bool isReplyExpected(tSerialCmd cmd)  {
 		switch (cmd) {
 		case CMD_NAK:  return false;
 		case CMD_ACK:  return false;
@@ -156,8 +156,8 @@ public:
 		default:  return false;
 		}
 	}
-	bool isReplyExpected() {
-	  return tSerialHeader::isReplyExpected(cmd);
+	bool isReplyExpected() const{
+	  return tSerialHeader::isReplyExpected(cmd) ;
 	}
 
 

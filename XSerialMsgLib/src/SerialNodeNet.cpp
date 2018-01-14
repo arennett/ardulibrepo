@@ -243,14 +243,7 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 // port or linked port found
 	if (pTargetPort) {
 		MPRINTLNS("SerialNodeNet::forward> port found");
-		if (pHeader->isReplyExpected()) {
-			// add a acb for the forwarded request
-			tAcb* pAcb =
-					AcbList::getList(pHeader->fromAddr.sysId, true)->createOrUseAcb(
-							pHeader);
-			pAcb->portId = pTargetPort->getId();
-
-		} else {
+		if (!pHeader->isReplyExpected()) {
 			// if reply -> find the acb of the forwarded request and delete it
 			AcbList* pList = AcbList::getList(pHeader->toAddr.sysId);
 			if (pList) {
@@ -278,10 +271,7 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 						"SerialNodeNet::forward> LINK found (far source port)");
 			}
 		}
-		tAcb* pAcb =
-				AcbList::getList(pHeader->fromAddr.sysId, true)->createOrUseAcb(
-						pHeader);
-		pAcb->portId = pTargetPort->getId();
+
 		MPRINTLNSVAL("SerialNodeNet::forward> ACB target port: >", pAcb->portId);
 		MPRINTLNSVAL("SerialNodeNet::forward> send message to port : ",
 				pTargetPort->getId());
@@ -319,12 +309,6 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 			// ??? same sys aktid but differnent portIDs
 			// send and wait or aktid mapping is needed
 
-			tAcb* pAcb =
-					AcbList::getList(pHeader->fromAddr.sysId, true)->createOrUseAcb(
-							pHeader);
-			pAcb->portId = pport->getId();
-			MPRINTLNSVAL("SerialNodeNet::forward> ACB target port: >",
-					pAcb->portId);
 			// wait , if (acb deleted, check link or next port) timeout next CR
 			MPRINTLNSVAL("SerialNodeNet::forward> send message to port : ",
 					pport->getId());
@@ -356,7 +340,7 @@ void SerialNodeNet::processNodes(bool lifeCheck) {
 
 	}
 
-	tStamp now = millis();
+
 
 	AcbList::removeOldAcbs();
 

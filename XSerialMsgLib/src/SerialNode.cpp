@@ -523,16 +523,10 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 	assert(pHeader);
 	assert(pHeader->toAddr.sysId != pHeader->fromAddr.sysId);
 
-	if (pHeader->aktid == 0) { // we need an aktId
-		pHeader->aktid = AcbList::getInstance()->getNextAktId();
 
-		if (tSerialHeader::isReplyExpected(pHeader->cmd)) {
-			AcbList::getInstance()->createOrUseAcb(pHeader)->portId = pPort->getId();
-			lastSendAcbAktId = pHeader->aktid;
-		}
-	}
 
 	pPort->sendMessage(pHeader,pData,datasize);
+	lastSendAcbAktId = pHeader->aktid;
 
 	SerialNodeNet::getInstance()->setProcessingNode(this);
 	MPRINTLNS("SerialNode::writeToPort> success , header...");

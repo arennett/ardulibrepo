@@ -36,6 +36,7 @@ void SoftSerialPort::cycleListenerPort() {
 
 		){
 		pPort->cycleNextSoftSerialPort()->listen();
+
 	}
 }
 
