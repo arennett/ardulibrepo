@@ -17,29 +17,38 @@ namespace SerialMsgLib {
 
 //static
 SoftSerialPort* SoftSerialPort::pSoftSerialPortList = NULL;
+SoftSerialPort* SoftSerialPort::pMaster = NULL;
 
 //--------------------static---------------------------------------------
 
 void SoftSerialPort::cycleListenerPort() {
-	SoftSerialPort* pPort = getListenerPort();
-	// if not at least 2 SoftwareSerialPorts we do not need to switch
-	if (!pPort || count() < 2) {
-		return;
-	};
+		SoftSerialPort* pPort = getListenerPort();
+		// if not at least 2 SoftwareSerialPorts we do not need to switch
 
-	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() listener : ",pPort->getId());
-	DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() acb count all for listener: ",AcbList::countAll(pPort->getId()));
+		if (count() == 1) {
+			pSoftSerialPortList->setMaster();
+			pMaster->listen();
+			return;
+		}
 
-	if (pPort && pPort->available() == 0  // no unread data on listener port
-			&& AcbList::countAll(pPort->getId()) == 0 //no acbs to listener port found
-			&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME // we listen long enough
+		DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() listener : ",pPort->getId());
+		DPRINTLNSVAL("SoftSerialPort::cycleListenerPort() acb count all for listener: ",AcbList::countAll(pPort->getId()));
 
+		// only change listen if no replies expected on this port
+		if (pPort && pPort->available() == 0  // no unread data on listener port
+				&& AcbList::countAll(pPort->getId()) == 0 //no acbs to listener port found
+				&& (millis() - pPort->listenTimeStamp) > MAX_SOFT_LISTEN_TIME // we listen long enough
 		){
-		pPort->cycleNextSoftSerialPort()->listen();
+			if (!pMaster) {
+				pPort->cycleNextSoftSerialPort()->listen();
+			}else{
+				pMaster->listen();
+			}
 
-	}
+		}
 }
 
+//static
 SoftSerialPort* SoftSerialPort::getListenerPort() {
 	SerialPort* pPort = pSerialPortList;
 	while (pPort) {
@@ -60,6 +69,22 @@ SoftSerialPort* SoftSerialPort::getListenerPort() {
 
 	}
 	return NULL;
+}
+
+//static
+void SoftSerialPort::resetMaster(){
+	SoftSerialPort::pMaster=NULL;
+}
+
+bool SoftSerialPort::isMaster(){
+	return this==pMaster;
+}
+
+void SoftSerialPort::setMaster() {
+	if (pMaster!=this) {
+			pMaster=this;
+			XPRINTLNSVAL("SoftSerialPort::setMaster : port : " ,getId());
+	}
 }
 
 byte SoftSerialPort::count() {

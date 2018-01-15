@@ -173,6 +173,13 @@ public:
 	 */
 	void checkConnection(SerialNode* pNode,tStamp periodMsec = 500);
 
+	/*
+	 * LcbList* getLcbList();
+	 * List of links between ports
+	 * < returns	...the Link List
+	 */
+	LcbList* getLcbList();
+
 
 private:
 	// a single instance of SerialNodeNet

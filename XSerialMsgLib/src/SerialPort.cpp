@@ -107,6 +107,7 @@ void SerialPort::sendMessage(tSerialHeader* pHeader,const byte* pData,size_t dat
 	 	if (pHeader->isReplyExpected()) {
 	 		tAcb* pAcb =AcbList::getList(pHeader->fromAddr.sysId, true)->createOrUseAcb(pHeader);
 			pAcb->portId = getId();
+			listen();
 		}
 		XPRINTS("SerialPort::sendMessage> ");XPRINTLNHEADER(pHeader);
 	    getTx()->sendPreamble();

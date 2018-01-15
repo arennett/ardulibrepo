@@ -99,19 +99,11 @@ tLcb* LcbList::getOpenLcb(tSerialHeader* pHeader) {
 		DPRINTS("pLcb addrB");
 		DPRINTLNADDR(pLcb->addrB);
 
-		DPRINTLNSVAL("pLcb->pPortA && !(pLcb->pPortB : ",
-				(pLcb->pPortA && !(pLcb->pPortB)));
-		DPRINTLNSVAL(
-				"pLcb->addrA == pHeader->fromAddr && pHeader->cmd == CMD_CR : ",
-				pLcb->addrA == pHeader->fromAddr && pHeader->cmd == CMD_CR);
-
-		DPRINTLNSVAL("pLcb->aktid == pHeader->aktid : ",
-				pLcb->aktid == pHeader->aktid);
 
 		if ( (pLcb->pPortA && !(pLcb->pPortB) )
 				&& ( (pLcb->addrA == pHeader->fromAddr   && pHeader->cmd == CMD_CR)
 					 || ( pLcb->addrA == pHeader->toAddr	&& pHeader->cmd == CMD_ACK
-						  && (pLcb->aktid == pHeader->aktid)
+						  //&& (pLcb->aktid == pHeader->aktid)
 					 	)
 					)
 			) {
@@ -141,6 +133,19 @@ unsigned int LcbList::count() {
 	}
 	return cnt;;
 }
+
+unsigned int LcbList::countCompleted() {
+	tLcb* p = pRoot;
+	unsigned int cnt = 0;
+	while (p) {
+		if(p->pPortB) {
+			++cnt;
+		}
+		p = p->pNext;
+	}
+	return cnt;;
+}
+
 void LcbList::deleteLcbList() {
 	tLcb* pLastEntry;
 	while ((pLastEntry = getLastLcbEntry()) != NULL) {

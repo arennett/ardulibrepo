@@ -19,7 +19,8 @@ class SoftSerialPort: public SerialPort {
 public:
 
 	static SoftSerialPort* pSoftSerialPortList;
-	static SoftSerialPort*  getListenerPort();
+	static SoftSerialPort* getListenerPort();
+	static SoftSerialPort* pMaster;
 
 	/**
 	 * static byte count();
@@ -34,6 +35,11 @@ public:
 	 * only for software serial ports important
 	 */
 	static void cycleListenerPort();
+
+	/*
+	 * deletes current selection of master port
+	 */
+	static void resetMaster();
 
 
 	SoftSerialPort();
@@ -83,8 +89,22 @@ public:
 	virtual int  available();
 	virtual bool isListening();
 
+	/*
+	 * if there is more as one SoftSerialPort, you have
+	 * to select a master for listening on commands
+	 */
+	bool isMaster();
+
+	/*
+	 *
+	 */
+	void setMaster();
+
+
 private:
 	SoftwareSerial* pSoftwareSerial;
+
+
 	};
 
 }

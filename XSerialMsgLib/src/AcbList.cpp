@@ -161,14 +161,14 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 	}
 	if (!pAcb) {
 		pAcb = createAcb(pHeader);
-
-
 	} else {
+		pAcb->cmd = pHeader->cmd;
+		pAcb->fromAddr = pHeader->fromAddr;
+		pAcb->toAddr = pHeader->toAddr;
 		pAcb->aktid=pHeader->aktid;
 		pAcb->timeStamp=millis();
 		XPRINTSVAL("AcbList::reUseAcb> sys: ",sysId);XPRINTLNSVAL(" aktId: ", pAcb->aktid);
 		XPRINTSVAL("AcbList::reUseAcb> count : ", count());XPRINTLNSVAL(" all :", countAll());
-
 	}
 
 

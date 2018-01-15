@@ -199,33 +199,29 @@ void SerialNodeNet::update(const byte* pMessage, size_t messageSize,
 bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 		SerialPort* pSourcePort) {
 	tSerialHeader* pHeader = (tSerialHeader*) pMessage;
-	MPRINTLNS("SerialNodeNet::forward>");
+	XPRINTLNS("SerialNodeNet::forward>");
 	MPRINTLNHEADER(pHeader);
 
 
 	// check if link cab ve completed
 	if (pHeader->cmd == CMD_ACK) { //no port no completed link
-		MPRINTLNS("SerialNodeNet::forward> search for open link ...");
-		AcbList* pList = AcbList::getList(pHeader->toAddr.sysId);
-		if (pList) {
-			MPRINTLNS("SerialNodeNet::forward> acblist found ...");
-			tAcb* pAcb = pList->getAcbEntry(pHeader->aktid);
-			if (pAcb) {
-				MPRINTLNS("SerialNodeNet::forward> acb found ...");
-				if (pAcb->cmd == CMD_CR) {
-					tLcb* pLcb = lcbList.getOpenLcb(pHeader);
-					if (pLcb) { //complete link
-						pLcb->addrB = pHeader->fromAddr;
-						pLcb->pPortB = pSourcePort;
-						XPRINTLNS("SerialNodeNet::forward> LINK completed");
-					}
-				}
-			}
+		tLcb* pLcb = lcbList.getOpenLcb(pHeader);
+		if (pLcb) { //complete link
+			pLcb->addrB = pHeader->fromAddr;
+			pLcb->pPortB = pSourcePort;
+			XPRINTLNS("SerialNodeNet::forward> LINK completed");
 		}
 	}
 
 	SerialPort* pTargetPort = SerialPort::getPort(pHeader->toAddr.sysId);
 	SerialPort* pMessageSourcePort = SerialPort::getPort(pHeader->fromAddr.sysId);
+
+
+	// set new masterport if softserial
+	if(pHeader->isReplyExpected()  && pSourcePort->getType()==PORTTYPE_SOFTSERIAL){
+		((SoftSerialPort*)pSourcePort)->setMaster();
+	}
+
 
 	if (!pTargetPort) {
 
@@ -236,7 +232,7 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 			XPRINTLNSVAL("SerialNodeNet::forward> LINK found to port : ",
 					pTargetPort->getId());
 		} else {
-			MPRINTLNS("SerialNodeNet::forward> no Link found");
+			XPRINTLNS("SerialNodeNet::forward> no Link found");
 		}
 	}
 
@@ -253,10 +249,10 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 				}
 			}
 		}
-		if (pHeader->isReplyExpected() && !pMessageSourcePort) { // if forward and far sourceport
+		if (pHeader->cmd==CMD_CR && !pMessageSourcePort) { // if forward and far sourceport
 			if (!lcbList.getLinkedLcb(pHeader)) {
 				MPRINTLNSVAL(
-						"SerialNodeNet::forward> message source port not found: ",
+						"SerialNodeNet::forward> CR message source port not found: ",
 						pHeader->fromAddr.sysId);
 				if (!lcbList.getOpenLcb(pHeader)) {
 					lcbList.createLcb(pHeader, pSourcePort);
@@ -272,7 +268,6 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 			}
 		}
 
-		MPRINTLNSVAL("SerialNodeNet::forward> ACB target port: >", pAcb->portId);
 		MPRINTLNSVAL("SerialNodeNet::forward> send message to port : ",
 				pTargetPort->getId());
 		MPRINTLNHEADER(pHeader);
@@ -291,6 +286,7 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 		return false;
 	}
 
+
 	if (!lcbList.getOpenLcb(pHeader)) {
 		lcbList.createLcb(pHeader, pSourcePort);
 		MPRINTLNSVAL("SerialNodeNet::forward> open LINK created from: ",
@@ -298,6 +294,7 @@ bool SerialNodeNet::forward(const byte* pMessage, size_t messageSize,
 	} else {
 		MPRINTLNS("SerialNodeNet::forward> open LINK found");
 	}
+
 
 	SerialPort* pport = SerialPort::pSerialPortList;
 
@@ -408,6 +405,10 @@ void SerialNodeNet::callOnPreConnect(SerialNode* pNode) {
 	if (pOnPreConnectHandler) {
 		pOnPreConnectHandler->onPreConnect(pNode);
 	}
+}
+
+LcbList* SerialNodeNet::getLcbList(){
+	return &lcbList;
 }
 
 void SerialNodeNet::checkConnection(SerialNode* pNode, tStamp period) {

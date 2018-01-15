@@ -36,6 +36,7 @@ public:
 		//void 	mprintAcb(tAcb* pAcb);
 	tLcb* 	getLastLcbEntry();
 	unsigned int count();
+	unsigned int countCompleted();
 	void 	deleteLcbList();
 	tLcb* pRoot = NULL;
 };
