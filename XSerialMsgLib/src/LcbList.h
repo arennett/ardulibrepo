@@ -17,8 +17,8 @@ struct tLcb {
 	//aktid of CR and corresponding ACK
 	tAktId   aktid;
 	//addr  of CR
-	tAddr     addrA;
-	tAddr     addrB;
+	byte     sysIdA;
+	byte     sysIdB;
 	SerialPort* pPortA=NULL;
 	SerialPort* pPortB=NULL;
 	tLcb* pNext=NULL;
@@ -33,7 +33,7 @@ public:
 	tLcb*   	getLinkedLcb(tSerialHeader* pHeader);
 	SerialPort* getTargetPort(tSerialHeader* pHeader);
 	tLcb* 		getOpenLcb(tSerialHeader* pHeader);
-		//void 	mprintAcb(tAcb* pAcb);
+		//void 	DPRINTAcb(tAcb* pAcb);
 	tLcb* 	getLastLcbEntry();
 	unsigned int count();
 	unsigned int countCompleted();

@@ -23,12 +23,12 @@ namespace SerialMsgLib {
 
 SerialTx::SerialTx(){
 	pSerialPort=NULL;
-	XPRINTLNSVAL("SerialTx::SerialTx() free ",freeRam());
+	MPRINTLNSVAL("SerialTx::SerialTx() free ",freeRam());
 }
 
 SerialTx::SerialTx(SerialPort* pSerialPort){
 	setPort(pSerialPort);
-	XPRINTLNSVAL("SerialTx::SerialTx() free ",freeRam());
+	MPRINTLNSVAL("SerialTx::SerialTx() free ",freeRam());
 }
 
 

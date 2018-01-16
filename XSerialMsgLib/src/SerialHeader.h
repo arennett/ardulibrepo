@@ -18,7 +18,7 @@
 
 #ifdef MPRINT_ON
 	#define MPRINTADDR(x)   XPRINTADDR(x)
-	#define MPRINTLNADDR(x) XPRINTLNADDR(x)
+	#define MPRINTLNADDR(x) X PRINTLNADDR(x)
 	#define MPRINTLNHEADER(pH)  XPRINTLNHEADER(pH)
 
 #else
@@ -27,26 +27,16 @@
 	#define MPRINTLNHEADER(pH)
 #endif
 
-
-
 #ifdef DPRINT_ON
-#define DPRINTADDR(x) 	MPRINTADDR(x)
-#define DPRINTLNADDR(x) MPRINTLNADDR(x)
-#define DPRINTLNHEADER(pH) MPRINTLNHEADER(pH)
+	#define DPRINTADDR(x) 	MPRINTADDR(x)
+	#define DPRINTLNADDR(x) MPRINTLNADDR(x)
+	#define DPRINTLNHEADER(pH) MPRINTLNHEADER(pH)
 #else
 	#define DPRINTADDR(x)
 	#define DPRINTLNADDR(x)
 	#define DPRINTLNHEADER(pH)
 #endif
-#ifdef DPRINT_ON
-#define DPRINTADDR(x) 	   MPRINTADDR(x)
-#define DPRINTLNADDR(x)    MPRINTLNADDR(x)
-#define DPRINTLNHEADER(pH) MPRINTLNHEADER(pH)
-#else
-	#define DPRINTADDR(x)
-	#define DPRINTLNADDR(x)
-	#define DPRINTLNHEADER(pH)
-#endif
+
 
 
 typedef enum {

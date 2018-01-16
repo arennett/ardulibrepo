@@ -63,12 +63,12 @@ void AcbList::removeOldAcbs(){
 			while (pAcb) {
 				if ((millis()-pAcb->timeStamp) > ACB_REPLYTIME_EXPIRED_MSEC) {
 
-					XPRINTSVAL("AcbList::removeOldAcbs>::isLifeCheckExpired> reply time expired for sys : ",pAcbList->getId());
-					XPRINTLNSVAL(" aktid: ",pAcb->aktid);
-					XPRINTS("cmd : ");MPRINTLNSS(tSerialHeader::cmd2Str(pAcb->cmd));
-					XPRINTS("from: ");MPRINTLNADDR(pAcb->fromAddr);
-					XPRINTS("to  : ");MPRINTLNADDR(pAcb->toAddr);
-					XPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
+					MPRINTSVAL("AcbList::removeOldAcbs>::isLifeCheckExpired> reply time expired for sys : ",pAcbList->getId());
+					MPRINTLNSVAL(" aktid: ",pAcb->aktid);
+					MPRINTS("cmd : ");DPRINTLNSS(tSerialHeader::cmd2Str(pAcb->cmd));
+					MPRINTS("from: ");DPRINTLNADDR(pAcb->fromAddr);
+					MPRINTS("to  : ");DPRINTLNADDR(pAcb->toAddr);
+					MPRINTLNSVAL(" round trip time : ",millis()-pAcb->timeStamp);
 					tAcb* pNext = (tAcb*) pAcb->pNext; //save next pointer
 					pAcbList->deleteAcbEntry(pAcb->aktid);
 					pAcb=pNext;
@@ -88,7 +88,7 @@ void AcbList::removeOldAcbs(){
 AcbList::AcbList(byte sysId) {
 	this->sysId=sysId;
 	aktId = 0;
-	XPRINTSVAL("AcbList::AcbList(",sysId);XPRINTLNSVAL(") free ",freeRam());
+	MPRINTSVAL("AcbList::AcbList(",sysId);MPRINTLNSVAL(") free ",freeRam());
 }
 
 AcbList::~AcbList() {
@@ -136,8 +136,8 @@ tAcb* AcbList::createAcb(tSerialHeader* pHeader) {
 		pNew->aktid = pHeader->aktid;
 	}
 	pNew->timeStamp=millis();
-	XPRINTSVAL("AcbList::createAcb> sys: ",sysId);XPRINTLNSVAL(" aktId: ", pNew->aktid);
-	XPRINTSVAL("AcbList::createAcb> count : ", count());XPRINTLNSVAL(" all :", countAll());
+	MPRINTSVAL("AcbList::createAcb> sys: ",sysId);MPRINTLNSVAL(" aktId: ", pNew->aktid);
+	MPRINTSVAL("AcbList::createAcb> count : ", count());MPRINTLNSVAL(" all :", countAll());
 	return pNew;
 
 }
@@ -167,8 +167,8 @@ tAcb* AcbList::createOrUseAcb(tSerialHeader* pHeader) {
 		pAcb->toAddr = pHeader->toAddr;
 		pAcb->aktid=pHeader->aktid;
 		pAcb->timeStamp=millis();
-		XPRINTSVAL("AcbList::reUseAcb> sys: ",sysId);XPRINTLNSVAL(" aktId: ", pAcb->aktid);
-		XPRINTSVAL("AcbList::reUseAcb> count : ", count());XPRINTLNSVAL(" all :", countAll());
+		MPRINTSVAL("AcbList::reUseAcb> sys: ",sysId);MPRINTLNSVAL(" aktId: ", pAcb->aktid);
+		MPRINTSVAL("AcbList::reUseAcb> count : ", count());MPRINTLNSVAL(" all :", countAll());
 	}
 
 
@@ -221,7 +221,7 @@ tAcb* AcbList::getAcbEntry(tCcb* pCcb, byte cmd) {
 	return pAcb;
 }
 
-//void 	mprintAcb(tAcb* pAcb);
+//void 	DPRINTAcb(tAcb* pAcb);
 tAcb* AcbList::getLastAcbEntry() {
 	tAcb* pLast = pRoot;
 	while (pLast && pLast->pNext) {
@@ -261,7 +261,7 @@ void AcbList::deleteAcbList() {
 }
 
 bool AcbList::deleteAcbEntry(tAktId aktId) {
-	XPRINTLNSVAL("AcbList::deleteAcbEntry> ", aktId);
+	MPRINTLNSVAL("AcbList::deleteAcbEntry> ", aktId);
 	tAcb* pAcb = getAcbEntry(aktId);
 
 	if (pAcb) {
@@ -316,7 +316,7 @@ bool AcbList::deleteAcbEntry(tCcb* pCcb, byte cmd) {
 
 void AcbList::printList(){
 	tAcb* pEntry=pRoot;
-	MPRINTLNSVAL("AcbList::printList>>>>>>>>begin>>>>>>>> count: " ,count());
+	DPRINTLNSVAL("AcbList::printList>>>>>>>>begin>>>>>>>> count: " ,count());
 	while (pEntry) {
 		DPRINTLNSVAL("AcbList::printList> ACB: ", pEntry->aktid);
 		pEntry=(tAcb*)pEntry->pNext;

@@ -45,7 +45,7 @@ SerialPort::SerialPort(byte remoteSysId){
     pPortRxTxMapper =new SerialPortRxTxMapper(this);
 	createDataBuffer(0);
 	DPRINTLNSVALS("SerialPort::SerialPort> cnt: ",cnt, " inited");
-	XPRINTLNSVAL("SerialPort::SerialPort() free ",freeRam());
+	MPRINTLNSVAL("SerialPort::SerialPort() free ",freeRam());
 
 	//pSerialRx= new SerialRx(this,20,SerialNode::update);
 };
@@ -67,8 +67,8 @@ void SerialPort::readNextOnAllPorts() {
 
 			  int size = pport->available();
 			  if (size > 0) {
-				  XPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
-				  XPRINTLNSVAL("SerialRx::data available size :",size );
+				  MPRINTLNSVAL("SerialRx::data available on port: ", pport->remoteSysId);
+				  MPRINTLNSVAL("SerialRx::data available size :",size );
 				  while (pport->available()){
 				  	  pport->getRx()->readNext();
 				  }
@@ -90,8 +90,8 @@ void SerialPort::sendMessage(tSerialHeader* pHeader,const byte* pData,size_t dat
 		if (available()) {
 		  int size =available();
 		   if (size > 0) {
-			  XPRINTLNSVAL("SerialPort::sendMessage: data available by send on port: ", remoteSysId);
-			  XPRINTLNSVAL("SerialPort::sendMessage read first: ",size );
+			  MPRINTLNSVAL("SerialPort::sendMessage: data available by send on port: ", remoteSysId);
+			  MPRINTLNSVAL("SerialPort::sendMessage read first: ",size );
 			  while (available()){
 				  getRx()->readNext();
 			  }
@@ -109,7 +109,7 @@ void SerialPort::sendMessage(tSerialHeader* pHeader,const byte* pData,size_t dat
 			pAcb->portId = getId();
 			listen();
 		}
-		XPRINTS("SerialPort::sendMessage> ");XPRINTLNHEADER(pHeader);
+		MPRINTS("SerialPort::sendMessage> ");MPRINTLNHEADER(pHeader);
 	    getTx()->sendPreamble();
 		getTx()->sendRawData((byte*) pHeader, sizeof(tSerialHeader));
 		if (pData && datasize > 0) {
@@ -118,9 +118,9 @@ void SerialPort::sendMessage(tSerialHeader* pHeader,const byte* pData,size_t dat
 		getTx()->sendPostamble();
 
 		if (pData) {
-			XPRINTLNSVAL(" datasize: ", datasize);
+			MPRINTLNSVAL(" datasize: ", datasize);
 		}else{
-			XPRINTLN("");
+			MPRINTLN("");
 		}
 }
 

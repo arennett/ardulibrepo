@@ -49,10 +49,10 @@ tLcb* LcbList::createLcb(tSerialHeader* pHeader, SerialPort* pFromPort) {
 	} else {
 		pRoot = pLcb;
 	}
-	pLcb->addrA = pHeader->fromAddr;
+	pLcb->sysIdA = pHeader->fromAddr.sysId;
 	pLcb->pPortA = pFromPort;
 	pLcb->aktid = pHeader->aktid;
-	XPRINTLNSVAL("cbList::createLcb> new LCB created, count :",count());
+	MPRINTLNSVAL("cbList::createLcb> new LCB created, count :",count());
 	return pLcb;
 }
 
@@ -60,10 +60,10 @@ tLcb* LcbList::getLinkedLcb(tSerialHeader* pHeader) {
 	tLcb* pLcb = pRoot;
 	while (pLcb) {
 		if (pLcb->pPortA && pLcb->pPortB
-				&& (pLcb->addrA == pHeader->fromAddr
-						|| pLcb->addrA == pHeader->toAddr)
-				&& (pLcb->addrB == pHeader->fromAddr
-						|| pLcb->addrB == pHeader->toAddr)) {	// link found
+				&& (pLcb->sysIdA == pHeader->fromAddr.sysId
+						|| pLcb->sysIdA == pHeader->toAddr.sysId)
+				&& (pLcb->sysIdB == pHeader->fromAddr.sysId
+						|| pLcb->sysIdB == pHeader->toAddr.sysId)) {	// link found
 			return pLcb;
 		}
 		pLcb = pLcb->pNext;
@@ -74,11 +74,11 @@ tLcb* LcbList::getLinkedLcb(tSerialHeader* pHeader) {
 SerialPort* LcbList::getTargetPort(tSerialHeader* pHeader) {
 	tLcb* pLcb = getLinkedLcb(pHeader);
 	if (pLcb) {
-		if (pLcb->addrA == pHeader->fromAddr
-				&& pLcb->addrB == pHeader->toAddr) {
+		if (pLcb->sysIdA == pHeader->fromAddr.sysId
+				&& pLcb->sysIdB == pHeader->toAddr.sysId) {
 			return pLcb->pPortB;
-		} else if (pLcb->addrB == pHeader->fromAddr
-				&& pLcb->addrA == pHeader->toAddr) {
+		} else if (pLcb->sysIdB == pHeader->fromAddr.sysId
+				&& pLcb->sysIdA == pHeader->toAddr.sysId) {
 			return pLcb->pPortA;
 		} else {
 			DPRINTLNS("LcbList::getTargetPort ERROR");
@@ -95,14 +95,14 @@ tLcb* LcbList::getOpenLcb(tSerialHeader* pHeader) {
 		DPRINTLNS("LcbList::getOpenLcb> [START] ");
 		DPRINTLNHEADER(pHeader);
 		DPRINTS("pLcb addrA");
-		DPRINTLNADDR(pLcb->addrA);
+		DPRINTLNADDR(pLcb->sysIdA);
 		DPRINTS("pLcb addrB");
-		DPRINTLNADDR(pLcb->addrB);
+		DPRINTLNADDR(pLcb->sysIdB);
 
 
 		if ( (pLcb->pPortA && !(pLcb->pPortB) )
-				&& ( (pLcb->addrA == pHeader->fromAddr   && pHeader->cmd == CMD_CR)
-					 || ( pLcb->addrA == pHeader->toAddr	&& pHeader->cmd == CMD_ACK
+				&& ( (pLcb->sysIdA == pHeader->fromAddr.sysId   && pHeader->cmd == CMD_CR)
+					 || ( pLcb->sysIdA == pHeader->toAddr.sysId	&& pHeader->cmd == CMD_ACK
 						  //&& (pLcb->aktid == pHeader->aktid)
 					 	)
 					)
@@ -115,7 +115,7 @@ tLcb* LcbList::getOpenLcb(tSerialHeader* pHeader) {
 	return NULL;
 }
 
-//void 	mprintAcb(tAcb* pAcb){}
+//void 	DPRINTAcb(tAcb* pAcb){}
 tLcb* LcbList::getLastLcbEntry() {
 	tLcb* pLast = pRoot;
 	while (pLast && pLast->pNext) {

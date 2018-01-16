@@ -111,7 +111,7 @@ size_t DummySerialPort::write(const byte* , size_t ) {
 bool DummySerialPort::listen() {
 	if (!isListening()) {
 		listenTimeStamp = millis();
-		XPRINTLNSVAL("DummySerialPort::listen> on port :", getId());
+		MPRINTLNSVAL("DummySerialPort::listen> on port :", getId());
 		//return pSoftwareSerial->listen();
 		return false;
 	}

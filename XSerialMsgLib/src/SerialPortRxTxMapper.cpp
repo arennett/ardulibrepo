@@ -13,7 +13,7 @@ SerialPortRxTxMapper::SerialPortRxTxMapper(){
 	pSerialRx=NULL;
 	pSerialTx=NULL;
 	pSerialPort=NULL;
-	XPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
+	MPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
 }
 
 SerialPortRxTxMapper::~SerialPortRxTxMapper() {
@@ -33,7 +33,7 @@ SerialPortRxTxMapper::SerialPortRxTxMapper(SerialPort* pSerialPort) {
 
 	this->pSerialPort = pSerialPort;
 	//pSerialRx->setUpdateCallback(SerialNodeNet::getInstance()->update);
-	XPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
+	MPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
 
 }
 
@@ -43,7 +43,7 @@ SerialPortRxTxMapper::SerialPortRxTxMapper(SerialPort* pSerialPort,SerialRx* pSe
 	this->pSerialTx = pSerialTx;
 	this->pSerialPort = pSerialPort;
 	//pSerialRx->setUpdateCallback(SerialNodeNet::getInstance()->update);
-	XPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
+	MPRINTLNSVAL("SerialPortRxTxMapper::SerialPortRxTxMapper() free ",freeRam());
 }
 
 void SerialPortRxTxMapper::createRxBuffer(size_t datasize){

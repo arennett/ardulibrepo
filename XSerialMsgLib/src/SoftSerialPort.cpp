@@ -83,7 +83,7 @@ bool SoftSerialPort::isMaster(){
 void SoftSerialPort::setMaster() {
 	if (pMaster!=this) {
 			pMaster=this;
-			XPRINTLNSVAL("SoftSerialPort::setMaster : port : " ,getId());
+			MPRINTLNSVAL("SoftSerialPort::setMaster : port : " ,getId());
 	}
 }
 
@@ -103,14 +103,14 @@ SoftSerialPort::SoftSerialPort(byte pinRx, byte pinRy, byte remoteSysId) :
 		SerialPort(remoteSysId) {
 
 	pSoftwareSerial = new SoftwareSerial(pinRx, pinRy);
-	XPRINTLNSVAL("SoftSerialPort::SoftSerialPort free ",freeRam());
+	MPRINTLNSVAL("SoftSerialPort::SoftSerialPort free ",freeRam());
 }
 
 SoftSerialPort::SoftSerialPort(SoftwareSerial* pSoftwareSerial, byte remoteSysId) :
 		SerialPort(remoteSysId) {
 	this->pSoftwareSerial = pSoftwareSerial;
 
-	XPRINTLNSVAL("SoftSerialPort::SoftSerialPort free ",freeRam());
+	MPRINTLNSVAL("SoftSerialPort::SoftSerialPort free ",freeRam());
 }
 
 SoftSerialPort::~SoftSerialPort() {
@@ -140,7 +140,7 @@ size_t SoftSerialPort::write(const byte* bb, size_t len) {
 bool SoftSerialPort::listen() {
 	if (!isListening()) {
 		listenTimeStamp = millis();
-		XPRINTLNSVAL("SoftSerialPort::listen> on port :", getId());
+		MPRINTLNSVAL("SoftSerialPort::listen> on port :", getId());
 		return pSoftwareSerial->listen();
 	}
 	return false;

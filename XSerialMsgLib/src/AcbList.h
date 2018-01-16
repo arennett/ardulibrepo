@@ -11,7 +11,7 @@
 #ifndef ACBLIST_H_
 #define ACBLIST_H_
 #define ACB_REPLYTIME_EXPIRED_CHECK_PERIOD_MSEC 	200
-#define ACB_REPLYTIME_EXPIRED_MSEC 	4000       // if we didnt hear anything , acb is deleted after 3 seconds
+#define ACB_REPLYTIME_EXPIRED_MSEC 	500       // if we didnt hear anything , acb is deleted after 3 seconds
 
 typedef struct {
 	tAktId 	aktid;
@@ -64,7 +64,7 @@ public:
 	unsigned int getNextAktId();
 	tAcb* 	createAcb(tSerialHeader* pHeader) ;
 	tAcb* 	createOrUseAcb(tSerialHeader* pHeader);
-	//void 	mprintAcb(tAcb* pAcb);
+	//void 	DPRINTAcb(tAcb* pAcb);
 	tAcb*   getAcbEntry(tAktId aktId);
 
 	/**
