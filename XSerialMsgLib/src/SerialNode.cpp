@@ -91,7 +91,7 @@ bool SerialNode::isLifeCheckLate() {
 		return false;
 	}
 	if ((millis() - lastReceiveTimeStamp) > SERIALNODE_TIME_LIFECHECK_LATE_MSEC) {
-		DPRINTSVAL(" SerialNode::isLifeCheckLate> node late: " ,getId());DPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
+		XPRINTSVAL(" SerialNode::isLifeCheckLate> node late: " ,getId());XPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
 		return true;
 	}
 
@@ -106,7 +106,7 @@ bool SerialNode::isLifeCheckExpired() {
 
 
 	if ((millis() - lastReceiveTimeStamp) > SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC) {
-		MPRINTSVAL(" SerialNode::isLifeCheckLate> node very late ,expired: " ,getId());DPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
+		XPRINTSVAL(" SerialNode::isLifeCheckExpired> node very late ,expired: " ,getId());XPRINTLNSVAL(" : ",millis() - lastReceiveTimeStamp);
 		return true;
 	}
 
@@ -131,9 +131,9 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 	bool userCall = false;
 	bool acbNotFound = false;
 
-	MPRINTSVALS("SerialNode::onMessage> node : ", getId(), "  <<< ");
-	MPRINTSS(tSerialHeader::cmd2Str(cmd));
-	MPRINTLNS(" <<<< ");
+	XPRINTSVALS("SerialNode::onMessage> node : ", getId(), "  <<< ");
+	XPRINTSS(tSerialHeader::cmd2Str(cmd));
+	XPRINTLNS(" <<<< ");
 	DPRINTLNHEADER(pSerialHeader);
 
 	if (!connected) {
@@ -314,7 +314,7 @@ void SerialNode::onMessage(tSerialHeader* pSerialHeader, const byte* pData, size
 	}
 	if (pAcb) {
 
-		XPRINTLNSVAL("SerialNode::onMessage> round trip time : ", millis() - pAcb->timeStamp);
+		MPRINTLNSVAL("SerialNode::onMessage> round trip time : ", millis() - pAcb->timeStamp);
 
 		unsigned int count = AcbList::getInstance()->count();
 
@@ -394,7 +394,8 @@ tAktId SerialNode::send(tSerialCmd cmd, tAktId replyOn, byte par, const byte* pD
 
 	tSerialHeader header, *pHeader;
 	pHeader = &header;
-	DPRINTS("SerialNode::send>  >>> ");DPRINTSS(tSerialHeader::cmd2Str(cmd));DPRINTLNS(" >>>");
+	//delay(20);
+	XPRINTS("SerialNode::send>  >>> ");XPRINTSS(tSerialHeader::cmd2Str(cmd));XPRINTLNS(" >>>");
 	assert(pCcb->remoteAddr.sysId != SerialNodeNet::getInstance()->getSystemId());
 
 // not connected

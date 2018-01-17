@@ -16,7 +16,7 @@
 
 #define SERIALNODE_TIME_LIFECHECK_PERIOD_MSEC 				400   	// check nodes all sec
 #define SERIALNODE_TIME_LIFECHECK_LATE_MSEC 				800  	// if we didn't hear anything for 3 sec 	->	send LIVE
-#define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 		1200	// if we didn't hear anything for 20 sec 	->	reconnect
+#define SERIALNODE_TIME_LIFECHECK_LATE_EXPIRED_MSEC 		3000	// if we didn't hear anything for 20 sec 	->	reconnect
 
 
 namespace SerialMsgLib {
