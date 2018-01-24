@@ -11,6 +11,8 @@
 #include "SoftSerialPort.h"
 #include "SerialNode.h"
 
+
+
 namespace SerialMsgLib {
 //static
 SerialNodeNet* SerialNodeNet::pInst = NULL;
@@ -351,8 +353,12 @@ void SerialNodeNet::processNodes(bool lifeCheck) {
 
 
 
-
-	/*if (SoftSerialPort::count() > 1) {
+#ifdef SERIALNODE_WAIT_FOR_REPLIES
+	if (AcbList::countAll() == 0) {
+			pProcessingNode = (SerialNode*) pProcessingNode->getNext();
+	}
+#else
+	if (SoftSerialPort::count() > 1) {
 		byte acbcnt = AcbList::countAll(
 				SoftSerialPort::getListenerPort()->getId());
 		if (acbcnt > 0) {
@@ -364,11 +370,8 @@ void SerialNodeNet::processNodes(bool lifeCheck) {
 		}
 	} else {
 		pProcessingNode = (SerialNode*) pProcessingNode->getNext();
-	}*/
-
-	if (AcbList::countAll() == 0) {
-		pProcessingNode = (SerialNode*) pProcessingNode->getNext();
 	}
+#endif
 
 
 
