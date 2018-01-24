@@ -7,8 +7,7 @@
 
 // serial output
 //#define DPRINT_ON     //...debugging level
-#define MPRINT_ON     //...monitoring level
-//#define XPRINT_ON    //...application messages / errors
+//#define MPRINT_ON     //...monitoring level
 
 
 #define FS(x) (__FlashStringHelper*)(x)
@@ -70,6 +69,7 @@
 	#define DPRINTLN(x)		MPRINTLN(x)
 	#define DPRINTS(s)		MPRINTS(s)
 	#define DPRINTSS(s)   	MPRINTSS(s)
+    #define DPRINTSS(s)   	MPRINTSS(s)
 	#define DPRINTLNS(s)	MPRINTLNS(s)
 	#define DPRINTSVAL(s,x) MPRINTSVAL(s,x)
     #define DPRINTLNSVAL(s,x) MPRINTLNSVAL(s,x)
@@ -85,6 +85,7 @@
 	#define DPRINTLN(x)
 	#define DPRINTS(s)
 	#define DPRINTSS(s)
+	#define DPRINTLNSS(s)
 	#define DPRINTLNS(s)
 	#define DPRINTSVAL(s,x)
     #define DPRINTLNSVAL(s,x)
