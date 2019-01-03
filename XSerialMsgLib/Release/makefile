@@ -11,9 +11,6 @@ RM := del
 -include subdir.mk
 -include src\subdir.mk
 -include libraries\XToolsLib\src\subdir.mk
--include libraries\XToolsLib\Release\src\subdir.mk
--include libraries\XToolsLib\Release\core\subdir.mk
--include libraries\XToolsLib\Release\subdir.mk
 -include libraries\SoftwareSerial\src\subdir.mk
 -include core\coreLib\subdir.mk
 -include objects.mk
@@ -71,24 +68,24 @@ all: XSerialMsgLib
 XSerialMsgLib: $(HEX)
 	@echo 'Building target: $@'
 	@echo 'Printing size:'
-	"C:\sloeber\sloeber4.1\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-size" -A "C:/Users/User/git/ardulibrepo/XSerialMsgLib/Release/XSerialMsgLib.elf"
+	"C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\tools\avr-gcc\5.4.0-atmel3.6.1-arduino2/bin/avr-size" -A "C:/Users/User/git/ardulibrepo/XSerialMsgLib/Release/XSerialMsgLib.elf"
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 C:\Users\User\git\ardulibrepo\XSerialMsgLib\Release\arduino.ar: $(AR_OBJ)
 	@echo 'Starting archiver'
-	"C:\sloeber\sloeber4.1\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-gcc-ar" rcs    C:/Users/User/git/ardulibrepo/XSerialMsgLib/Release/arduino.ar $(AR_OBJ)
+	"C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\tools\avr-gcc\5.4.0-atmel3.6.1-arduino2/bin/avr-gcc-ar" rcs     C:/Users/User/git/ardulibrepo/XSerialMsgLib/Release/arduino.ar $(AR_OBJ)
 	@echo 'Finished building: $@'
 	@echo ' '
 
 XSerialMsgLib.elf: $(LINK_OBJ) $(AR)
 	@echo 'Starting combiner'
-	"C:\sloeber\sloeber4.1\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-gcc" -Wall -Wextra -Os -g -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega328p -o "C:\Users\User\git\ardulibrepo\XSerialMsgLib/Release/XSerialMsgLib.elf"   $(LINK_OBJ) $(AR)   C:/Users/User/git/ardulibrepo/XSerialMsgLib/Release/arduino.ar  "-LC:\Users\User\git\ardulibrepo\XSerialMsgLib/Release" -lm
+	"C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\tools\avr-gcc\5.4.0-atmel3.6.1-arduino2/bin/avr-gcc" -Wall -Wextra -Os -g -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega328p  -o "C:/Users/User/git/ardulibrepo/XSerialMsgLib/Release/XSerialMsgLib.elf"   $(LINK_OBJ)   C:/Users/User/git/ardulibrepo/XSerialMsgLib/Release/arduino.ar  "-LC:/Users/User/git/ardulibrepo/XSerialMsgLib/Release" -lm
 	@echo 'Finished building: $@'
 	@echo ' '
 
 XSerialMsgLib.hex: $(ELF)
-	@echo 'Create eeprom image'
+	@echo 'Do all objcopy commands'
 	${A.RECIPE.OBJCOPY.EEP.PATTERN}
 	${A.RECIPE.OBJCOPY.HEX.PATTERN}
 	@echo 'Finished building: $@'
@@ -100,6 +97,5 @@ clean:
 	-@echo ' '
 
 .PHONY: all clean dependents
-.SECONDARY:
 
 -include ..\makefile.targets
