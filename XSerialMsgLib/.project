@@ -39,7 +39,7 @@
 		<link>
 			<name>core/coreLib</name>
 			<type>2</type>
-			<location>C:/sloeber/sloeber4.1/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/cores/arduinoLib</location>
+			<location>C:/sloeber/sloeber4.3.1/arduinoPlugin/packages/arduino/hardware/avr/1.6.23/cores/arduinoLib</location>
 		</link>
 		<link>
 			<name>core/variant</name>

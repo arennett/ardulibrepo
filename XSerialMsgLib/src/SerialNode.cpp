@@ -491,7 +491,7 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 				MPRINTSVAL("SerialNode::writeToPort> waiting for replies on port: ",pListener->getId());
 				MPRINTLNSVAL(" acb count: " ,listenerAcbCount);
 				MPRINTFREE;
-				unsigned long tStamp= millis();
+				tStamp now= millis();
 				pListener->listen(); // to be sure
 				while(listenerAcbCount > 0) {
 					while (pListener->available() > 0)  {
@@ -508,7 +508,8 @@ tAktId SerialNode::writeToPort(tSerialHeader* pHeader, const byte* pData, size_t
 					listenerAcbCount = AcbList::countAll(pListener->getId());
 				}
 				MPRINTSVAL("SerialNode::writeToPort> waiting end, node : ",getId());
-				MPRINTLNSVAL(" waited for : " ,millis()-tStamp);
+
+				MPRINTLNSVAL(" waited for : " ,millis()-now);
 				pPort->listen();
 
 			}
