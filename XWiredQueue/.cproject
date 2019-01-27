@@ -23,6 +23,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/ArduinoQueue}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/Wire/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/XToolsLib/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/core/core}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.686618817" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -32,6 +33,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/ArduinoQueue}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/Wire/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/XToolsLib/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/core/core}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.184961539" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -41,6 +43,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/ArduinoQueue}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/Wire/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/libraries/XToolsLib/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XWiredQueue/core/core}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.729239232" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>
