@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>XToolsLib</name>
+	<name>XWiredQueue</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -32,14 +32,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>core/core</name>
-			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.23/cores/arduino</locationURI>
-		</link>
-		<link>
 			<name>core/coreLib</name>
 			<type>2</type>
-			<location>C:/sloeber/sloeber4.3.1/arduinoPlugin/packages/arduino/hardware/avr/1.6.23/cores/arduinoLib</location>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.23/cores/arduinoLib</locationURI>
 		</link>
 		<link>
 			<name>core/variant</name>
@@ -47,9 +42,19 @@
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.23/variants/eightanaloginputs</locationURI>
 		</link>
 		<link>
-			<name>core/core/coreLib</name>
+			<name>libraries/ArduinoQueue</name>
 			<type>2</type>
-			<location>C:/sloeber/sloeber4.1/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/cores/arduinoLib</location>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/ArduinoQueue/1.0.1</locationURI>
+		</link>
+		<link>
+			<name>libraries/Wire</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.23/libraries/Wire</locationURI>
+		</link>
+		<link>
+			<name>libraries/XToolsLib</name>
+			<type>2</type>
+			<location>C:/Users/User/git/ardulibrepo/XToolsLib</location>
 		</link>
 	</linkedResources>
 </projectDescription>
