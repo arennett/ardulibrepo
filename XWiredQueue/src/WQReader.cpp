@@ -13,10 +13,16 @@
 WQReader::WQReader(uint8_t pin_newdata,int i2c_master_address){
 	m_pin_newdata =pin_newdata;
 	m_i2c_master_address =i2c_master_address;
+
 }
 
 WQReader::~WQReader() {
 	// TODO Auto-generated destructor stub
+}
+
+void WQReader::init() {
+	pinMode(m_pin_newdata, INPUT_PULLUP);
+	MPRINTLNSVAL("WQReader::init: INPUT_PULLUP on pin: " ,INPUT_PULLUP);
 }
 
 bool WQReader::process (tWQMessage& wqMessage){

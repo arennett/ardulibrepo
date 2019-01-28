@@ -28,25 +28,30 @@ void WQWriter::init(uint8_t pin_newdata,int i2c_master_address ,void (*onRequest
 	Wire.onRequest(onRequestHandler);
 }
 
-void WQWriter::write(tWQMessage message) {
-	m_wqQueue.enqueue(message);
+void WQWriter::write(tWQMessage wqMessage) {
+	m_wqQueue.enqueue(wqMessage);
+	digitalWrite(m_pin_newdata,LOW);
+	MPRINTLNSVAL("WQWriter::write: cmd: ",wqMessage.cmd);
 }
 
 void WQWriter::onRequestEvent() {
-
+	MPRINTLNS("");
+	MPRINTLNS("WQWriter::onRequestEvent()");
 	if (!m_wqQueue.isEmpty()){
 		MPRINTLNS("WQWriter::onRequestEvent:: dequeue message");
 		tWQMessage wqMessage = m_wqQueue.dequeue();
-		Wire.write(wqMessage.bytes, WQ_MESSAGE_LENGTH);
+		MPRINTLNSVAL("WQWriter::onRequestEvent:: CMD :",wqMessage.cmd);
+		MPRINTSVAL("WQWriter::onRequestEvent:: write ",sizeof(wqMessage));MPRINTLN(" bytes");
+		Wire.write(wqMessage.bytes, sizeof(wqMessage));
 		if (m_wqQueue.isEmpty()) {
-			MPRINTLNS("WQWriter::onRequestEvent:: queue is empty now");
-			digitalWrite(m_pin_newdata,LOW);
+			MPRINTLNS("WQWriter::onRequestEvent:: queue is empty");
+			digitalWrite(m_pin_newdata,HIGH);
 		}
 	}else {
 		// to be sure
-		if (digitalRead(m_pin_newdata)==HIGH) {
-			MPRINTLNS("WQWriter::onRequestEvent:: queue is empty, but pin_newdata was high");
-			digitalWrite(m_pin_newdata,LOW);
+		if (digitalRead(m_pin_newdata)==LOW) {
+			MPRINTLNS("WQWriter::onRequestEvent:: queue is unexpected empty");
+			digitalWrite(m_pin_newdata,HIGH);
 		}
 
 	}

@@ -10,10 +10,11 @@
 
 
 #define FS(x) (__FlashStringHelper*)(x)
-
-#define XPRINT(x)   		Serial.print((x))
-#define XPRINTHEX(x)   		Serial.print((x),HEX)
-#define XPRINTLN(x) 		Serial.println((x))
+#define XPRINTER    	    Serial
+#define XFLUSH				XPRINTER.flush()
+#define XPRINT(x)   		XPRINTER.print((x))
+#define XPRINTHEX(x)   		XPRINTER.print((x),HEX)
+#define XPRINTLN(x) 		XPRINTER.println((x))
 #define XPRINTS(s)   		XPRINT(F(s))
 #define XPRINTSS(s)   		XPRINT(FS(s))		// print   const progmem char[]
 #define XPRINTLNS(s)   	 	XPRINTLN(F(s))

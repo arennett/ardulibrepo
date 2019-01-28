@@ -10,19 +10,21 @@
 #include <Queue.h>
 
 typedef	union {
-		uint16_t 	  cmd;
-		union  {
-			byte	  data[8];
-			char	  str[8];
-			uint8_t   unint8;
-			uint16_t  unint16;
-			uint32_t  unint32;
-			uint64_t  unint64;
-			int8_t    int8;
-			int16_t   int16;
+	    union  {
+			uint16_t  cmd;
+			byte	  data[4];
+			char	  str[4];
+			uint32_t  uint32;
 			int32_t   int32;
-			int64_t   int64;
-		};
+			union {
+				uint16_t sub_cmd;
+				void*    ptr;
+			};
+			union {
+				int16_t u_int16;
+				int16_t int16;
+			};
+	    };
 		byte bytes[sizeof(cmd)+sizeof(data)];
 	}
 	tWQMessage;

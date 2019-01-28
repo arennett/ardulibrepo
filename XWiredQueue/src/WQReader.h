@@ -16,6 +16,7 @@ public:
 
 	WQReader(uint8_t pin_newdata,int i2c_master_address);
 	virtual ~WQReader();
+	void init();
 
 	bool process (tWQMessage& message);
 
