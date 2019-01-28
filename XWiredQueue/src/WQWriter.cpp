@@ -6,9 +6,7 @@
  */
 #include "Arduino.h"
 #include <Wire.h>
-#define MPRINT_ON
 #include <tools.h>
-#include <Queue.h>
 #include "WQDefines.h"
 #include "WQWriter.h"
 
@@ -23,12 +21,11 @@ WQWriter::~WQWriter() {
 }
 
 void WQWriter::init(uint8_t pin_newdata,int i2c_master_address ,void (*onRequestHandler)() ){
-	XPRINTLNS("");
-	XPRINTLNS("WQWriter::init()");
+	m_pin_newdata=pin_newdata;
+	MPRINTLNS("WQWriter::init()");
 	pinMode(pin_newdata,OUTPUT);
 	Wire.begin(i2c_master_address);                // join i2c bus with address #8
 	Wire.onRequest(onRequestHandler);
-	XPRINTFREE;
 }
 
 void WQWriter::write(tWQMessage message) {
@@ -36,10 +33,22 @@ void WQWriter::write(tWQMessage message) {
 }
 
 void WQWriter::onRequestEvent() {
-	XPRINTLNS("WQWriter::onRequestEvent()");
+
 	if (!m_wqQueue.isEmpty()){
+		MPRINTLNS("WQWriter::onRequestEvent:: dequeue message");
 		tWQMessage wqMessage = m_wqQueue.dequeue();
 		Wire.write(wqMessage.bytes, WQ_MESSAGE_LENGTH);
+		if (m_wqQueue.isEmpty()) {
+			MPRINTLNS("WQWriter::onRequestEvent:: queue is empty now");
+			digitalWrite(m_pin_newdata,LOW);
+		}
+	}else {
+		// to be sure
+		if (digitalRead(m_pin_newdata)==HIGH) {
+			MPRINTLNS("WQWriter::onRequestEvent:: queue is empty, but pin_newdata was high");
+			digitalWrite(m_pin_newdata,LOW);
+		}
+
 	}
 }
 

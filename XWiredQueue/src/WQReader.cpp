@@ -6,7 +6,6 @@
  */
 #include "Arduino.h"
 #include <Wire.h>
-#define MPRINT_ON
 #include <tools.h>
 #include "WQDefines.h"
 #include "WQReader.h"

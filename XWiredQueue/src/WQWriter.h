@@ -17,7 +17,9 @@ public:
 	virtual ~WQWriter();
 
 private:
+	uint8_t m_pin_newdata = 0;
 	Queue<tWQMessage> m_wqQueue;
+
 };
 
 #endif /* WQWRITER_H_ */

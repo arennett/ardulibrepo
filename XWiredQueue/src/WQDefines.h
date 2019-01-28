@@ -7,7 +7,7 @@
 
 #ifndef WQDEFINES_H_
 #define WQDEFINES_H_
-
+#include <Queue.h>
 
 typedef	union {
 		uint16_t 	  cmd;

@@ -4,7 +4,6 @@
 #include <assert.h>
 #include "Arduino.h"
 
-
 // serial output
 //#define DPRINT_ON     //...debugging level
 #define MPRINT_ON     //...monitoring level

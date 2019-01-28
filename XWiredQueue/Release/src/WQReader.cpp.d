@@ -13,6 +13,8 @@ src\WQReader.cpp.o: ..\src\WQReader.cpp \
  C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\hardware\avr\1.6.23\libraries\Wire\src/Wire.h \
  C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\hardware\avr\1.6.23\cores\arduino/Stream.h \
  C:\Users\User\git\ardulibrepo\XToolsLib\src/tools.h ..\src\WQDefines.h \
+ C:\sloeber\sloeber4.3.1\arduinoPlugin\libraries\ArduinoQueue\1.0.1/Queue.h \
+ C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\hardware\avr\1.6.23\cores\arduino/arduino.h \
  ..\src\WQReader.h
 
 C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\hardware\avr\1.6.23\cores\arduino/Arduino.h:
@@ -44,5 +46,9 @@ C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\hardware\avr\1.6.23\cores
 C:\Users\User\git\ardulibrepo\XToolsLib\src/tools.h:
 
 ..\src\WQDefines.h:
+
+C:\sloeber\sloeber4.3.1\arduinoPlugin\libraries\ArduinoQueue\1.0.1/Queue.h:
+
+C:\sloeber\sloeber4.3.1\arduinoPlugin\packages\arduino\hardware\avr\1.6.23\cores\arduino/arduino.h:
 
 ..\src\WQReader.h:
