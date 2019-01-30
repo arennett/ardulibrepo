@@ -6,8 +6,9 @@
  *      Author: User
  */
 
+#include "XTools.h"
+
 #include "Arduino.h"
-#include "tools.h"
 
 unsigned long timeStampLastPick = 0;
 unsigned long timeDuration = 0;

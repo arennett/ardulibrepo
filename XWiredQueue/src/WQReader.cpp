@@ -6,7 +6,7 @@
  */
 #include "Arduino.h"
 #include <Wire.h>
-#include <tools.h>
+#include <XTools.h>
 #include "WQDefines.h"
 #include "WQReader.h"
 

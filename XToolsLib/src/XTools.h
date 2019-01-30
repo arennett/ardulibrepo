@@ -1,16 +1,21 @@
-#ifndef tools_h
-#define tools_h
+#ifndef TOOLS_H_
+#define TOOLS_H
 //#define __ASSERT_USE_STDERR
 #include <assert.h>
 #include "Arduino.h"
 
 // serial output
 //#define DPRINT_ON     //...debugging level
-#define MPRINT_ON     //...monitoring level
-
+//#define MPRINT_ON     //...monitoring level
+#ifdef MPRINT_ON
+ #warning  >>>>MPRINT_ON
+#endif
+#ifndef XPRINTER
+ #define XPRINTER  Serial
+#endif
 
 #define FS(x) (__FlashStringHelper*)(x)
-#define XPRINTER    	    Serial
+
 #define XFLUSH				XPRINTER.flush()
 #define XPRINT(x)   		XPRINTER.print((x))
 #define XPRINTHEX(x)   		XPRINTER.print((x),HEX)

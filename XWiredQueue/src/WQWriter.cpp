@@ -6,9 +6,9 @@
  */
 #include "Arduino.h"
 #include <Wire.h>
-#include <tools.h>
 #include "WQDefines.h"
 #include "WQWriter.h"
+#include <XTools.h>
 
 
 WQWriter::WQWriter(){
